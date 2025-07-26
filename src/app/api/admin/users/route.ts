@@ -6,6 +6,7 @@ import { verifyAuth } from '@/lib/auth';
 import { getUserModel } from '@/models/User';
 import { MongoClient } from 'mongodb';
 import bcrypt from 'bcryptjs';
+import { cleanupMfaSessionsForUser } from '@/lib/mfa';
 
 // MongoDB connection string
 const uri = process.env.MONGODB_URI || '';
@@ -622,44 +623,107 @@ export async function DELETE(request: NextRequest) {
       userModel = mongoose.models.User || getUserModel('');
     }
     
-    // Get all users to be deleted for verification
+    // Get all users to be deleted for verification and cleanup
     const usersToDelete = await userModel.find({ _id: { $in: userIds } });
-    
+
+    if (usersToDelete.length === 0) {
+      return NextResponse.json({ error: 'No users found to delete' }, { status: 404 });
+    }
+
     // Admin can only delete users with the same company code
     if (payload.role === 'admin') {
       // Use company code comparison
       const adminCompanyCode = payload.companyCode;
       const nonCompanyUsers = usersToDelete.filter(user => user.companyCode.toLowerCase() !== adminCompanyCode.toLowerCase());
-      
+
       if (nonCompanyUsers.length > 0) {
-        return NextResponse.json({ 
+        return NextResponse.json({
           error: 'You can only delete users in your own company',
           invalidUsers: nonCompanyUsers.map(u => u.username)
         }, { status: 403 });
       }
-      
+
       // Admin cannot delete another admin
       const otherAdmins = usersToDelete.filter(user => user.role === 'admin' && user._id.toString() !== payload.id);
       if (otherAdmins.length > 0) {
-        return NextResponse.json({ 
+        return NextResponse.json({
           error: 'You cannot delete other admin users',
           adminUsers: otherAdmins.map(u => u.username)
         }, { status: 403 });
       }
     }
-    
-    // Delete the users
-    const result = await userModel.deleteMany({ _id: { $in: userIds } });
-    
-    if (result.deletedCount === 0) {
-      return NextResponse.json({ error: 'No users were deleted' }, { status: 404 });
+
+    console.log(`[BULK DELETE] Starting comprehensive deletion of ${usersToDelete.length} users`);
+
+    // COMPREHENSIVE CLEANUP: Delete from ALL databases
+    const client = new MongoClient(process.env.MONGODB_URI || '');
+    await client.connect();
+
+    try {
+      let totalDeleted = 0;
+
+      for (const user of usersToDelete) {
+        console.log(`[BULK DELETE] Deleting user: ${user.email} (${user._id})`);
+
+        // 1. Delete from company database
+        const companyDb = client.db(`company_${user.companyCode.toLowerCase()}`);
+        const usersCollection = companyDb.collection('users');
+        const companyResult = await usersCollection.deleteOne({ _id: user._id });
+
+        if (companyResult.deletedCount > 0) {
+          totalDeleted++;
+          console.log(`[BULK DELETE] ✅ Deleted ${user.email} from company database`);
+        }
+
+        // 2. Delete from central auth database
+        try {
+          const authDb = client.db('auth_db');
+          const authUsersCollection = authDb.collection('authUsers');
+          const authResult = await authUsersCollection.deleteMany({
+            $or: [
+              { originalId: user._id },
+              { email: user.email.toLowerCase() }
+            ]
+          });
+          console.log(`[BULK DELETE] ✅ Deleted ${authResult.deletedCount} records from central auth database for ${user.email}`);
+        } catch (authError) {
+          console.error(`[BULK DELETE] ⚠️ Warning: Failed to delete ${user.email} from central auth database:`, authError);
+        }
+
+        // 3. Delete from company auth collection
+        try {
+          const companyAuthCollection = companyDb.collection('auth');
+          const companyAuthResult = await companyAuthCollection.deleteMany({
+            $or: [
+              { originalId: user._id },
+              { email: user.email.toLowerCase() }
+            ]
+          });
+          console.log(`[BULK DELETE] ✅ Deleted ${companyAuthResult.deletedCount} records from company auth collection for ${user.email}`);
+        } catch (companyAuthError) {
+          console.error(`[BULK DELETE] ⚠️ Warning: Failed to delete ${user.email} from company auth collection:`, companyAuthError);
+        }
+
+        // 4. Clean up MFA sessions
+        try {
+          const cleanedSessions = cleanupMfaSessionsForUser(user._id.toString(), user.email);
+          console.log(`[BULK DELETE] ✅ Cleaned up ${cleanedSessions} MFA sessions for ${user.email}`);
+        } catch (mfaError) {
+          console.error(`[BULK DELETE] ⚠️ Warning: Failed to clean up MFA sessions for ${user.email}:`, mfaError);
+        }
+      }
+
+      console.log(`[BULK DELETE] ✅ Comprehensive deletion completed: ${totalDeleted} users deleted from all databases`);
+
+      return NextResponse.json({
+        success: true,
+        deletedCount: totalDeleted,
+        message: `Successfully deleted ${totalDeleted} user(s) from all databases`
+      });
+
+    } finally {
+      await client.close();
     }
-    
-    return NextResponse.json({ 
-      success: true, 
-      deletedCount: result.deletedCount,
-      message: `Successfully deleted ${result.deletedCount} user(s)`
-    });
   } catch (error: any) {
     console.error('Error deleting users:', error);
     return NextResponse.json({ error: error.message || 'Failed to delete users' }, { status: 500 });

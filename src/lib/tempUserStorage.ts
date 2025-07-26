@@ -49,13 +49,19 @@ export const storeTempUserData = (sessionId: string, userData: TempUserData): vo
  * @returns User data if found and not expired, null otherwise
  */
 export const getTempUserData = (sessionId: string): TempUserData | null => {
-  console.log(`[TEMP-STORAGE] Looking for temp user data with session: ${sessionId}`);
-  console.log(`[TEMP-STORAGE] Available sessions: ${Array.from(tempUserStorage.keys()).join(', ')}`);
+  console.log(`[TEMP-STORAGE] 🔍 Looking for temp user data with session: ${sessionId}`);
+  console.log(`[TEMP-STORAGE] 📋 Available sessions (${tempUserStorage.size}): ${Array.from(tempUserStorage.keys()).join(', ')}`);
+
+  // List all sessions with details
+  tempUserStorage.forEach((data, id) => {
+    console.log(`[TEMP-STORAGE] 📝 Session ${id}: ${data.email}, expires: ${data.expiresAt.toISOString()}`);
+  });
 
   const userData = tempUserStorage.get(sessionId);
 
   if (!userData) {
-    console.log(`[TEMP-STORAGE] No temp user data found for session: ${sessionId}`);
+    console.log(`[TEMP-STORAGE] ❌ No temp user data found for session: ${sessionId}`);
+    console.log(`[TEMP-STORAGE] 🚨 THIS IS THE PROBLEM! Temp data is missing for signup MFA!`);
     return null;
   }
   

@@ -100,10 +100,10 @@ export async function GET(req: NextRequest) {
     console.log('[DEBUG] verify-session: Original req.url:', req.url);
     console.log('[DEBUG] verify-session: Process env NEXT_PUBLIC_APP_URL:', process.env.NEXT_PUBLIC_APP_URL);
 
-    // Redirect back to signup page with company code and email
+    // Redirect back to signup page with success status and company code
     const response = NextResponse.redirect(
       new URL(
-        `/company-signup?company_code=${encodeURIComponent(companyCode)}&email=${encodeURIComponent(email)}`,
+        `/company-signup?success=true&company_code=${encodeURIComponent(companyCode)}`,
         baseUrl  // Using baseUrl instead of req.url - THIS IS THE KEY FIX!
       )
     );

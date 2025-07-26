@@ -62,17 +62,22 @@ export default function UserManagement({ currentUser, onEditUser }: UserManageme
 
   // Filter users based on search term and filters
   const filteredUsers = users.filter(user => {
-    const matchesSearch = 
+    // EXCLUDE pending users - they should only appear in manage signups tab
+    if (user.status === 'pending') {
+      return false;
+    }
+
+    const matchesSearch =
       user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (user.firstName && user.firstName.toLowerCase().includes(searchTerm.toLowerCase())) ||
       (user.lastName && user.lastName.toLowerCase().includes(searchTerm.toLowerCase()));
-      
+
     const matchesRole = roleFilter === 'all' || user.role === roleFilter;
     const matchesStatus = statusFilter === 'all' || user.status === statusFilter;
-    
+
     const isIncluded = matchesSearch && matchesRole && matchesStatus;
-    
+
     // Debug log for admin users
     if (user.role === 'admin') {
       console.log('Admin user:', user, {
@@ -84,7 +89,7 @@ export default function UserManagement({ currentUser, onEditUser }: UserManageme
         isIncluded
       });
     }
-    
+
     return isIncluded;
   });
   
@@ -272,18 +277,16 @@ export default function UserManagement({ currentUser, onEditUser }: UserManageme
           <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value)}>
             <SelectTrigger className="min-w-[150px] bg-white rounded-lg text-black border border-gray-300 [&>span]:text-black focus:ring-0 focus:ring-offset-0 focus:outline-none focus:border-purple-500">
               <span className="block truncate">
-                {statusFilter === 'all' ? 'All Status' : 
+                {statusFilter === 'all' ? 'All Status' :
                  statusFilter === 'active' ? 'Active' :
-                 statusFilter === 'inactive' ? 'Inactive' :
-                 statusFilter === 'pending' ? 'Pending' : 'All Status'}
+                 statusFilter === 'inactive' ? 'Inactive' : 'All Status'}
               </span>
             </SelectTrigger>
             <SelectContent className="bg-white text-black [&>div]:text-black">
               <SelectItem value="all">All Status</SelectItem>
               <SelectItem value="active">Active</SelectItem>
               <SelectItem value="inactive">Inactive</SelectItem>
-              <SelectItem value="pending">Pending</SelectItem>
-
+              {/* Removed pending option - pending users only show in manage signups tab */}
             </SelectContent>
           </Select>
         </div>

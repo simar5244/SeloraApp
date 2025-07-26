@@ -4,6 +4,7 @@ import connectDB from '@/lib/dbConnect';
 import User, { getUserModel } from '@/models/User';
 import { MongoClient, ObjectId } from 'mongodb';
 import { getDBConnection } from '@/lib/companyDBConnect';
+import { cleanupMfaSessionsForUser } from '@/lib/mfa';
 
 // GET handler to retrieve a user by ID
 export async function GET(
@@ -377,16 +378,86 @@ export async function DELETE(
             }
           }
           
-          // Delete the user
-          const result = await usersCollection.deleteOne({ _id: objId });
-          
-          if (result.deletedCount === 0) {
-            console.log('No document was deleted');
-            return NextResponse.json({ error: 'User not found or could not be deleted' }, { status: 404 });
+          // Get user data before deletion for cleanup
+          const user = await usersCollection.findOne({ _id: objId });
+          if (!user) {
+            return NextResponse.json({ error: 'User not found' }, { status: 404 });
           }
-          
-          console.log(`Successfully deleted user with ID ${userId}`);
-          return NextResponse.json({ message: 'User deleted successfully' });
+
+          console.log('[DELETE] Deleting user data:', {
+            userId: user._id,
+            email: user.email
+          });
+
+          // COPY EXACT REJECT MECHANISM - Start a session for the transaction
+          const session = client.startSession();
+
+          try {
+            await session.withTransaction(async () => {
+              // 1. Delete from company database users collection
+              const result = await usersCollection.deleteOne({ _id: user._id }, { session });
+
+              if (result.deletedCount === 0) {
+                throw new Error('Failed to delete user from company database');
+              }
+
+              console.log('[DELETE] ✅ User deleted from company database');
+
+              // 2. Delete from central auth database
+              try {
+                const authDb = client.db('auth_db');
+                const authUsersCollection = authDb.collection('authUsers');
+                const authResult = await authUsersCollection.deleteMany({
+                  $or: [
+                    { originalId: user._id },
+                    { email: user.email.toLowerCase() }
+                  ]
+                });
+                console.log(`[DELETE] ✅ Deleted ${authResult.deletedCount} records from central auth database`);
+              } catch (authError) {
+                console.error('[DELETE] ⚠️ Warning: Failed to delete from central auth database:', authError);
+              }
+
+              // 3. Delete from company auth collection
+              try {
+                const companyAuthCollection = companyDb.collection('auth');
+                const companyAuthResult = await companyAuthCollection.deleteMany({
+                  $or: [
+                    { originalId: user._id },
+                    { email: user.email.toLowerCase() }
+                  ]
+                });
+                console.log(`[DELETE] ✅ Deleted ${companyAuthResult.deletedCount} records from company auth collection`);
+              } catch (companyAuthError) {
+                console.error('[DELETE] ⚠️ Warning: Failed to delete from company auth collection:', companyAuthError);
+              }
+
+              // 4. Clean up any active MFA sessions for this user
+              try {
+                const cleanedSessions = cleanupMfaSessionsForUser(user._id.toString(), user.email);
+                console.log(`[DELETE] ✅ Cleaned up ${cleanedSessions} MFA sessions`);
+              } catch (mfaError) {
+                console.error('[DELETE] ⚠️ Warning: Failed to clean up MFA sessions:', mfaError);
+              }
+
+              console.log('[DELETE] ✅ User data deleted successfully from all databases and sessions cleaned up');
+            });
+
+            return NextResponse.json({
+              success: true,
+              message: 'User deleted successfully from all databases',
+              user: {
+                _id: user._id.toString(),
+                email: user.email
+              }
+            });
+
+          } catch (error) {
+            console.error('[DELETE] Error during user deletion:', error);
+            throw error;
+          } finally {
+            await session.endSession();
+          }
         } finally {
           await client.close();
         }

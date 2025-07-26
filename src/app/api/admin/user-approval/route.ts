@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { MongoClient } from 'mongodb';
 import { verifyAuth } from '@/lib/auth';
+import { cleanupMfaSessionsForUser } from '@/lib/mfa';
 import Stripe from 'stripe';
 
 // Initialize Stripe
@@ -433,7 +434,7 @@ export async function POST(request: NextRequest) {
         }
       });
     } else {
-      // For reject, completely remove the user and their data
+      // For reject, completely remove the user and their data from ALL databases
       console.log('[USER APPROVAL] Deleting user data for rejected user:', {
         userId: user._id,
         email: user.email
@@ -441,20 +442,71 @@ export async function POST(request: NextRequest) {
 
       // Start a session for the transaction
       const session = client.startSession();
-      
+
       try {
         await session.withTransaction(async () => {
-          // First, find and delete any related data (customize this based on your data model)
-          // Example: await companyDb.collection('user_profiles').deleteOne({ userId: user._id }, { session });
-          
-          // Then delete the user
+          // 1. Delete from company database users collection
           const result = await usersCollection.deleteOne({ _id: user._id }, { session });
-          
+
           if (result.deletedCount === 0) {
-            throw new Error('Failed to delete user');
+            throw new Error('Failed to delete user from company database');
           }
-          
-          console.log('[USER APPROVAL] User data deleted successfully');
+
+          console.log('[USER APPROVAL] ✅ User deleted from company database');
+
+          // 2. Delete from central auth database
+          try {
+            const authDb = client.db('auth_db');
+            const authUsersCollection = authDb.collection('authUsers');
+            const authResult = await authUsersCollection.deleteMany({
+              $or: [
+                { originalId: user._id },
+                { email: user.email.toLowerCase() }
+              ]
+            });
+            console.log(`[USER APPROVAL] ✅ Deleted ${authResult.deletedCount} records from central auth database`);
+          } catch (authError) {
+            console.error('[USER APPROVAL] ⚠️ Warning: Failed to delete from central auth database:', authError);
+          }
+
+          // 3. Delete from company auth collection
+          try {
+            const companyAuthCollection = companyDb.collection('auth');
+            const companyAuthResult = await companyAuthCollection.deleteMany({
+              $or: [
+                { originalId: user._id },
+                { email: user.email.toLowerCase() }
+              ]
+            });
+            console.log(`[USER APPROVAL] ✅ Deleted ${companyAuthResult.deletedCount} records from company auth collection`);
+          } catch (companyAuthError) {
+            console.error('[USER APPROVAL] ⚠️ Warning: Failed to delete from company auth collection:', companyAuthError);
+          }
+
+          // 4. Delete from legacy main database (fallback login source)
+          try {
+            const mainDb = client.db();
+            const legacyUsersCollection = mainDb.collection('users');
+            const legacyResult = await legacyUsersCollection.deleteMany({
+              $or: [
+                { _id: user._id },
+                { email: user.email.toLowerCase() }
+              ]
+            });
+            console.log(`[USER APPROVAL] ✅ Deleted ${legacyResult.deletedCount} records from legacy main database`);
+          } catch (legacyError) {
+            console.error('[USER APPROVAL] ⚠️ Warning: Failed to delete from legacy main database:', legacyError);
+          }
+
+          // 5. Clean up any active MFA sessions for this user
+          try {
+            const cleanedSessions = cleanupMfaSessionsForUser(user._id.toString(), user.email);
+            console.log(`[USER APPROVAL] ✅ Cleaned up ${cleanedSessions} MFA sessions`);
+          } catch (mfaError) {
+            console.error('[USER APPROVAL] ⚠️ Warning: Failed to clean up MFA sessions:', mfaError);
+          }
+
+          console.log('[USER APPROVAL] ✅ User data deleted successfully from ALL databases and sessions cleaned up');
         });
         
         return NextResponse.json({

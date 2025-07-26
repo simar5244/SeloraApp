@@ -106,10 +106,11 @@ export async function POST(req: NextRequest) {
     // SECOND: Only if PRIMARY failed, try central auth database
     if (!primarySuccess) {
       console.log('PRIMARY failed, attempting login using central auth database');
-    
+      console.log('⚠️ WARNING: User should exist in company database but was not found. This indicates a sync issue.');
+
     // Find user by email (case insensitive) via Mongoose model
     const authUser = await AuthUserModel.findOne({ email: email.toLowerCase() }).select('+password');
-    
+
     if (!authUser) {
       console.log('User not found in central auth database, checking company auth databases...');
       // Fallback: search company-specific auth collections
@@ -247,12 +248,27 @@ export async function POST(req: NextRequest) {
     console.log('AuthUser password hash:', authUser.password);
     console.log('Provided password:', password);
     
-    // Verify password
-    let isMatch = await bcrypt.compare(password, authUser.password);
-    // Fallback if auth DB stored plaintext
-    if (!isMatch && authUser.password === password) {
-      console.log('Auth DB password stored in plaintext, matching directly');
-      isMatch = true;
+    // Verify password (fixed double-hashing issue)
+    console.log(`[PASSWORD-DEBUG] Comparing password for ${authUser.email}`);
+    console.log(`[PASSWORD-DEBUG] Hash starts with $2b$: ${authUser.password.startsWith('$2b$')}`);
+
+    let isMatch = false;
+
+    try {
+      // Standard bcrypt comparison (should work now that double-hashing is fixed)
+      isMatch = await bcrypt.compare(password.trim(), authUser.password);
+      console.log(`[PASSWORD-DEBUG] bcrypt.compare result: ${isMatch}`);
+
+      // Fallback for plaintext passwords (legacy)
+      if (!isMatch && authUser.password === password.trim()) {
+        console.log('[PASSWORD-DEBUG] Direct plaintext match found (legacy)');
+        isMatch = true;
+      }
+
+    } catch (bcryptError) {
+      console.error(`[PASSWORD-DEBUG] bcrypt error: ${bcryptError.message}`);
+      // Fallback to direct comparison
+      isMatch = (authUser.password === password.trim());
     }
     if (!isMatch) {
       console.log('Password mismatch for user in auth database, falling back to legacy login');
@@ -279,7 +295,52 @@ export async function POST(req: NextRequest) {
       // If still no match
       return NextResponse.json({ success: false, message: 'Invalid credentials' }, { status: 401 });
     }
-    
+
+    // 🔧 RECOVERY MECHANISM: If user exists in auth DB but not in company DB, create them in company DB
+    if (authUser.companyCode) {
+      try {
+        console.log(`[RECOVERY] Checking if user exists in company database: company_${authUser.companyCode}`);
+        const companyDb = client.db(`company_${authUser.companyCode}`);
+        const companyUsersCollection = companyDb.collection('users');
+        const companyUser = await companyUsersCollection.findOne({ email: email.toLowerCase() });
+
+        if (!companyUser) {
+          console.log(`[RECOVERY] ⚠️ User missing from company database! Creating user in company_${authUser.companyCode}`);
+
+          // Create user in company database
+          const newCompanyUser = {
+            username: authUser.username,
+            email: authUser.email,
+            password: authUser.password,
+            firstName: authUser.username, // Use username as fallback
+            lastName: '',
+            company: authUser.companyName,
+            companyCode: authUser.companyCode,
+            role: authUser.role,
+            status: authUser.status,
+            emailVerified: true,
+            createdAt: new Date(),
+            updatedAt: new Date()
+          };
+
+          const insertResult = await companyUsersCollection.insertOne(newCompanyUser);
+          console.log(`[RECOVERY] ✅ Successfully created user in company database with ID: ${insertResult.insertedId}`);
+
+          // Update auth user with the new company DB ObjectId
+          await AuthUserModel.updateOne(
+            { _id: authUser._id },
+            { $set: { originalId: insertResult.insertedId } }
+          );
+          console.log(`[RECOVERY] ✅ Updated auth user with company DB ObjectId`);
+        } else {
+          console.log(`[RECOVERY] ✅ User exists in company database, no recovery needed`);
+        }
+      } catch (recoveryError) {
+        console.error(`[RECOVERY] ❌ Failed to recover user in company database:`, recoveryError);
+        // Don't fail login - continue with auth database user
+      }
+    }
+
     // Check company-specific database for latest status first
     let userStatus = authUser.status;
     

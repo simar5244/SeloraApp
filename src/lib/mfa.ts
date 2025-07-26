@@ -30,11 +30,12 @@ export const generateMfaCode = (): string => {
  * @param code MFA code to store
  * @param email User's email address
  * @param username User's username
+ * @param customSessionId Optional custom session ID (for signup sync)
  * @returns Session ID for verification
  */
-export const storeMfaSession = (userId: string, code: string, email: string, username: string): string => {
-  // Generate a unique session ID
-  const sessionId = crypto.randomUUID();
+export const storeMfaSession = (userId: string, code: string, email: string, username: string, customSessionId?: string): string => {
+  // Use custom session ID if provided, otherwise generate one
+  const sessionId = customSessionId || crypto.randomUUID();
   
   // Set expiration for 30 minutes from now (increased from 10 minutes)
   const expires = new Date();
@@ -115,12 +116,37 @@ export const verifyMfaSession = (sessionId: string, code: string): string | null
  */
 export const listActiveSessions = (): void => {
   if (!DEBUG_MFA) return;
-  
+
   console.log(`[MFA-DEBUG] Currently ${otpSessions.size} active sessions:`);
-  
+
   otpSessions.forEach((session, id) => {
     console.log(`[MFA-DEBUG] Session ${id}: User ${session.userId}, Code ${session.code}, Expires ${session.expires.toISOString()}`);
   });
+};
+
+/**
+ * Clean up MFA sessions for a specific user (when user is deleted/rejected)
+ * @param userId User ID to clean up sessions for
+ * @param email User email to clean up sessions for
+ */
+export const cleanupMfaSessionsForUser = (userId?: string, email?: string): number => {
+  let cleanedCount = 0;
+
+  otpSessions.forEach((session, sessionId) => {
+    if ((userId && session.userId === userId) || (email && session.email.toLowerCase() === email.toLowerCase())) {
+      otpSessions.delete(sessionId);
+      cleanedCount++;
+      if (DEBUG_MFA) {
+        console.log(`[MFA-CLEANUP] Removed orphaned session ${sessionId} for user ${session.userId} (${session.email})`);
+      }
+    }
+  });
+
+  if (DEBUG_MFA && cleanedCount > 0) {
+    console.log(`[MFA-CLEANUP] Cleaned up ${cleanedCount} MFA sessions`);
+  }
+
+  return cleanedCount;
 };
 
 /**

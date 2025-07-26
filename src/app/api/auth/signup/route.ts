@@ -7,8 +7,7 @@ import { MongoClient } from 'mongodb';
 import { getAuthUserModel } from '@/models/AuthUser';
 import { getCompanyAuthModel } from '@/models/CompanyAuth';
 import Subscription from '@/models/Subscription';
-import { createAndSendMfaCode, sendWelcomeEmailToNewUser } from '@/lib/mfa';
-import { storeTempUserData, type TempUserData } from '@/lib/tempUserStorage';
+import { createAndSendMfaCode, sendWelcomeEmailToNewUser, storeMfaSession } from '@/lib/mfa';
 import bcrypt from 'bcryptjs';
 import Stripe from 'stripe';
 
@@ -211,61 +210,83 @@ export async function POST(req: NextRequest) {
         // Always store company name in lowercase
         const companyName = company ? company.toLowerCase() : (companyInfo.name || '').toLowerCase();
 
-        // Hash password before storing temporarily
-        const hashedPassword = await bcrypt.hash(password, 12);
+        // Store password as plaintext temporarily - it will be hashed by the User model's pre-save hook
+        // This prevents double-hashing which causes login issues
+        const passwordToStore = password;
 
         // Generate a temporary user ID for MFA session
         const tempUserId = generateRandomToken();
 
         console.log(`[SIGNUP] Preparing user data for temporary storage: ${email}`);
 
-        // Prepare user data for temporary storage (don't save to MongoDB yet)
-        const tempUserData: TempUserData = {
+        // Create user record immediately but with emailVerified: false
+        console.log(`[SIGNUP] Creating user record immediately with unverified status`);
+        
+        const newUser = new User({
           username,
           email: email.toLowerCase(),
-          password: hashedPassword,
+          password: passwordToStore, // Will be hashed by User model pre-save hook
           firstName: firstName || '',
           lastName: lastName || '',
           company: companyName,
           companyCode: verifiedCompanyCode,
           role: 'employee_tier_3',
-          status: 'pending',
+          status: 'pending', // User is pending until admin approval
+          emailVerified: false, // This is key - not verified until MFA passes
           emailVerificationToken,
           createdAt: new Date(),
-          expiresAt: new Date(Date.now() + 60 * 60 * 1000) // Expires in 1 hour
-        };
-        
-        // Send OTP verification email using temporary user ID
-        console.log(`[SIGNUP] Generating and sending OTP verification code to ${email}`);
-        const mfaSession = await createAndSendMfaCode(tempUserId, email, username);
+          isActive: false // Not active until both email verified and admin approved
+        });
 
-        if (!mfaSession) {
+        const savedUser = await newUser.save();
+        const userId = String(savedUser._id);
+        console.log(`[SIGNUP] ✅ User created with ID: ${userId}, but not verified yet`);
+
+        // Generate MFA session ID
+        const mfaSessionId = crypto.randomUUID();
+
+        // Generate MFA code and store it
+        const code = Math.floor(100000 + Math.random() * 900000).toString();
+        const mfaStored = storeMfaSession(userId, code, email, username, mfaSessionId);
+
+        if (!mfaStored) {
+          console.error(`[SIGNUP] Failed to store MFA session`);
+          // Clean up the created user
+          await User.findByIdAndDelete(savedUser._id);
+          return NextResponse.json(
+            { success: false, message: 'Failed to create verification session. Please try again.' },
+            { status: 500 }
+          );
+        }
+
+        // Send the email with the code
+        const { sendOTPVerificationEmail } = await import('@/services/emailService');
+        const emailSent = await sendOTPVerificationEmail(email, code, username);
+
+        if (!emailSent) {
           console.error(`[SIGNUP] Failed to send OTP verification email to ${email}`);
+          // Clean up the created user and MFA session
+          await User.findByIdAndDelete(savedUser._id);
           return NextResponse.json(
             { success: false, message: 'Failed to send verification email. Please try again.' },
             { status: 500 }
           );
         }
 
-        // Store user data temporarily until MFA verification
-        storeTempUserData(mfaSession, tempUserData);
-        console.log(`[SIGNUP] User data stored temporarily for MFA verification: ${email}`);
+        console.log(`[SIGNUP] ✅ User created and verification email sent`);
 
-        // Don't send welcome email yet - wait until MFA verification
-        console.log(`[SIGNUP] Signup initiated for ${email}, awaiting MFA verification`);
-
-         // Return success with MFA session (no token or user data until verification)
+         // Return success with MFA session (no token until verification)
          return NextResponse.json({
           success: true,
           message: 'Please verify your email with the code we sent to complete registration.',
           requireMFA: true,
-          mfaSession,
-          // Don't include user data or token until MFA verification
+          mfaSession: mfaSessionId,
           tempUser: {
-            email: tempUserData.email,
-            username: tempUserData.username,
-            firstName: tempUserData.firstName,
-            lastName: tempUserData.lastName,
+            id: userId,
+            email: savedUser.email,
+            username: savedUser.username,
+            firstName: savedUser.firstName,
+            lastName: savedUser.lastName,
             company: companyName,
             companyCode: verifiedCompanyCode
           }

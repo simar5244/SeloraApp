@@ -435,7 +435,12 @@ export default function SignupPage() {
         localStorage.setItem('token', result.token);
         localStorage.setItem('user', JSON.stringify(result.user));
 
-        console.log('MFA verification successful, checking user status');
+        // Also set cookie manually as backup (the API should set it, but just in case)
+        document.cookie = `token=${result.token}; path=/; ${process.env.NODE_ENV === 'production' ? 'secure;' : ''} samesite=lax`;
+        document.cookie = `userRole=${result.user.role}; path=/; ${process.env.NODE_ENV === 'production' ? 'secure;' : ''} samesite=lax`;
+
+        console.log('MFA verification successful, token stored:', result.token);
+        console.log('Cookies set manually as backup');
 
         // Always redirect to pending approval page after MFA verification for new signups
         console.log('User is pending approval, redirecting');
