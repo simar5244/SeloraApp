@@ -1,0 +1,87 @@
+/* Reset all default styles first */
+[data-radix-select-trigger],
+[data-radix-select-content],
+[data-radix-select-item],
+[data-radix-select-viewport] {
+  all: unset;
+}
+
+/* Trigger button */
+[data-radix-select-trigger] {
+  background-color: transparent !important;
+  color: white !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  border-radius: 4px !important;
+  padding: 8px 12px !important;
+  font-size: 14px !important;
+  width: 100% !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  cursor: pointer !important;
+  transition: all 0.2s !important;
+}
+
+[data-radix-select-trigger]:hover {
+  background-color: rgba(0, 0, 0, 0.5) !important;
+  border-color: rgba(255, 255, 255, 0.5) !important;
+}
+
+/* Content */
+[data-radix-select-content] {
+  background-color: rgba(0, 0, 0, 0.9) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: 4px !important;
+  padding: 4px !important;
+  z-index: 9999 !important;
+  min-width: var(--radix-select-trigger-width) !important;
+  backdrop-filter: blur(8px) !important;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Viewport */
+[data-radix-select-viewport] {
+  padding: 4px !important;
+}
+
+/* Item */
+[data-radix-select-item] {
+  color: white !important;
+  padding: 8px 12px !important;
+  border-radius: 4px !important;
+  cursor: pointer !important;
+  outline: none !important;
+  font-size: 14px !important;
+  line-height: 1.5 !important;
+  position: relative !important;
+  user-select: none !important;
+  transition: all 0.2s !important;
+}
+
+[data-radix-select-item][data-highlighted] {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  color: white !important;
+}
+
+[data-radix-select-item]:hover {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Scroll button */
+[data-radix-select-scroll-up-button],
+[data-radix-select-scroll-down-button] {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  height: 32px !important;
+  background-color: rgba(0, 0, 0, 0.9) !important;
+  color: white !important;
+  cursor: default !important;
+}
+
+/* Separator */
+[data-radix-select-separator] {
+  height: 1px !important;
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  margin: 4px 0 !important;
+}

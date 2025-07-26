@@ -1,0 +1,770 @@
+[2025-07-23T23:49:23.879Z] [INFO] Starting scheduled reports daemon with check interval of 10000ms
+[2025-07-23T23:49:23.880Z] [INFO] Checking for scheduled reports...
+[2025-07-23T23:49:24.804Z] [DEBUG] Connected to MongoDB
+[2025-07-23T23:49:24.884Z] [INFO] Found 3 company databases
+[2025-07-23T23:49:24.884Z] [DEBUG] Processing company database: company_kv0fpqae
+[2025-07-23T23:49:24.954Z] [DEBUG] Skipping company_kv0fpqae: No scheduled reports collection found
+[2025-07-23T23:49:24.955Z] [DEBUG] Processing company database: company_pyat1tbz
+[2025-07-23T23:49:25.023Z] [DEBUG] Skipping company_pyat1tbz: No scheduled reports collection found
+[2025-07-23T23:49:25.023Z] [DEBUG] Processing company database: company_ry0iwbpw
+[2025-07-23T23:49:25.092Z] [DEBUG] Finding reports to execute in company_ry0iwbpw (current time: 2025-07-23T23:49:25.092Z)
+[2025-07-23T23:49:25.163Z] [INFO] Found 0 reports to execute in company_ry0iwbpw
+[2025-07-23T23:49:25.163Z] [INFO] Scheduled reports check completed
+[2025-07-23T23:49:25.164Z] [DEBUG] MongoDB connection closed
+[2025-07-23T23:49:25.164Z] [INFO] Daemon is now running continuously...
+[2025-07-23T23:49:35.165Z] [INFO] Checking for scheduled reports...
+[2025-07-23T23:49:35.960Z] [DEBUG] Connected to MongoDB
+[2025-07-23T23:49:36.042Z] [INFO] Found 3 company databases
+[2025-07-23T23:49:36.042Z] [DEBUG] Processing company database: company_kv0fpqae
+[2025-07-23T23:49:36.115Z] [DEBUG] Skipping company_kv0fpqae: No scheduled reports collection found
+[2025-07-23T23:49:36.116Z] [DEBUG] Processing company database: company_pyat1tbz
+[2025-07-23T23:49:36.190Z] [DEBUG] Skipping company_pyat1tbz: No scheduled reports collection found
+[2025-07-23T23:49:36.191Z] [DEBUG] Processing company database: company_ry0iwbpw
+[2025-07-23T23:49:36.269Z] [DEBUG] Finding reports to execute in company_ry0iwbpw (current time: 2025-07-23T23:49:36.269Z)
+[2025-07-23T23:49:36.342Z] [INFO] Found 0 reports to execute in company_ry0iwbpw
+[2025-07-23T23:49:36.343Z] [INFO] Scheduled reports check completed
+[2025-07-23T23:49:36.347Z] [DEBUG] MongoDB connection closed
+[2025-07-23T23:49:45.166Z] [INFO] Checking for scheduled reports...
+[2025-07-23T23:49:45.963Z] [DEBUG] Connected to MongoDB
+[2025-07-23T23:49:46.049Z] [INFO] Found 3 company databases
+[2025-07-23T23:49:46.050Z] [DEBUG] Processing company database: company_kv0fpqae
+[2025-07-23T23:49:46.121Z] [DEBUG] Skipping company_kv0fpqae: No scheduled reports collection found
+[2025-07-23T23:49:46.122Z] [DEBUG] Processing company database: company_pyat1tbz
+[2025-07-23T23:49:46.193Z] [DEBUG] Skipping company_pyat1tbz: No scheduled reports collection found
+[2025-07-23T23:49:46.194Z] [DEBUG] Processing company database: company_ry0iwbpw
+[2025-07-23T23:49:46.268Z] [DEBUG] Finding reports to execute in company_ry0iwbpw (current time: 2025-07-23T23:49:46.268Z)
+[2025-07-23T23:49:46.339Z] [INFO] Found 0 reports to execute in company_ry0iwbpw
+[2025-07-23T23:49:46.340Z] [INFO] Scheduled reports check completed
+[2025-07-23T23:49:46.344Z] [DEBUG] MongoDB connection closed
+[2025-07-23T23:49:55.168Z] [INFO] Checking for scheduled reports...
+[2025-07-23T23:49:55.947Z] [DEBUG] Connected to MongoDB
+[2025-07-23T23:49:56.029Z] [INFO] Found 3 company databases
+[2025-07-23T23:49:56.030Z] [DEBUG] Processing company database: company_kv0fpqae
+[2025-07-23T23:49:56.103Z] [DEBUG] Skipping company_kv0fpqae: No scheduled reports collection found
+[2025-07-23T23:49:56.103Z] [DEBUG] Processing company database: company_pyat1tbz
+[2025-07-23T23:49:56.174Z] [DEBUG] Skipping company_pyat1tbz: No scheduled reports collection found
+[2025-07-23T23:49:56.174Z] [DEBUG] Processing company database: company_ry0iwbpw
+[2025-07-23T23:49:56.252Z] [DEBUG] Finding reports to execute in company_ry0iwbpw (current time: 2025-07-23T23:49:56.252Z)
+[2025-07-23T23:49:56.329Z] [INFO] Found 0 reports to execute in company_ry0iwbpw
+[2025-07-23T23:49:56.330Z] [INFO] Scheduled reports check completed
+[2025-07-23T23:49:56.334Z] [DEBUG] MongoDB connection closed
+[2025-07-23T23:50:05.169Z] [INFO] Checking for scheduled reports...
+[2025-07-23T23:50:05.953Z] [DEBUG] Connected to MongoDB
+[2025-07-23T23:50:06.035Z] [INFO] Found 3 company databases
+[2025-07-23T23:50:06.036Z] [DEBUG] Processing company database: company_kv0fpqae
+[2025-07-23T23:50:06.107Z] [DEBUG] Skipping company_kv0fpqae: No scheduled reports collection found
+[2025-07-23T23:50:06.107Z] [DEBUG] Processing company database: company_pyat1tbz
+[2025-07-23T23:50:06.179Z] [DEBUG] Skipping company_pyat1tbz: No scheduled reports collection found
+[2025-07-23T23:50:06.179Z] [DEBUG] Processing company database: company_ry0iwbpw
+[2025-07-23T23:50:06.257Z] [DEBUG] Finding reports to execute in company_ry0iwbpw (current time: 2025-07-23T23:50:06.257Z)
+[2025-07-23T23:50:06.328Z] [INFO] Found 0 reports to execute in company_ry0iwbpw
+[2025-07-23T23:50:06.329Z] [INFO] Scheduled reports check completed
+[2025-07-23T23:50:06.332Z] [DEBUG] MongoDB connection closed
+[2025-07-23T23:50:15.170Z] [INFO] Checking for scheduled reports...
+[2025-07-23T23:50:15.953Z] [DEBUG] Connected to MongoDB
+[2025-07-23T23:50:16.035Z] [INFO] Found 3 company databases
+[2025-07-23T23:50:16.035Z] [DEBUG] Processing company database: company_kv0fpqae
+[2025-07-23T23:50:16.105Z] [DEBUG] Skipping company_kv0fpqae: No scheduled reports collection found
+[2025-07-23T23:50:16.106Z] [DEBUG] Processing company database: company_pyat1tbz
+[2025-07-23T23:50:16.181Z] [DEBUG] Skipping company_pyat1tbz: No scheduled reports collection found
+[2025-07-23T23:50:16.182Z] [DEBUG] Processing company database: company_ry0iwbpw
+[2025-07-23T23:50:16.254Z] [DEBUG] Finding reports to execute in company_ry0iwbpw (current time: 2025-07-23T23:50:16.254Z)
+[2025-07-23T23:50:16.325Z] [INFO] Found 0 reports to execute in company_ry0iwbpw
+[2025-07-23T23:50:16.326Z] [INFO] Scheduled reports check completed
+[2025-07-23T23:50:16.329Z] [DEBUG] MongoDB connection closed
+[2025-07-23T23:50:25.171Z] [INFO] Checking for scheduled reports...
+[2025-07-23T23:50:25.994Z] [DEBUG] Connected to MongoDB
+[2025-07-23T23:50:26.075Z] [INFO] Found 3 company databases
+[2025-07-23T23:50:26.076Z] [DEBUG] Processing company database: company_kv0fpqae
+[2025-07-23T23:50:26.146Z] [DEBUG] Skipping company_kv0fpqae: No scheduled reports collection found
+[2025-07-23T23:50:26.147Z] [DEBUG] Processing company database: company_pyat1tbz
+[2025-07-23T23:50:26.219Z] [DEBUG] Skipping company_pyat1tbz: No scheduled reports collection found
+[2025-07-23T23:50:26.219Z] [DEBUG] Processing company database: company_ry0iwbpw
+[2025-07-23T23:50:26.291Z] [DEBUG] Finding reports to execute in company_ry0iwbpw (current time: 2025-07-23T23:50:26.291Z)
+[2025-07-23T23:50:26.362Z] [INFO] Found 0 reports to execute in company_ry0iwbpw
+[2025-07-23T23:50:26.362Z] [INFO] Scheduled reports check completed
+[2025-07-23T23:50:26.364Z] [DEBUG] MongoDB connection closed
+[2025-07-23T23:50:35.173Z] [INFO] Checking for scheduled reports...
+[2025-07-23T23:50:36.007Z] [DEBUG] Connected to MongoDB
+[2025-07-23T23:50:36.088Z] [INFO] Found 3 company databases
+[2025-07-23T23:50:36.089Z] [DEBUG] Processing company database: company_kv0fpqae
+[2025-07-23T23:50:36.160Z] [DEBUG] Skipping company_kv0fpqae: No scheduled reports collection found
+[2025-07-23T23:50:36.161Z] [DEBUG] Processing company database: company_pyat1tbz
+[2025-07-23T23:50:36.233Z] [DEBUG] Skipping company_pyat1tbz: No scheduled reports collection found
+[2025-07-23T23:50:36.234Z] [DEBUG] Processing company database: company_ry0iwbpw
+[2025-07-23T23:50:36.309Z] [DEBUG] Finding reports to execute in company_ry0iwbpw (current time: 2025-07-23T23:50:36.309Z)
+[2025-07-23T23:50:36.380Z] [INFO] Found 0 reports to execute in company_ry0iwbpw
+[2025-07-23T23:50:36.381Z] [INFO] Scheduled reports check completed
+[2025-07-23T23:50:36.383Z] [DEBUG] MongoDB connection closed
+[2025-07-23T23:50:45.175Z] [INFO] Checking for scheduled reports...
+[2025-07-23T23:50:46.368Z] [DEBUG] Connected to MongoDB
+[2025-07-23T23:50:46.451Z] [INFO] Found 3 company databases
+[2025-07-23T23:50:46.452Z] [DEBUG] Processing company database: company_kv0fpqae
+[2025-07-23T23:50:46.525Z] [DEBUG] Skipping company_kv0fpqae: No scheduled reports collection found
+[2025-07-23T23:50:46.526Z] [DEBUG] Processing company database: company_pyat1tbz
+[2025-07-23T23:50:46.599Z] [DEBUG] Skipping company_pyat1tbz: No scheduled reports collection found
+[2025-07-23T23:50:46.599Z] [DEBUG] Processing company database: company_ry0iwbpw
+[2025-07-23T23:50:46.671Z] [DEBUG] Finding reports to execute in company_ry0iwbpw (current time: 2025-07-23T23:50:46.671Z)
+[2025-07-23T23:50:46.748Z] [INFO] Found 0 reports to execute in company_ry0iwbpw
+[2025-07-23T23:50:46.748Z] [INFO] Scheduled reports check completed
+[2025-07-23T23:50:46.751Z] [DEBUG] MongoDB connection closed
+[2025-07-23T23:50:55.175Z] [INFO] Checking for scheduled reports...
+[2025-07-23T23:50:55.986Z] [DEBUG] Connected to MongoDB
+[2025-07-23T23:50:56.067Z] [INFO] Found 3 company databases
+[2025-07-23T23:50:56.067Z] [DEBUG] Processing company database: company_kv0fpqae
+[2025-07-23T23:50:56.139Z] [DEBUG] Skipping company_kv0fpqae: No scheduled reports collection found
+[2025-07-23T23:50:56.140Z] [DEBUG] Processing company database: company_pyat1tbz
+[2025-07-23T23:50:56.211Z] [DEBUG] Skipping company_pyat1tbz: No scheduled reports collection found
+[2025-07-23T23:50:56.212Z] [DEBUG] Processing company database: company_ry0iwbpw
+[2025-07-23T23:50:56.288Z] [DEBUG] Finding reports to execute in company_ry0iwbpw (current time: 2025-07-23T23:50:56.288Z)
+[2025-07-23T23:50:56.359Z] [INFO] Found 0 reports to execute in company_ry0iwbpw
+[2025-07-23T23:50:56.360Z] [INFO] Scheduled reports check completed
+[2025-07-23T23:50:56.363Z] [DEBUG] MongoDB connection closed
+[2025-07-23T23:51:05.177Z] [INFO] Checking for scheduled reports...
+[2025-07-23T23:51:05.991Z] [DEBUG] Connected to MongoDB
+[2025-07-23T23:51:06.073Z] [INFO] Found 3 company databases
+[2025-07-23T23:51:06.073Z] [DEBUG] Processing company database: company_kv0fpqae
+[2025-07-23T23:51:06.146Z] [DEBUG] Skipping company_kv0fpqae: No scheduled reports collection found
+[2025-07-23T23:51:06.147Z] [DEBUG] Processing company database: company_pyat1tbz
+[2025-07-23T23:51:06.219Z] [DEBUG] Skipping company_pyat1tbz: No scheduled reports collection found
+[2025-07-23T23:51:06.220Z] [DEBUG] Processing company database: company_ry0iwbpw
+[2025-07-23T23:51:06.297Z] [DEBUG] Finding reports to execute in company_ry0iwbpw (current time: 2025-07-23T23:51:06.297Z)
+[2025-07-23T23:51:06.370Z] [INFO] Found 0 reports to execute in company_ry0iwbpw
+[2025-07-23T23:51:06.370Z] [INFO] Scheduled reports check completed
+[2025-07-23T23:51:06.373Z] [DEBUG] MongoDB connection closed
+[2025-07-23T23:51:15.178Z] [INFO] Checking for scheduled reports...
+[2025-07-23T23:51:15.971Z] [DEBUG] Connected to MongoDB
+[2025-07-23T23:51:16.055Z] [INFO] Found 3 company databases
+[2025-07-23T23:51:16.056Z] [DEBUG] Processing company database: company_kv0fpqae
+[2025-07-23T23:51:16.125Z] [DEBUG] Skipping company_kv0fpqae: No scheduled reports collection found
+[2025-07-23T23:51:16.126Z] [DEBUG] Processing company database: company_pyat1tbz
+[2025-07-23T23:51:16.197Z] [DEBUG] Skipping company_pyat1tbz: No scheduled reports collection found
+[2025-07-23T23:51:16.198Z] [DEBUG] Processing company database: company_ry0iwbpw
+[2025-07-23T23:51:16.270Z] [DEBUG] Finding reports to execute in company_ry0iwbpw (current time: 2025-07-23T23:51:16.270Z)
+[2025-07-23T23:51:16.341Z] [INFO] Found 0 reports to execute in company_ry0iwbpw
+[2025-07-23T23:51:16.341Z] [INFO] Scheduled reports check completed
+[2025-07-23T23:51:16.344Z] [DEBUG] MongoDB connection closed
+[2025-07-23T23:51:25.179Z] [INFO] Checking for scheduled reports...
+[2025-07-23T23:51:26.001Z] [DEBUG] Connected to MongoDB
+[2025-07-23T23:51:26.084Z] [INFO] Found 3 company databases
+[2025-07-23T23:51:26.085Z] [DEBUG] Processing company database: company_kv0fpqae
+[2025-07-23T23:51:26.155Z] [DEBUG] Skipping company_kv0fpqae: No scheduled reports collection found
+[2025-07-23T23:51:26.156Z] [DEBUG] Processing company database: company_pyat1tbz
+[2025-07-23T23:51:26.226Z] [DEBUG] Skipping company_pyat1tbz: No scheduled reports collection found
+[2025-07-23T23:51:26.226Z] [DEBUG] Processing company database: company_ry0iwbpw
+[2025-07-23T23:51:26.298Z] [DEBUG] Finding reports to execute in company_ry0iwbpw (current time: 2025-07-23T23:51:26.298Z)
+[2025-07-23T23:51:26.371Z] [INFO] Found 0 reports to execute in company_ry0iwbpw
+[2025-07-23T23:51:26.372Z] [INFO] Scheduled reports check completed
+[2025-07-23T23:51:26.374Z] [DEBUG] MongoDB connection closed
+[2025-07-23T23:51:35.180Z] [INFO] Checking for scheduled reports...
+[2025-07-23T23:51:36.014Z] [DEBUG] Connected to MongoDB
+[2025-07-23T23:51:36.094Z] [INFO] Found 3 company databases
+[2025-07-23T23:51:36.095Z] [DEBUG] Processing company database: company_kv0fpqae
+[2025-07-23T23:51:36.166Z] [DEBUG] Skipping company_kv0fpqae: No scheduled reports collection found
+[2025-07-23T23:51:36.167Z] [DEBUG] Processing company database: company_pyat1tbz
+[2025-07-23T23:51:36.235Z] [DEBUG] Skipping company_pyat1tbz: No scheduled reports collection found
+[2025-07-23T23:51:36.236Z] [DEBUG] Processing company database: company_ry0iwbpw
+[2025-07-23T23:51:36.308Z] [DEBUG] Finding reports to execute in company_ry0iwbpw (current time: 2025-07-23T23:51:36.308Z)
+[2025-07-23T23:51:36.385Z] [INFO] Found 0 reports to execute in company_ry0iwbpw
+[2025-07-23T23:51:36.386Z] [INFO] Scheduled reports check completed
+[2025-07-23T23:51:36.389Z] [DEBUG] MongoDB connection closed
+[2025-07-23T23:51:45.181Z] [INFO] Checking for scheduled reports...
+[2025-07-23T23:51:45.969Z] [DEBUG] Connected to MongoDB
+[2025-07-23T23:51:46.050Z] [INFO] Found 3 company databases
+[2025-07-23T23:51:46.051Z] [DEBUG] Processing company database: company_kv0fpqae
+[2025-07-23T23:51:46.122Z] [DEBUG] Skipping company_kv0fpqae: No scheduled reports collection found
+[2025-07-23T23:51:46.123Z] [DEBUG] Processing company database: company_pyat1tbz
+[2025-07-23T23:51:46.194Z] [DEBUG] Skipping company_pyat1tbz: No scheduled reports collection found
+[2025-07-23T23:51:46.195Z] [DEBUG] Processing company database: company_ry0iwbpw
+[2025-07-23T23:51:46.275Z] [DEBUG] Finding reports to execute in company_ry0iwbpw (current time: 2025-07-23T23:51:46.275Z)
+[2025-07-23T23:51:46.346Z] [INFO] Found 0 reports to execute in company_ry0iwbpw
+[2025-07-23T23:51:46.347Z] [INFO] Scheduled reports check completed
+[2025-07-23T23:51:46.349Z] [DEBUG] MongoDB connection closed
+[2025-07-23T23:51:55.183Z] [INFO] Checking for scheduled reports...
+[2025-07-23T23:51:55.980Z] [DEBUG] Connected to MongoDB
+[2025-07-23T23:51:56.062Z] [INFO] Found 3 company databases
+[2025-07-23T23:51:56.063Z] [DEBUG] Processing company database: company_kv0fpqae
+[2025-07-23T23:51:56.134Z] [DEBUG] Skipping company_kv0fpqae: No scheduled reports collection found
+[2025-07-23T23:51:56.135Z] [DEBUG] Processing company database: company_pyat1tbz
+[2025-07-23T23:51:56.206Z] [DEBUG] Skipping company_pyat1tbz: No scheduled reports collection found
+[2025-07-23T23:51:56.207Z] [DEBUG] Processing company database: company_ry0iwbpw
+[2025-07-23T23:51:56.278Z] [DEBUG] Finding reports to execute in company_ry0iwbpw (current time: 2025-07-23T23:51:56.278Z)
+[2025-07-23T23:51:56.350Z] [INFO] Found 0 reports to execute in company_ry0iwbpw
+[2025-07-23T23:51:56.351Z] [INFO] Scheduled reports check completed
+[2025-07-23T23:51:56.353Z] [DEBUG] MongoDB connection closed
+[2025-07-23T23:52:05.184Z] [INFO] Checking for scheduled reports...
+[2025-07-23T23:52:06.018Z] [DEBUG] Connected to MongoDB
+[2025-07-23T23:52:06.099Z] [INFO] Found 3 company databases
+[2025-07-23T23:52:06.099Z] [DEBUG] Processing company database: company_kv0fpqae
+[2025-07-23T23:52:06.171Z] [DEBUG] Skipping company_kv0fpqae: No scheduled reports collection found
+[2025-07-23T23:52:06.172Z] [DEBUG] Processing company database: company_pyat1tbz
+[2025-07-23T23:52:06.242Z] [DEBUG] Skipping company_pyat1tbz: No scheduled reports collection found
+[2025-07-23T23:52:06.243Z] [DEBUG] Processing company database: company_ry0iwbpw
+[2025-07-23T23:52:06.315Z] [DEBUG] Finding reports to execute in company_ry0iwbpw (current time: 2025-07-23T23:52:06.315Z)
+[2025-07-23T23:52:06.386Z] [INFO] Found 0 reports to execute in company_ry0iwbpw
+[2025-07-23T23:52:06.387Z] [INFO] Scheduled reports check completed
+[2025-07-23T23:52:06.390Z] [DEBUG] MongoDB connection closed
+[2025-07-23T23:52:15.186Z] [INFO] Checking for scheduled reports...
+[2025-07-23T23:52:15.995Z] [DEBUG] Connected to MongoDB
+[2025-07-23T23:52:16.078Z] [INFO] Found 3 company databases
+[2025-07-23T23:52:16.078Z] [DEBUG] Processing company database: company_kv0fpqae
+[2025-07-23T23:52:16.150Z] [DEBUG] Skipping company_kv0fpqae: No scheduled reports collection found
+[2025-07-23T23:52:16.151Z] [DEBUG] Processing company database: company_pyat1tbz
+[2025-07-23T23:52:16.223Z] [DEBUG] Skipping company_pyat1tbz: No scheduled reports collection found
+[2025-07-23T23:52:16.223Z] [DEBUG] Processing company database: company_ry0iwbpw
+[2025-07-23T23:52:16.296Z] [DEBUG] Finding reports to execute in company_ry0iwbpw (current time: 2025-07-23T23:52:16.296Z)
+[2025-07-23T23:52:16.368Z] [INFO] Found 0 reports to execute in company_ry0iwbpw
+[2025-07-23T23:52:16.368Z] [INFO] Scheduled reports check completed
+[2025-07-23T23:52:16.372Z] [DEBUG] MongoDB connection closed
+[2025-07-23T23:52:25.187Z] [INFO] Checking for scheduled reports...
+[2025-07-23T23:52:26.011Z] [DEBUG] Connected to MongoDB
+[2025-07-23T23:52:26.100Z] [INFO] Found 3 company databases
+[2025-07-23T23:52:26.100Z] [DEBUG] Processing company database: company_kv0fpqae
+[2025-07-23T23:52:26.173Z] [DEBUG] Skipping company_kv0fpqae: No scheduled reports collection found
+[2025-07-23T23:52:26.173Z] [DEBUG] Processing company database: company_pyat1tbz
+[2025-07-23T23:52:26.245Z] [DEBUG] Skipping company_pyat1tbz: No scheduled reports collection found
+[2025-07-23T23:52:26.246Z] [DEBUG] Processing company database: company_ry0iwbpw
+[2025-07-23T23:52:26.320Z] [DEBUG] Finding reports to execute in company_ry0iwbpw (current time: 2025-07-23T23:52:26.320Z)
+[2025-07-23T23:52:26.391Z] [INFO] Found 0 reports to execute in company_ry0iwbpw
+[2025-07-23T23:52:26.392Z] [INFO] Scheduled reports check completed
+[2025-07-23T23:52:26.395Z] [DEBUG] MongoDB connection closed
+[2025-07-23T23:52:35.188Z] [INFO] Checking for scheduled reports...
+[2025-07-23T23:52:36.001Z] [DEBUG] Connected to MongoDB
+[2025-07-23T23:52:36.081Z] [INFO] Found 3 company databases
+[2025-07-23T23:52:36.082Z] [DEBUG] Processing company database: company_kv0fpqae
+[2025-07-23T23:52:36.152Z] [DEBUG] Skipping company_kv0fpqae: No scheduled reports collection found
+[2025-07-23T23:52:36.153Z] [DEBUG] Processing company database: company_pyat1tbz
+[2025-07-23T23:52:36.223Z] [DEBUG] Skipping company_pyat1tbz: No scheduled reports collection found
+[2025-07-23T23:52:36.223Z] [DEBUG] Processing company database: company_ry0iwbpw
+[2025-07-23T23:52:36.298Z] [DEBUG] Finding reports to execute in company_ry0iwbpw (current time: 2025-07-23T23:52:36.298Z)
+[2025-07-23T23:52:36.373Z] [INFO] Found 0 reports to execute in company_ry0iwbpw
+[2025-07-23T23:52:36.374Z] [INFO] Scheduled reports check completed
+[2025-07-23T23:52:36.376Z] [DEBUG] MongoDB connection closed
+[2025-07-23T23:52:45.189Z] [INFO] Checking for scheduled reports...
+[2025-07-23T23:52:46.334Z] [DEBUG] Connected to MongoDB
+[2025-07-23T23:52:46.417Z] [INFO] Found 3 company databases
+[2025-07-23T23:52:46.417Z] [DEBUG] Processing company database: company_kv0fpqae
+[2025-07-23T23:52:46.497Z] [DEBUG] Skipping company_kv0fpqae: No scheduled reports collection found
+[2025-07-23T23:52:46.497Z] [DEBUG] Processing company database: company_pyat1tbz
+[2025-07-23T23:52:46.574Z] [DEBUG] Skipping company_pyat1tbz: No scheduled reports collection found
+[2025-07-23T23:52:46.574Z] [DEBUG] Processing company database: company_ry0iwbpw
+[2025-07-23T23:52:46.645Z] [DEBUG] Finding reports to execute in company_ry0iwbpw (current time: 2025-07-23T23:52:46.645Z)
+[2025-07-23T23:52:46.716Z] [INFO] Found 0 reports to execute in company_ry0iwbpw
+[2025-07-23T23:52:46.717Z] [INFO] Scheduled reports check completed
+[2025-07-23T23:52:46.720Z] [DEBUG] MongoDB connection closed
+[2025-07-23T23:52:55.190Z] [INFO] Checking for scheduled reports...
+[2025-07-23T23:52:55.995Z] [DEBUG] Connected to MongoDB
+[2025-07-23T23:52:56.077Z] [INFO] Found 3 company databases
+[2025-07-23T23:52:56.078Z] [DEBUG] Processing company database: company_kv0fpqae
+[2025-07-23T23:52:56.150Z] [DEBUG] Skipping company_kv0fpqae: No scheduled reports collection found
+[2025-07-23T23:52:56.151Z] [DEBUG] Processing company database: company_pyat1tbz
+[2025-07-23T23:52:56.224Z] [DEBUG] Skipping company_pyat1tbz: No scheduled reports collection found
+[2025-07-23T23:52:56.225Z] [DEBUG] Processing company database: company_ry0iwbpw
+[2025-07-23T23:52:56.298Z] [DEBUG] Finding reports to execute in company_ry0iwbpw (current time: 2025-07-23T23:52:56.298Z)
+[2025-07-23T23:52:56.370Z] [INFO] Found 0 reports to execute in company_ry0iwbpw
+[2025-07-23T23:52:56.370Z] [INFO] Scheduled reports check completed
+[2025-07-23T23:52:56.373Z] [DEBUG] MongoDB connection closed
+[2025-07-23T23:53:05.191Z] [INFO] Checking for scheduled reports...
+[2025-07-23T23:53:05.975Z] [DEBUG] Connected to MongoDB
+[2025-07-23T23:53:06.055Z] [INFO] Found 3 company databases
+[2025-07-23T23:53:06.056Z] [DEBUG] Processing company database: company_kv0fpqae
+[2025-07-23T23:53:06.127Z] [DEBUG] Skipping company_kv0fpqae: No scheduled reports collection found
+[2025-07-23T23:53:06.127Z] [DEBUG] Processing company database: company_pyat1tbz
+[2025-07-23T23:53:06.200Z] [DEBUG] Skipping company_pyat1tbz: No scheduled reports collection found
+[2025-07-23T23:53:06.200Z] [DEBUG] Processing company database: company_ry0iwbpw
+[2025-07-23T23:53:06.271Z] [DEBUG] Finding reports to execute in company_ry0iwbpw (current time: 2025-07-23T23:53:06.271Z)
+[2025-07-23T23:53:06.343Z] [INFO] Found 0 reports to execute in company_ry0iwbpw
+[2025-07-23T23:53:06.344Z] [INFO] Scheduled reports check completed
+[2025-07-23T23:53:06.346Z] [DEBUG] MongoDB connection closed
+[2025-07-23T23:53:15.192Z] [INFO] Checking for scheduled reports...
+[2025-07-23T23:53:15.988Z] [DEBUG] Connected to MongoDB
+[2025-07-23T23:53:16.072Z] [INFO] Found 3 company databases
+[2025-07-23T23:53:16.073Z] [DEBUG] Processing company database: company_kv0fpqae
+[2025-07-23T23:53:16.143Z] [DEBUG] Skipping company_kv0fpqae: No scheduled reports collection found
+[2025-07-23T23:53:16.144Z] [DEBUG] Processing company database: company_pyat1tbz
+[2025-07-23T23:53:16.214Z] [DEBUG] Skipping company_pyat1tbz: No scheduled reports collection found
+[2025-07-23T23:53:16.215Z] [DEBUG] Processing company database: company_ry0iwbpw
+[2025-07-23T23:53:16.285Z] [DEBUG] Finding reports to execute in company_ry0iwbpw (current time: 2025-07-23T23:53:16.285Z)
+[2025-07-23T23:53:16.356Z] [INFO] Found 0 reports to execute in company_ry0iwbpw
+[2025-07-23T23:53:16.357Z] [INFO] Scheduled reports check completed
+[2025-07-23T23:53:16.359Z] [DEBUG] MongoDB connection closed
+[2025-07-23T23:53:25.194Z] [INFO] Checking for scheduled reports...
+[2025-07-23T23:53:26.053Z] [DEBUG] Connected to MongoDB
+[2025-07-23T23:53:26.133Z] [INFO] Found 3 company databases
+[2025-07-23T23:53:26.134Z] [DEBUG] Processing company database: company_kv0fpqae
+[2025-07-23T23:53:26.204Z] [DEBUG] Skipping company_kv0fpqae: No scheduled reports collection found
+[2025-07-23T23:53:26.205Z] [DEBUG] Processing company database: company_pyat1tbz
+[2025-07-23T23:53:26.275Z] [DEBUG] Skipping company_pyat1tbz: No scheduled reports collection found
+[2025-07-23T23:53:26.276Z] [DEBUG] Processing company database: company_ry0iwbpw
+[2025-07-23T23:53:26.347Z] [DEBUG] Finding reports to execute in company_ry0iwbpw (current time: 2025-07-23T23:53:26.347Z)
+[2025-07-23T23:53:26.418Z] [INFO] Found 0 reports to execute in company_ry0iwbpw
+[2025-07-23T23:53:26.418Z] [INFO] Scheduled reports check completed
+[2025-07-23T23:53:26.421Z] [DEBUG] MongoDB connection closed
+[2025-07-23T23:53:35.196Z] [INFO] Checking for scheduled reports...
+[2025-07-23T23:53:36.105Z] [DEBUG] Connected to MongoDB
+[2025-07-23T23:53:36.184Z] [INFO] Found 3 company databases
+[2025-07-23T23:53:36.185Z] [DEBUG] Processing company database: company_kv0fpqae
+[2025-07-23T23:53:36.255Z] [DEBUG] Skipping company_kv0fpqae: No scheduled reports collection found
+[2025-07-23T23:53:36.255Z] [DEBUG] Processing company database: company_pyat1tbz
+[2025-07-23T23:53:36.325Z] [DEBUG] Skipping company_pyat1tbz: No scheduled reports collection found
+[2025-07-23T23:53:36.326Z] [DEBUG] Processing company database: company_ry0iwbpw
+[2025-07-23T23:53:36.396Z] [DEBUG] Finding reports to execute in company_ry0iwbpw (current time: 2025-07-23T23:53:36.396Z)
+[2025-07-23T23:53:36.466Z] [INFO] Found 0 reports to execute in company_ry0iwbpw
+[2025-07-23T23:53:36.467Z] [INFO] Scheduled reports check completed
+[2025-07-23T23:53:36.469Z] [DEBUG] MongoDB connection closed
+[2025-07-23T23:53:45.197Z] [INFO] Checking for scheduled reports...
+[2025-07-23T23:53:45.977Z] [DEBUG] Connected to MongoDB
+[2025-07-23T23:53:46.059Z] [INFO] Found 3 company databases
+[2025-07-23T23:53:46.060Z] [DEBUG] Processing company database: company_kv0fpqae
+[2025-07-23T23:53:46.130Z] [DEBUG] Skipping company_kv0fpqae: No scheduled reports collection found
+[2025-07-23T23:53:46.130Z] [DEBUG] Processing company database: company_pyat1tbz
+[2025-07-23T23:53:46.201Z] [DEBUG] Skipping company_pyat1tbz: No scheduled reports collection found
+[2025-07-23T23:53:46.201Z] [DEBUG] Processing company database: company_ry0iwbpw
+[2025-07-23T23:53:46.271Z] [DEBUG] Finding reports to execute in company_ry0iwbpw (current time: 2025-07-23T23:53:46.271Z)
+[2025-07-23T23:53:46.341Z] [INFO] Found 0 reports to execute in company_ry0iwbpw
+[2025-07-23T23:53:46.341Z] [INFO] Scheduled reports check completed
+[2025-07-23T23:53:46.343Z] [DEBUG] MongoDB connection closed
+[2025-07-23T23:53:55.198Z] [INFO] Checking for scheduled reports...
+[2025-07-23T23:53:55.984Z] [DEBUG] Connected to MongoDB
+[2025-07-23T23:53:56.063Z] [INFO] Found 3 company databases
+[2025-07-23T23:53:56.064Z] [DEBUG] Processing company database: company_kv0fpqae
+[2025-07-23T23:53:56.134Z] [DEBUG] Skipping company_kv0fpqae: No scheduled reports collection found
+[2025-07-23T23:53:56.135Z] [DEBUG] Processing company database: company_pyat1tbz
+[2025-07-23T23:53:56.205Z] [DEBUG] Skipping company_pyat1tbz: No scheduled reports collection found
+[2025-07-23T23:53:56.206Z] [DEBUG] Processing company database: company_ry0iwbpw
+[2025-07-23T23:53:56.276Z] [DEBUG] Finding reports to execute in company_ry0iwbpw (current time: 2025-07-23T23:53:56.276Z)
+[2025-07-23T23:53:56.347Z] [INFO] Found 0 reports to execute in company_ry0iwbpw
+[2025-07-23T23:53:56.348Z] [INFO] Scheduled reports check completed
+[2025-07-23T23:53:56.350Z] [DEBUG] MongoDB connection closed
+[2025-07-23T23:54:05.199Z] [INFO] Checking for scheduled reports...
+[2025-07-23T23:54:05.974Z] [DEBUG] Connected to MongoDB
+[2025-07-23T23:54:06.053Z] [INFO] Found 3 company databases
+[2025-07-23T23:54:06.053Z] [DEBUG] Processing company database: company_kv0fpqae
+[2025-07-23T23:54:06.122Z] [DEBUG] Skipping company_kv0fpqae: No scheduled reports collection found
+[2025-07-23T23:54:06.122Z] [DEBUG] Processing company database: company_pyat1tbz
+[2025-07-23T23:54:06.192Z] [DEBUG] Skipping company_pyat1tbz: No scheduled reports collection found
+[2025-07-23T23:54:06.192Z] [DEBUG] Processing company database: company_ry0iwbpw
+[2025-07-23T23:54:06.276Z] [DEBUG] Finding reports to execute in company_ry0iwbpw (current time: 2025-07-23T23:54:06.276Z)
+[2025-07-23T23:54:06.345Z] [INFO] Found 0 reports to execute in company_ry0iwbpw
+[2025-07-23T23:54:06.346Z] [INFO] Scheduled reports check completed
+[2025-07-23T23:54:06.348Z] [DEBUG] MongoDB connection closed
+[2025-07-23T23:54:15.200Z] [INFO] Checking for scheduled reports...
+[2025-07-23T23:54:15.981Z] [DEBUG] Connected to MongoDB
+[2025-07-23T23:54:16.061Z] [INFO] Found 3 company databases
+[2025-07-23T23:54:16.061Z] [DEBUG] Processing company database: company_kv0fpqae
+[2025-07-23T23:54:16.131Z] [DEBUG] Skipping company_kv0fpqae: No scheduled reports collection found
+[2025-07-23T23:54:16.131Z] [DEBUG] Processing company database: company_pyat1tbz
+[2025-07-23T23:54:16.202Z] [DEBUG] Skipping company_pyat1tbz: No scheduled reports collection found
+[2025-07-23T23:54:16.203Z] [DEBUG] Processing company database: company_ry0iwbpw
+[2025-07-23T23:54:16.274Z] [DEBUG] Finding reports to execute in company_ry0iwbpw (current time: 2025-07-23T23:54:16.274Z)
+[2025-07-23T23:54:16.344Z] [INFO] Found 0 reports to execute in company_ry0iwbpw
+[2025-07-23T23:54:16.345Z] [INFO] Scheduled reports check completed
+[2025-07-23T23:54:16.347Z] [DEBUG] MongoDB connection closed
+[2025-07-23T23:54:25.200Z] [INFO] Checking for scheduled reports...
+[2025-07-23T23:54:26.034Z] [DEBUG] Connected to MongoDB
+[2025-07-23T23:54:26.115Z] [INFO] Found 3 company databases
+[2025-07-23T23:54:26.115Z] [DEBUG] Processing company database: company_kv0fpqae
+[2025-07-23T23:54:26.184Z] [DEBUG] Skipping company_kv0fpqae: No scheduled reports collection found
+[2025-07-23T23:54:26.185Z] [DEBUG] Processing company database: company_pyat1tbz
+[2025-07-23T23:54:26.260Z] [DEBUG] Skipping company_pyat1tbz: No scheduled reports collection found
+[2025-07-23T23:54:26.261Z] [DEBUG] Processing company database: company_ry0iwbpw
+[2025-07-23T23:54:26.331Z] [DEBUG] Finding reports to execute in company_ry0iwbpw (current time: 2025-07-23T23:54:26.331Z)
+[2025-07-23T23:54:26.401Z] [INFO] Found 0 reports to execute in company_ry0iwbpw
+[2025-07-23T23:54:26.401Z] [INFO] Scheduled reports check completed
+[2025-07-23T23:54:26.404Z] [DEBUG] MongoDB connection closed
+[2025-07-23T23:54:35.202Z] [INFO] Checking for scheduled reports...
+[2025-07-23T23:54:36.327Z] [DEBUG] Connected to MongoDB
+[2025-07-23T23:54:36.489Z] [INFO] Found 3 company databases
+[2025-07-23T23:54:36.490Z] [DEBUG] Processing company database: company_kv0fpqae
+[2025-07-23T23:54:36.666Z] [DEBUG] Skipping company_kv0fpqae: No scheduled reports collection found
+[2025-07-23T23:54:36.667Z] [DEBUG] Processing company database: company_pyat1tbz
+[2025-07-23T23:54:36.843Z] [DEBUG] Skipping company_pyat1tbz: No scheduled reports collection found
+[2025-07-23T23:54:36.844Z] [DEBUG] Processing company database: company_ry0iwbpw
+[2025-07-23T23:54:37.023Z] [DEBUG] Finding reports to execute in company_ry0iwbpw (current time: 2025-07-23T23:54:37.023Z)
+[2025-07-23T23:54:37.204Z] [INFO] Found 0 reports to execute in company_ry0iwbpw
+[2025-07-23T23:54:37.205Z] [INFO] Scheduled reports check completed
+[2025-07-23T23:54:37.207Z] [DEBUG] MongoDB connection closed
+[2025-07-23T23:54:45.203Z] [INFO] Checking for scheduled reports...
+[2025-07-23T23:54:46.019Z] [DEBUG] Connected to MongoDB
+[2025-07-23T23:54:46.102Z] [INFO] Found 3 company databases
+[2025-07-23T23:54:46.102Z] [DEBUG] Processing company database: company_kv0fpqae
+[2025-07-23T23:54:46.174Z] [DEBUG] Skipping company_kv0fpqae: No scheduled reports collection found
+[2025-07-23T23:54:46.174Z] [DEBUG] Processing company database: company_pyat1tbz
+[2025-07-23T23:54:46.247Z] [DEBUG] Skipping company_pyat1tbz: No scheduled reports collection found
+[2025-07-23T23:54:46.248Z] [DEBUG] Processing company database: company_ry0iwbpw
+[2025-07-23T23:54:46.321Z] [DEBUG] Finding reports to execute in company_ry0iwbpw (current time: 2025-07-23T23:54:46.321Z)
+[2025-07-23T23:54:46.500Z] [INFO] Found 0 reports to execute in company_ry0iwbpw
+[2025-07-23T23:54:46.501Z] [INFO] Scheduled reports check completed
+[2025-07-23T23:54:46.503Z] [DEBUG] MongoDB connection closed
+[2025-07-23T23:54:55.204Z] [INFO] Checking for scheduled reports...
+[2025-07-23T23:54:56.014Z] [DEBUG] Connected to MongoDB
+[2025-07-23T23:54:56.099Z] [INFO] Found 3 company databases
+[2025-07-23T23:54:56.100Z] [DEBUG] Processing company database: company_kv0fpqae
+[2025-07-23T23:54:56.175Z] [DEBUG] Skipping company_kv0fpqae: No scheduled reports collection found
+[2025-07-23T23:54:56.176Z] [DEBUG] Processing company database: company_pyat1tbz
+[2025-07-23T23:54:56.248Z] [DEBUG] Skipping company_pyat1tbz: No scheduled reports collection found
+[2025-07-23T23:54:56.248Z] [DEBUG] Processing company database: company_ry0iwbpw
+[2025-07-23T23:54:56.320Z] [DEBUG] Finding reports to execute in company_ry0iwbpw (current time: 2025-07-23T23:54:56.320Z)
+[2025-07-23T23:54:56.391Z] [INFO] Found 0 reports to execute in company_ry0iwbpw
+[2025-07-23T23:54:56.392Z] [INFO] Scheduled reports check completed
+[2025-07-23T23:54:56.394Z] [DEBUG] MongoDB connection closed
+[2025-07-23T23:55:05.205Z] [INFO] Checking for scheduled reports...
+[2025-07-23T23:55:06.014Z] [DEBUG] Connected to MongoDB
+[2025-07-23T23:55:06.095Z] [INFO] Found 3 company databases
+[2025-07-23T23:55:06.096Z] [DEBUG] Processing company database: company_kv0fpqae
+[2025-07-23T23:55:06.167Z] [DEBUG] Skipping company_kv0fpqae: No scheduled reports collection found
+[2025-07-23T23:55:06.167Z] [DEBUG] Processing company database: company_pyat1tbz
+[2025-07-23T23:55:06.237Z] [DEBUG] Skipping company_pyat1tbz: No scheduled reports collection found
+[2025-07-23T23:55:06.238Z] [DEBUG] Processing company database: company_ry0iwbpw
+[2025-07-23T23:55:06.310Z] [DEBUG] Finding reports to execute in company_ry0iwbpw (current time: 2025-07-23T23:55:06.310Z)
+[2025-07-23T23:55:06.380Z] [INFO] Found 0 reports to execute in company_ry0iwbpw
+[2025-07-23T23:55:06.380Z] [INFO] Scheduled reports check completed
+[2025-07-23T23:55:06.383Z] [DEBUG] MongoDB connection closed
+[2025-07-23T23:55:15.206Z] [INFO] Checking for scheduled reports...
+[2025-07-23T23:55:16.648Z] [DEBUG] Connected to MongoDB
+[2025-07-23T23:55:16.727Z] [INFO] Found 3 company databases
+[2025-07-23T23:55:16.728Z] [DEBUG] Processing company database: company_kv0fpqae
+[2025-07-23T23:55:16.800Z] [DEBUG] Skipping company_kv0fpqae: No scheduled reports collection found
+[2025-07-23T23:55:16.800Z] [DEBUG] Processing company database: company_pyat1tbz
+[2025-07-23T23:55:16.879Z] [DEBUG] Skipping company_pyat1tbz: No scheduled reports collection found
+[2025-07-23T23:55:16.879Z] [DEBUG] Processing company database: company_ry0iwbpw
+[2025-07-23T23:55:16.975Z] [DEBUG] Finding reports to execute in company_ry0iwbpw (current time: 2025-07-23T23:55:16.975Z)
+[2025-07-23T23:55:17.456Z] [INFO] Found 0 reports to execute in company_ry0iwbpw
+[2025-07-23T23:55:17.457Z] [INFO] Scheduled reports check completed
+[2025-07-23T23:55:17.459Z] [DEBUG] MongoDB connection closed
+[2025-07-23T23:55:25.207Z] [INFO] Checking for scheduled reports...
+[2025-07-23T23:55:28.376Z] [DEBUG] Connected to MongoDB
+[2025-07-23T23:55:28.479Z] [INFO] Found 3 company databases
+[2025-07-23T23:55:28.479Z] [DEBUG] Processing company database: company_kv0fpqae
+[2025-07-23T23:55:28.614Z] [DEBUG] Skipping company_kv0fpqae: No scheduled reports collection found
+[2025-07-23T23:55:28.615Z] [DEBUG] Processing company database: company_pyat1tbz
+[2025-07-23T23:55:29.037Z] [DEBUG] Skipping company_pyat1tbz: No scheduled reports collection found
+[2025-07-23T23:55:29.037Z] [DEBUG] Processing company database: company_ry0iwbpw
+[2025-07-23T23:55:29.113Z] [DEBUG] Finding reports to execute in company_ry0iwbpw (current time: 2025-07-23T23:55:29.113Z)
+[2025-07-23T23:55:29.245Z] [INFO] Found 0 reports to execute in company_ry0iwbpw
+[2025-07-23T23:55:29.246Z] [INFO] Scheduled reports check completed
+[2025-07-23T23:55:29.248Z] [DEBUG] MongoDB connection closed
+[2025-07-23T23:55:35.208Z] [INFO] Checking for scheduled reports...
+[2025-07-23T23:55:38.413Z] [DEBUG] Connected to MongoDB
+[2025-07-23T23:55:38.545Z] [INFO] Found 3 company databases
+[2025-07-23T23:55:38.546Z] [DEBUG] Processing company database: company_kv0fpqae
+[2025-07-23T23:55:38.704Z] [DEBUG] Skipping company_kv0fpqae: No scheduled reports collection found
+[2025-07-23T23:55:38.705Z] [DEBUG] Processing company database: company_pyat1tbz
+[2025-07-23T23:55:38.881Z] [DEBUG] Skipping company_pyat1tbz: No scheduled reports collection found
+[2025-07-23T23:55:38.882Z] [DEBUG] Processing company database: company_ry0iwbpw
+[2025-07-23T23:55:39.053Z] [DEBUG] Finding reports to execute in company_ry0iwbpw (current time: 2025-07-23T23:55:39.053Z)
+[2025-07-23T23:55:39.228Z] [INFO] Found 0 reports to execute in company_ry0iwbpw
+[2025-07-23T23:55:39.229Z] [INFO] Scheduled reports check completed
+[2025-07-23T23:55:39.231Z] [DEBUG] MongoDB connection closed
+[2025-07-23T23:55:45.209Z] [INFO] Checking for scheduled reports...
+[2025-07-23T23:55:47.434Z] [DEBUG] Connected to MongoDB
+[2025-07-23T23:55:47.543Z] [INFO] Found 3 company databases
+[2025-07-23T23:55:47.544Z] [DEBUG] Processing company database: company_kv0fpqae
+[2025-07-23T23:55:47.614Z] [DEBUG] Skipping company_kv0fpqae: No scheduled reports collection found
+[2025-07-23T23:55:47.614Z] [DEBUG] Processing company database: company_pyat1tbz
+[2025-07-23T23:55:47.684Z] [DEBUG] Skipping company_pyat1tbz: No scheduled reports collection found
+[2025-07-23T23:55:47.685Z] [DEBUG] Processing company database: company_ry0iwbpw
+[2025-07-23T23:55:47.756Z] [DEBUG] Finding reports to execute in company_ry0iwbpw (current time: 2025-07-23T23:55:47.756Z)
+[2025-07-23T23:55:47.826Z] [INFO] Found 0 reports to execute in company_ry0iwbpw
+[2025-07-23T23:55:47.827Z] [INFO] Scheduled reports check completed
+[2025-07-23T23:55:47.830Z] [DEBUG] MongoDB connection closed
+[2025-07-23T23:55:55.210Z] [INFO] Checking for scheduled reports...
+[2025-07-23T23:55:57.617Z] [DEBUG] Connected to MongoDB
+[2025-07-23T23:55:57.719Z] [INFO] Found 3 company databases
+[2025-07-23T23:55:57.720Z] [DEBUG] Processing company database: company_kv0fpqae
+[2025-07-23T23:55:57.808Z] [DEBUG] Skipping company_kv0fpqae: No scheduled reports collection found
+[2025-07-23T23:55:57.809Z] [DEBUG] Processing company database: company_pyat1tbz
+[2025-07-23T23:55:57.923Z] [DEBUG] Skipping company_pyat1tbz: No scheduled reports collection found
+[2025-07-23T23:55:57.924Z] [DEBUG] Processing company database: company_ry0iwbpw
+[2025-07-23T23:55:57.995Z] [DEBUG] Finding reports to execute in company_ry0iwbpw (current time: 2025-07-23T23:55:57.995Z)
+[2025-07-23T23:55:58.065Z] [INFO] Found 0 reports to execute in company_ry0iwbpw
+[2025-07-23T23:55:58.065Z] [INFO] Scheduled reports check completed
+[2025-07-23T23:55:58.068Z] [DEBUG] MongoDB connection closed
+[2025-07-23T23:56:05.212Z] [INFO] Checking for scheduled reports...
+[2025-07-23T23:56:07.505Z] [DEBUG] Connected to MongoDB
+[2025-07-23T23:56:07.678Z] [INFO] Found 3 company databases
+[2025-07-23T23:56:07.679Z] [DEBUG] Processing company database: company_kv0fpqae
+[2025-07-23T23:56:07.760Z] [DEBUG] Skipping company_kv0fpqae: No scheduled reports collection found
+[2025-07-23T23:56:07.761Z] [DEBUG] Processing company database: company_pyat1tbz
+[2025-07-23T23:56:07.865Z] [DEBUG] Skipping company_pyat1tbz: No scheduled reports collection found
+[2025-07-23T23:56:07.865Z] [DEBUG] Processing company database: company_ry0iwbpw
+[2025-07-23T23:56:07.951Z] [DEBUG] Finding reports to execute in company_ry0iwbpw (current time: 2025-07-23T23:56:07.951Z)
+[2025-07-23T23:56:08.032Z] [INFO] Found 0 reports to execute in company_ry0iwbpw
+[2025-07-23T23:56:08.033Z] [INFO] Scheduled reports check completed
+[2025-07-23T23:56:08.035Z] [DEBUG] MongoDB connection closed
+[2025-07-23T23:56:15.213Z] [INFO] Checking for scheduled reports...
+[2025-07-23T23:56:20.748Z] [DEBUG] Connected to MongoDB
+[2025-07-23T23:56:20.881Z] [INFO] Found 3 company databases
+[2025-07-23T23:56:20.881Z] [DEBUG] Processing company database: company_kv0fpqae
+[2025-07-23T23:56:21.001Z] [DEBUG] Skipping company_kv0fpqae: No scheduled reports collection found
+[2025-07-23T23:56:21.002Z] [DEBUG] Processing company database: company_pyat1tbz
+[2025-07-23T23:56:21.432Z] [DEBUG] Skipping company_pyat1tbz: No scheduled reports collection found
+[2025-07-23T23:56:21.432Z] [DEBUG] Processing company database: company_ry0iwbpw
+[2025-07-23T23:56:21.513Z] [DEBUG] Finding reports to execute in company_ry0iwbpw (current time: 2025-07-23T23:56:21.513Z)
+[2025-07-23T23:56:21.589Z] [INFO] Found 0 reports to execute in company_ry0iwbpw
+[2025-07-23T23:56:21.590Z] [INFO] Scheduled reports check completed
+[2025-07-23T23:56:21.593Z] [DEBUG] MongoDB connection closed
+[2025-07-23T23:56:25.214Z] [INFO] Checking for scheduled reports...
+[2025-07-23T23:56:31.354Z] [DEBUG] Connected to MongoDB
+[2025-07-23T23:56:31.511Z] [INFO] Found 3 company databases
+[2025-07-23T23:56:31.512Z] [DEBUG] Processing company database: company_kv0fpqae
+[2025-07-23T23:56:31.590Z] [DEBUG] Skipping company_kv0fpqae: No scheduled reports collection found
+[2025-07-23T23:56:31.590Z] [DEBUG] Processing company database: company_pyat1tbz
+[2025-07-23T23:56:31.714Z] [DEBUG] Skipping company_pyat1tbz: No scheduled reports collection found
+[2025-07-23T23:56:31.715Z] [DEBUG] Processing company database: company_ry0iwbpw
+[2025-07-23T23:56:31.818Z] [DEBUG] Finding reports to execute in company_ry0iwbpw (current time: 2025-07-23T23:56:31.818Z)
+[2025-07-23T23:56:31.915Z] [INFO] Found 0 reports to execute in company_ry0iwbpw
+[2025-07-23T23:56:31.916Z] [INFO] Scheduled reports check completed
+[2025-07-23T23:56:31.919Z] [DEBUG] MongoDB connection closed
+[2025-07-23T23:56:35.215Z] [INFO] Checking for scheduled reports...
+[2025-07-23T23:56:40.677Z] [DEBUG] Connected to MongoDB
+[2025-07-23T23:56:40.760Z] [INFO] Found 3 company databases
+[2025-07-23T23:56:40.761Z] [DEBUG] Processing company database: company_kv0fpqae
+[2025-07-23T23:56:40.847Z] [DEBUG] Skipping company_kv0fpqae: No scheduled reports collection found
+[2025-07-23T23:56:40.847Z] [DEBUG] Processing company database: company_pyat1tbz
+[2025-07-23T23:56:40.943Z] [DEBUG] Skipping company_pyat1tbz: No scheduled reports collection found
+[2025-07-23T23:56:40.943Z] [DEBUG] Processing company database: company_ry0iwbpw
+[2025-07-23T23:56:41.016Z] [DEBUG] Finding reports to execute in company_ry0iwbpw (current time: 2025-07-23T23:56:41.016Z)
+[2025-07-23T23:56:41.115Z] [INFO] Found 0 reports to execute in company_ry0iwbpw
+[2025-07-23T23:56:41.116Z] [INFO] Scheduled reports check completed
+[2025-07-23T23:56:41.119Z] [DEBUG] MongoDB connection closed
+[2025-07-23T23:56:45.216Z] [INFO] Checking for scheduled reports...
+[2025-07-23T23:56:50.835Z] [DEBUG] Connected to MongoDB
+[2025-07-23T23:56:51.216Z] [INFO] Found 3 company databases
+[2025-07-23T23:56:51.217Z] [DEBUG] Processing company database: company_kv0fpqae
+[2025-07-23T23:56:51.290Z] [DEBUG] Skipping company_kv0fpqae: No scheduled reports collection found
+[2025-07-23T23:56:51.291Z] [DEBUG] Processing company database: company_pyat1tbz
+[2025-07-23T23:56:51.404Z] [DEBUG] Skipping company_pyat1tbz: No scheduled reports collection found
+[2025-07-23T23:56:51.405Z] [DEBUG] Processing company database: company_ry0iwbpw
+[2025-07-23T23:56:51.521Z] [DEBUG] Finding reports to execute in company_ry0iwbpw (current time: 2025-07-23T23:56:51.521Z)
+[2025-07-23T23:56:51.626Z] [INFO] Found 0 reports to execute in company_ry0iwbpw
+[2025-07-23T23:56:51.627Z] [INFO] Scheduled reports check completed
+[2025-07-23T23:56:51.629Z] [DEBUG] MongoDB connection closed
+[2025-07-23T23:56:55.217Z] [INFO] Checking for scheduled reports...
+[2025-07-23T23:56:56.464Z] [DEBUG] Connected to MongoDB
+[2025-07-23T23:56:56.567Z] [INFO] Found 3 company databases
+[2025-07-23T23:56:56.567Z] [DEBUG] Processing company database: company_kv0fpqae
+[2025-07-23T23:56:56.641Z] [DEBUG] Skipping company_kv0fpqae: No scheduled reports collection found
+[2025-07-23T23:56:56.642Z] [DEBUG] Processing company database: company_pyat1tbz
+[2025-07-23T23:56:56.715Z] [DEBUG] Skipping company_pyat1tbz: No scheduled reports collection found
+[2025-07-23T23:56:56.716Z] [DEBUG] Processing company database: company_ry0iwbpw
+[2025-07-23T23:56:56.787Z] [DEBUG] Finding reports to execute in company_ry0iwbpw (current time: 2025-07-23T23:56:56.787Z)
+[2025-07-23T23:56:56.858Z] [INFO] Found 0 reports to execute in company_ry0iwbpw
+[2025-07-23T23:56:56.860Z] [INFO] Scheduled reports check completed
+[2025-07-23T23:56:56.864Z] [DEBUG] MongoDB connection closed
+[2025-07-23T23:57:05.218Z] [INFO] Checking for scheduled reports...
+[2025-07-23T23:57:06.088Z] [DEBUG] Connected to MongoDB
+[2025-07-23T23:57:06.169Z] [INFO] Found 3 company databases
+[2025-07-23T23:57:06.170Z] [DEBUG] Processing company database: company_kv0fpqae
+[2025-07-23T23:57:06.249Z] [DEBUG] Skipping company_kv0fpqae: No scheduled reports collection found
+[2025-07-23T23:57:06.250Z] [DEBUG] Processing company database: company_pyat1tbz
+[2025-07-23T23:57:06.332Z] [DEBUG] Skipping company_pyat1tbz: No scheduled reports collection found
+[2025-07-23T23:57:06.333Z] [DEBUG] Processing company database: company_ry0iwbpw
+[2025-07-23T23:57:06.413Z] [DEBUG] Finding reports to execute in company_ry0iwbpw (current time: 2025-07-23T23:57:06.413Z)
+[2025-07-23T23:57:06.496Z] [INFO] Found 0 reports to execute in company_ry0iwbpw
+[2025-07-23T23:57:06.496Z] [INFO] Scheduled reports check completed
+[2025-07-23T23:57:06.499Z] [DEBUG] MongoDB connection closed
+[2025-07-23T23:57:15.219Z] [INFO] Checking for scheduled reports...
+[2025-07-23T23:57:16.048Z] [DEBUG] Connected to MongoDB
+[2025-07-23T23:57:16.133Z] [INFO] Found 3 company databases
+[2025-07-23T23:57:16.134Z] [DEBUG] Processing company database: company_kv0fpqae
+[2025-07-23T23:57:16.212Z] [DEBUG] Skipping company_kv0fpqae: No scheduled reports collection found
+[2025-07-23T23:57:16.212Z] [DEBUG] Processing company database: company_pyat1tbz
+[2025-07-23T23:57:16.282Z] [DEBUG] Skipping company_pyat1tbz: No scheduled reports collection found
+[2025-07-23T23:57:16.283Z] [DEBUG] Processing company database: company_ry0iwbpw
+[2025-07-23T23:57:16.360Z] [DEBUG] Finding reports to execute in company_ry0iwbpw (current time: 2025-07-23T23:57:16.360Z)
+[2025-07-23T23:57:16.432Z] [INFO] Found 0 reports to execute in company_ry0iwbpw
+[2025-07-23T23:57:16.432Z] [INFO] Scheduled reports check completed
+[2025-07-23T23:57:16.435Z] [DEBUG] MongoDB connection closed
+[2025-07-23T23:57:25.221Z] [INFO] Checking for scheduled reports...
+[2025-07-23T23:57:26.130Z] [DEBUG] Connected to MongoDB
+[2025-07-23T23:57:26.220Z] [INFO] Found 3 company databases
+[2025-07-23T23:57:26.220Z] [DEBUG] Processing company database: company_kv0fpqae
+[2025-07-23T23:57:26.312Z] [DEBUG] Skipping company_kv0fpqae: No scheduled reports collection found
+[2025-07-23T23:57:26.313Z] [DEBUG] Processing company database: company_pyat1tbz
+[2025-07-23T23:57:26.393Z] [DEBUG] Skipping company_pyat1tbz: No scheduled reports collection found
+[2025-07-23T23:57:26.394Z] [DEBUG] Processing company database: company_ry0iwbpw
+[2025-07-23T23:57:26.470Z] [DEBUG] Finding reports to execute in company_ry0iwbpw (current time: 2025-07-23T23:57:26.470Z)
+[2025-07-23T23:57:26.548Z] [INFO] Found 0 reports to execute in company_ry0iwbpw
+[2025-07-23T23:57:26.549Z] [INFO] Scheduled reports check completed
+[2025-07-23T23:57:26.552Z] [DEBUG] MongoDB connection closed
+[2025-07-23T23:57:35.221Z] [INFO] Checking for scheduled reports...
+[2025-07-23T23:57:36.144Z] [DEBUG] Connected to MongoDB
+[2025-07-23T23:57:36.232Z] [INFO] Found 3 company databases
+[2025-07-23T23:57:36.233Z] [DEBUG] Processing company database: company_kv0fpqae
+[2025-07-23T23:57:36.305Z] [DEBUG] Skipping company_kv0fpqae: No scheduled reports collection found
+[2025-07-23T23:57:36.306Z] [DEBUG] Processing company database: company_pyat1tbz
+[2025-07-23T23:57:36.386Z] [DEBUG] Skipping company_pyat1tbz: No scheduled reports collection found
+[2025-07-23T23:57:36.387Z] [DEBUG] Processing company database: company_ry0iwbpw
+[2025-07-23T23:57:36.467Z] [DEBUG] Finding reports to execute in company_ry0iwbpw (current time: 2025-07-23T23:57:36.467Z)
+[2025-07-23T23:57:36.549Z] [INFO] Found 0 reports to execute in company_ry0iwbpw
+[2025-07-23T23:57:36.549Z] [INFO] Scheduled reports check completed
+[2025-07-23T23:57:36.552Z] [DEBUG] MongoDB connection closed
+[2025-07-23T23:57:45.222Z] [INFO] Checking for scheduled reports...
+[2025-07-23T23:57:46.097Z] [DEBUG] Connected to MongoDB
+[2025-07-23T23:57:46.195Z] [INFO] Found 3 company databases
+[2025-07-23T23:57:46.195Z] [DEBUG] Processing company database: company_kv0fpqae
+[2025-07-23T23:57:46.276Z] [DEBUG] Skipping company_kv0fpqae: No scheduled reports collection found
+[2025-07-23T23:57:46.277Z] [DEBUG] Processing company database: company_pyat1tbz
+[2025-07-23T23:57:46.357Z] [DEBUG] Skipping company_pyat1tbz: No scheduled reports collection found
+[2025-07-23T23:57:46.358Z] [DEBUG] Processing company database: company_ry0iwbpw
+[2025-07-23T23:57:46.448Z] [DEBUG] Finding reports to execute in company_ry0iwbpw (current time: 2025-07-23T23:57:46.448Z)
+[2025-07-23T23:57:46.521Z] [INFO] Found 0 reports to execute in company_ry0iwbpw
+[2025-07-23T23:57:46.521Z] [INFO] Scheduled reports check completed
+[2025-07-23T23:57:46.525Z] [DEBUG] MongoDB connection closed
+[2025-07-23T23:57:55.224Z] [INFO] Checking for scheduled reports...
+[2025-07-23T23:57:56.085Z] [DEBUG] Connected to MongoDB
+[2025-07-23T23:57:56.177Z] [INFO] Found 3 company databases
+[2025-07-23T23:57:56.178Z] [DEBUG] Processing company database: company_kv0fpqae
+[2025-07-23T23:57:56.262Z] [DEBUG] Skipping company_kv0fpqae: No scheduled reports collection found
+[2025-07-23T23:57:56.263Z] [DEBUG] Processing company database: company_pyat1tbz
+[2025-07-23T23:57:56.337Z] [DEBUG] Skipping company_pyat1tbz: No scheduled reports collection found
+[2025-07-23T23:57:56.338Z] [DEBUG] Processing company database: company_ry0iwbpw
+[2025-07-23T23:57:56.430Z] [DEBUG] Finding reports to execute in company_ry0iwbpw (current time: 2025-07-23T23:57:56.430Z)
+[2025-07-23T23:57:56.512Z] [INFO] Found 0 reports to execute in company_ry0iwbpw
+[2025-07-23T23:57:56.512Z] [INFO] Scheduled reports check completed
+[2025-07-23T23:57:56.516Z] [DEBUG] MongoDB connection closed
+[2025-07-23T23:58:05.225Z] [INFO] Checking for scheduled reports...
+[2025-07-23T23:58:06.098Z] [DEBUG] Connected to MongoDB
+[2025-07-23T23:58:06.189Z] [INFO] Found 3 company databases
+[2025-07-23T23:58:06.189Z] [DEBUG] Processing company database: company_kv0fpqae
+[2025-07-23T23:58:06.263Z] [DEBUG] Skipping company_kv0fpqae: No scheduled reports collection found
+[2025-07-23T23:58:06.264Z] [DEBUG] Processing company database: company_pyat1tbz
+[2025-07-23T23:58:06.342Z] [DEBUG] Skipping company_pyat1tbz: No scheduled reports collection found
+[2025-07-23T23:58:06.343Z] [DEBUG] Processing company database: company_ry0iwbpw
+[2025-07-23T23:58:06.418Z] [DEBUG] Finding reports to execute in company_ry0iwbpw (current time: 2025-07-23T23:58:06.418Z)
+[2025-07-23T23:58:06.502Z] [INFO] Found 0 reports to execute in company_ry0iwbpw
+[2025-07-23T23:58:06.503Z] [INFO] Scheduled reports check completed
+[2025-07-23T23:58:06.505Z] [DEBUG] MongoDB connection closed
+[2025-07-23T23:58:15.227Z] [INFO] Checking for scheduled reports...
+[2025-07-23T23:58:17.405Z] [DEBUG] Connected to MongoDB
+[2025-07-23T23:58:17.497Z] [INFO] Found 3 company databases
+[2025-07-23T23:58:17.497Z] [DEBUG] Processing company database: company_kv0fpqae
+[2025-07-23T23:58:17.571Z] [DEBUG] Skipping company_kv0fpqae: No scheduled reports collection found
+[2025-07-23T23:58:17.572Z] [DEBUG] Processing company database: company_pyat1tbz
+[2025-07-23T23:58:17.642Z] [DEBUG] Skipping company_pyat1tbz: No scheduled reports collection found
+[2025-07-23T23:58:17.642Z] [DEBUG] Processing company database: company_ry0iwbpw
+[2025-07-23T23:58:17.969Z] [DEBUG] Finding reports to execute in company_ry0iwbpw (current time: 2025-07-23T23:58:17.969Z)
+[2025-07-23T23:58:18.330Z] [INFO] Found 0 reports to execute in company_ry0iwbpw
+[2025-07-23T23:58:18.331Z] [INFO] Scheduled reports check completed
+[2025-07-23T23:58:18.332Z] [DEBUG] MongoDB connection closed
+[2025-07-23T23:58:25.228Z] [INFO] Checking for scheduled reports...
+[2025-07-23T23:58:26.897Z] [DEBUG] Connected to MongoDB
+[2025-07-23T23:58:26.987Z] [INFO] Found 3 company databases
+[2025-07-23T23:58:26.987Z] [DEBUG] Processing company database: company_kv0fpqae
+[2025-07-23T23:58:27.063Z] [DEBUG] Skipping company_kv0fpqae: No scheduled reports collection found
+[2025-07-23T23:58:27.064Z] [DEBUG] Processing company database: company_pyat1tbz
+[2025-07-23T23:58:27.143Z] [DEBUG] Skipping company_pyat1tbz: No scheduled reports collection found
+[2025-07-23T23:58:27.143Z] [DEBUG] Processing company database: company_ry0iwbpw
+[2025-07-23T23:58:27.233Z] [DEBUG] Finding reports to execute in company_ry0iwbpw (current time: 2025-07-23T23:58:27.233Z)
+[2025-07-23T23:58:27.323Z] [INFO] Found 0 reports to execute in company_ry0iwbpw
+[2025-07-23T23:58:27.323Z] [INFO] Scheduled reports check completed
+[2025-07-23T23:58:27.326Z] [DEBUG] MongoDB connection closed
+[2025-07-23T23:58:35.229Z] [INFO] Checking for scheduled reports...
+[2025-07-23T23:58:37.184Z] [DEBUG] Connected to MongoDB
+[2025-07-23T23:58:37.267Z] [INFO] Found 3 company databases
+[2025-07-23T23:58:37.268Z] [DEBUG] Processing company database: company_kv0fpqae
+[2025-07-23T23:58:37.346Z] [DEBUG] Skipping company_kv0fpqae: No scheduled reports collection found
+[2025-07-23T23:58:37.348Z] [DEBUG] Processing company database: company_pyat1tbz
+[2025-07-23T23:58:37.428Z] [DEBUG] Skipping company_pyat1tbz: No scheduled reports collection found
+[2025-07-23T23:58:37.429Z] [DEBUG] Processing company database: company_ry0iwbpw
+[2025-07-23T23:58:37.509Z] [DEBUG] Finding reports to execute in company_ry0iwbpw (current time: 2025-07-23T23:58:37.509Z)
+[2025-07-23T23:58:37.581Z] [INFO] Found 0 reports to execute in company_ry0iwbpw
+[2025-07-23T23:58:37.582Z] [INFO] Scheduled reports check completed
+[2025-07-23T23:58:37.584Z] [DEBUG] MongoDB connection closed
+[2025-07-23T23:58:45.229Z] [INFO] Checking for scheduled reports...
+[2025-07-23T23:58:47.278Z] [DEBUG] Connected to MongoDB
+[2025-07-23T23:58:47.383Z] [INFO] Found 3 company databases
+[2025-07-23T23:58:47.383Z] [DEBUG] Processing company database: company_kv0fpqae
+[2025-07-23T23:58:47.454Z] [DEBUG] Skipping company_kv0fpqae: No scheduled reports collection found
+[2025-07-23T23:58:47.455Z] [DEBUG] Processing company database: company_pyat1tbz
+[2025-07-23T23:58:47.529Z] [DEBUG] Skipping company_pyat1tbz: No scheduled reports collection found
+[2025-07-23T23:58:47.531Z] [DEBUG] Processing company database: company_ry0iwbpw
+[2025-07-23T23:58:47.632Z] [DEBUG] Finding reports to execute in company_ry0iwbpw (current time: 2025-07-23T23:58:47.632Z)
+[2025-07-23T23:58:47.716Z] [INFO] Found 0 reports to execute in company_ry0iwbpw
+[2025-07-23T23:58:47.717Z] [INFO] Scheduled reports check completed
+[2025-07-23T23:58:47.720Z] [DEBUG] MongoDB connection closed
+[2025-07-23T23:58:55.231Z] [INFO] Checking for scheduled reports...
+[2025-07-23T23:58:56.717Z] [DEBUG] Connected to MongoDB
+[2025-07-23T23:58:56.827Z] [INFO] Found 3 company databases
+[2025-07-23T23:58:56.828Z] [DEBUG] Processing company database: company_kv0fpqae
+[2025-07-23T23:58:56.900Z] [DEBUG] Skipping company_kv0fpqae: No scheduled reports collection found
+[2025-07-23T23:58:56.900Z] [DEBUG] Processing company database: company_pyat1tbz
+[2025-07-23T23:58:56.979Z] [DEBUG] Skipping company_pyat1tbz: No scheduled reports collection found
+[2025-07-23T23:58:56.980Z] [DEBUG] Processing company database: company_ry0iwbpw
+[2025-07-23T23:58:57.057Z] [DEBUG] Finding reports to execute in company_ry0iwbpw (current time: 2025-07-23T23:58:57.057Z)
+[2025-07-23T23:58:57.143Z] [INFO] Found 0 reports to execute in company_ry0iwbpw
+[2025-07-23T23:58:57.144Z] [INFO] Scheduled reports check completed
+[2025-07-23T23:58:57.148Z] [DEBUG] MongoDB connection closed
+[2025-07-23T23:59:05.232Z] [INFO] Checking for scheduled reports...
+[2025-07-23T23:59:06.620Z] [DEBUG] Connected to MongoDB
+[2025-07-23T23:59:06.708Z] [INFO] Found 3 company databases
+[2025-07-23T23:59:06.709Z] [DEBUG] Processing company database: company_kv0fpqae
+[2025-07-23T23:59:06.783Z] [DEBUG] Skipping company_kv0fpqae: No scheduled reports collection found
+[2025-07-23T23:59:06.784Z] [DEBUG] Processing company database: company_pyat1tbz
+[2025-07-23T23:59:06.858Z] [DEBUG] Skipping company_pyat1tbz: No scheduled reports collection found
+[2025-07-23T23:59:06.859Z] [DEBUG] Processing company database: company_ry0iwbpw
+[2025-07-23T23:59:06.935Z] [DEBUG] Finding reports to execute in company_ry0iwbpw (current time: 2025-07-23T23:59:06.935Z)
+[2025-07-23T23:59:07.008Z] [INFO] Found 0 reports to execute in company_ry0iwbpw
+[2025-07-23T23:59:07.009Z] [INFO] Scheduled reports check completed
+[2025-07-23T23:59:07.011Z] [DEBUG] MongoDB connection closed
+[2025-07-23T23:59:15.234Z] [INFO] Checking for scheduled reports...
+[2025-07-23T23:59:19.289Z] [DEBUG] Connected to MongoDB
+[2025-07-23T23:59:19.695Z] [INFO] Found 3 company databases
+[2025-07-23T23:59:19.696Z] [DEBUG] Processing company database: company_kv0fpqae
+[2025-07-23T23:59:19.776Z] [DEBUG] Skipping company_kv0fpqae: No scheduled reports collection found
+[2025-07-23T23:59:19.777Z] [DEBUG] Processing company database: company_pyat1tbz
+[2025-07-23T23:59:19.857Z] [DEBUG] Skipping company_pyat1tbz: No scheduled reports collection found
+[2025-07-23T23:59:19.858Z] [DEBUG] Processing company database: company_ry0iwbpw
+[2025-07-23T23:59:20.177Z] [DEBUG] Finding reports to execute in company_ry0iwbpw (current time: 2025-07-23T23:59:20.177Z)
+[2025-07-23T23:59:20.599Z] [INFO] Found 0 reports to execute in company_ry0iwbpw
+[2025-07-23T23:59:20.600Z] [INFO] Scheduled reports check completed
+[2025-07-23T23:59:20.603Z] [DEBUG] MongoDB connection closed
+[2025-07-23T23:59:25.235Z] [INFO] Checking for scheduled reports...
+[2025-07-23T23:59:29.415Z] [DEBUG] Connected to MongoDB
+[2025-07-23T23:59:29.520Z] [INFO] Found 3 company databases
+[2025-07-23T23:59:29.520Z] [DEBUG] Processing company database: company_kv0fpqae
+[2025-07-23T23:59:29.611Z] [DEBUG] Skipping company_kv0fpqae: No scheduled reports collection found
+[2025-07-23T23:59:29.612Z] [DEBUG] Processing company database: company_pyat1tbz
+[2025-07-23T23:59:29.689Z] [DEBUG] Skipping company_pyat1tbz: No scheduled reports collection found
+[2025-07-23T23:59:29.689Z] [DEBUG] Processing company database: company_ry0iwbpw
+[2025-07-23T23:59:29.782Z] [DEBUG] Finding reports to execute in company_ry0iwbpw (current time: 2025-07-23T23:59:29.782Z)
+[2025-07-23T23:59:31.145Z] [INFO] Found 0 reports to execute in company_ry0iwbpw
+[2025-07-23T23:59:31.146Z] [INFO] Scheduled reports check completed
+[2025-07-23T23:59:31.150Z] [DEBUG] MongoDB connection closed
+[2025-07-23T23:59:35.236Z] [INFO] Checking for scheduled reports...
+[2025-07-23T23:59:38.202Z] [DEBUG] Connected to MongoDB
+[2025-07-23T23:59:38.593Z] [INFO] Found 3 company databases
+[2025-07-23T23:59:38.595Z] [DEBUG] Processing company database: company_kv0fpqae
+[2025-07-23T23:59:39.024Z] [DEBUG] Skipping company_kv0fpqae: No scheduled reports collection found
+[2025-07-23T23:59:39.025Z] [DEBUG] Processing company database: company_pyat1tbz
+[2025-07-23T23:59:39.118Z] [DEBUG] Skipping company_pyat1tbz: No scheduled reports collection found
+[2025-07-23T23:59:39.119Z] [DEBUG] Processing company database: company_ry0iwbpw
+[2025-07-23T23:59:39.204Z] [DEBUG] Finding reports to execute in company_ry0iwbpw (current time: 2025-07-23T23:59:39.204Z)
+[2025-07-23T23:59:39.900Z] [INFO] Found 0 reports to execute in company_ry0iwbpw
+[2025-07-23T23:59:39.901Z] [INFO] Scheduled reports check completed
+[2025-07-23T23:59:39.904Z] [DEBUG] MongoDB connection closed
+[2025-07-23T23:59:45.237Z] [INFO] Checking for scheduled reports...
+[2025-07-23T23:59:47.794Z] [DEBUG] Connected to MongoDB
+[2025-07-23T23:59:47.884Z] [INFO] Found 3 company databases
+[2025-07-23T23:59:47.885Z] [DEBUG] Processing company database: company_kv0fpqae
+[2025-07-23T23:59:47.984Z] [DEBUG] Skipping company_kv0fpqae: No scheduled reports collection found
+[2025-07-23T23:59:47.985Z] [DEBUG] Processing company database: company_pyat1tbz
+[2025-07-23T23:59:48.101Z] [DEBUG] Skipping company_pyat1tbz: No scheduled reports collection found
+[2025-07-23T23:59:48.101Z] [DEBUG] Processing company database: company_ry0iwbpw
+[2025-07-23T23:59:48.199Z] [DEBUG] Finding reports to execute in company_ry0iwbpw (current time: 2025-07-23T23:59:48.199Z)
+[2025-07-23T23:59:48.882Z] [INFO] Found 0 reports to execute in company_ry0iwbpw
+[2025-07-23T23:59:48.883Z] [INFO] Scheduled reports check completed
+[2025-07-23T23:59:48.886Z] [DEBUG] MongoDB connection closed
+[2025-07-23T23:59:55.238Z] [INFO] Checking for scheduled reports...
+[2025-07-23T23:59:58.622Z] [DEBUG] Connected to MongoDB
+[2025-07-23T23:59:58.732Z] [INFO] Found 3 company databases
+[2025-07-23T23:59:58.733Z] [DEBUG] Processing company database: company_kv0fpqae
+[2025-07-23T23:59:59.118Z] [DEBUG] Skipping company_kv0fpqae: No scheduled reports collection found
+[2025-07-23T23:59:59.118Z] [DEBUG] Processing company database: company_pyat1tbz
+[2025-07-23T23:59:59.190Z] [DEBUG] Skipping company_pyat1tbz: No scheduled reports collection found
+[2025-07-23T23:59:59.191Z] [DEBUG] Processing company database: company_ry0iwbpw
+[2025-07-23T23:59:59.308Z] [DEBUG] Finding reports to execute in company_ry0iwbpw (current time: 2025-07-23T23:59:59.308Z)
+[2025-07-23T23:59:59.406Z] [INFO] Found 0 reports to execute in company_ry0iwbpw
+[2025-07-23T23:59:59.407Z] [INFO] Scheduled reports check completed
+[2025-07-23T23:59:59.412Z] [DEBUG] MongoDB connection closed

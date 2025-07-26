@@ -1,0 +1,129 @@
+[2025-06-30T06:16:44.901Z] [INFO] Starting data update daemon...
+[2025-06-30T06:16:44.902Z] [INFO] Will run updates every 10 hours
+[2025-06-30T06:16:44.902Z] [INFO] Starting scheduled data updates...
+[2025-06-30T06:16:44.902Z] [INFO] Starting Employee Utilization Analysis (employee_utilization_analyzer.py --update)...
+[2025-06-30T06:16:44.902Z] [INFO] Executing: "python3" "/Users/sim/TestingPig/employee_utilization_analyzer.py" "--update"
+[2025-06-30T06:18:56.544Z] [INFO] Starting scheduled data updates...
+[2025-06-30T06:18:56.545Z] [INFO] Starting Employee Utilization Analysis (employee_utilization_analyzer.py --update)...
+[2025-06-30T06:18:56.545Z] [INFO] Executing: "python3" "/Users/sim/TestingPig/employee_utilization_analyzer.py" "--update"
+[2025-06-30T06:18:56.632Z] [ERROR] [employee_utilization_analyzer.py ERROR] Traceback (most recent call last):
+[2025-06-30T06:18:56.635Z] [ERROR] [employee_utilization_analyzer.py ERROR] File "/Users/sim/TestingPig/employee_utilization_analyzer.py", line 5, in <module>
+[2025-06-30T06:18:56.635Z] [ERROR] [employee_utilization_analyzer.py ERROR]     from pymongo import MongoClient, UpdateOne
+[2025-06-30T06:18:56.635Z] [ERROR] [employee_utilization_analyzer.py ERROR] ModuleNotFoundError: No module named 'pymongo'
+[2025-06-30T06:18:56.641Z] [ERROR] ❌ Employee Utilization Analysis failed after 0.1s: Python script employee_utilization_analyzer.py failed with code 1
+[2025-06-30T06:19:06.110Z] [INFO] Starting scheduled data updates...
+[2025-06-30T06:19:06.111Z] [INFO] Starting Employee Utilization Analysis (employee_utilization_analyzer.py --update)...
+[2025-06-30T06:19:06.111Z] [INFO] Executing: "python3" "/Users/sim/TestingPig/employee_utilization_analyzer.py" "--update"
+[2025-06-30T06:19:06.172Z] [ERROR] [employee_utilization_analyzer.py ERROR] Traceback (most recent call last):
+[2025-06-30T06:19:06.174Z] [ERROR] [employee_utilization_analyzer.py ERROR] File "/Users/sim/TestingPig/employee_utilization_analyzer.py", line 5, in <module>
+[2025-06-30T06:19:06.174Z] [ERROR] [employee_utilization_analyzer.py ERROR]     from pymongo import MongoClient, UpdateOne
+[2025-06-30T06:19:06.175Z] [ERROR] [employee_utilization_analyzer.py ERROR] ModuleNotFoundError: No module named 'pymongo'
+[2025-06-30T06:19:06.181Z] [ERROR] ❌ Employee Utilization Analysis failed after 0.1s: Python script employee_utilization_analyzer.py failed with code 1
+[2025-06-30T06:19:06.643Z] [INFO] Starting Attrition Score Calculation (attrition_score.py )...
+[2025-06-30T06:19:06.644Z] [INFO] Executing: "python3" "/Users/sim/TestingPig/attrition_score.py"
+[2025-06-30T06:19:06.706Z] [ERROR] [attrition_score.py ERROR] Traceback (most recent call last):
+[2025-06-30T06:19:06.709Z] [ERROR] [attrition_score.py ERROR] File "/Users/sim/TestingPig/attrition_score.py", line 6, in <module>
+[2025-06-30T06:19:06.709Z] [ERROR] [attrition_score.py ERROR]     import numpy as np
+[2025-06-30T06:19:06.709Z] [ERROR] [attrition_score.py ERROR] ModuleNotFoundError: No module named 'numpy'
+[2025-06-30T06:19:06.715Z] [ERROR] ❌ Attrition Score Calculation failed after 0.1s: Python script attrition_score.py failed with code 1
+[2025-06-30T06:19:16.182Z] [INFO] Starting Attrition Score Calculation (attrition_score.py )...
+[2025-06-30T06:19:16.183Z] [INFO] Executing: "python3" "/Users/sim/TestingPig/attrition_score.py"
+[2025-06-30T06:19:16.248Z] [ERROR] [attrition_score.py ERROR] Traceback (most recent call last):
+[2025-06-30T06:19:16.250Z] [ERROR] [attrition_score.py ERROR] File "/Users/sim/TestingPig/attrition_score.py", line 6, in <module>
+[2025-06-30T06:19:16.251Z] [ERROR] [attrition_score.py ERROR]     import numpy as np
+[2025-06-30T06:19:16.251Z] [ERROR] [attrition_score.py ERROR] ModuleNotFoundError: No module named 'numpy'
+[2025-06-30T06:19:16.256Z] [ERROR] ❌ Attrition Score Calculation failed after 0.1s: Python script attrition_score.py failed with code 1
+[2025-06-30T06:19:16.717Z] [INFO] Starting Successor Identification (successor_identification.py --batch)...
+[2025-06-30T06:19:16.718Z] [INFO] Executing: "python3" "/Users/sim/TestingPig/successor_identification.py" "--batch"
+[2025-06-30T06:19:16.777Z] [ERROR] [successor_identification.py ERROR] Traceback (most recent call last):
+[2025-06-30T06:19:16.779Z] [ERROR] [successor_identification.py ERROR] File "/Users/sim/TestingPig/successor_identification.py", line 6, in <module>
+[2025-06-30T06:19:16.779Z] [ERROR] [successor_identification.py ERROR]     import numpy as np
+[2025-06-30T06:19:16.779Z] [ERROR] [successor_identification.py ERROR] ModuleNotFoundError: No module named 'numpy'
+[2025-06-30T06:19:16.785Z] [ERROR] ❌ Successor Identification failed after 0.1s: Python script successor_identification.py failed with code 1
+[2025-06-30T06:19:26.258Z] [INFO] Starting Successor Identification (successor_identification.py --batch)...
+[2025-06-30T06:19:26.258Z] [INFO] Executing: "python3" "/Users/sim/TestingPig/successor_identification.py" "--batch"
+[2025-06-30T06:19:26.317Z] [ERROR] [successor_identification.py ERROR] Traceback (most recent call last):
+[2025-06-30T06:19:26.319Z] [ERROR] [successor_identification.py ERROR] File "/Users/sim/TestingPig/successor_identification.py", line 6, in <module>
+[2025-06-30T06:19:26.319Z] [ERROR] [successor_identification.py ERROR]     import numpy as np
+[2025-06-30T06:19:26.320Z] [ERROR] [successor_identification.py ERROR] ModuleNotFoundError: No module named 'numpy'
+[2025-06-30T06:19:26.325Z] [ERROR] ❌ Successor Identification failed after 0.1s: Python script successor_identification.py failed with code 1
+[2025-06-30T06:19:26.786Z] [INFO] Starting Successor Finder (successor_finder.py --refresh)...
+[2025-06-30T06:19:26.787Z] [INFO] Executing: "python3" "/Users/sim/TestingPig/successor_finder.py" "--refresh"
+[2025-06-30T06:19:26.833Z] [ERROR] [successor_finder.py ERROR] File "/Users/sim/TestingPig/successor_finder.py", line 1080
+[2025-06-30T06:19:26.834Z] [ERROR] [successor_finder.py ERROR]     """Main function for running the successor finder tool"""
+[2025-06-30T06:19:26.834Z] [ERROR] [successor_finder.py ERROR]                                                           ^
+[2025-06-30T06:19:26.834Z] [ERROR] [successor_finder.py ERROR] SyntaxError: unterminated triple-quoted string literal (detected at line 1146)
+[2025-06-30T06:19:26.838Z] [ERROR] ❌ Successor Finder failed after 0.1s: Python script successor_finder.py failed with code 1
+[2025-06-30T06:19:36.327Z] [INFO] Starting Successor Finder (successor_finder.py --refresh)...
+[2025-06-30T06:19:36.327Z] [INFO] Executing: "python3" "/Users/sim/TestingPig/successor_finder.py" "--refresh"
+[2025-06-30T06:19:36.392Z] [ERROR] [successor_finder.py ERROR] File "/Users/sim/TestingPig/successor_finder.py", line 1080
+[2025-06-30T06:19:36.392Z] [ERROR] [successor_finder.py ERROR]     """Main function for running the successor finder tool"""
+[2025-06-30T06:19:36.392Z] [ERROR] [successor_finder.py ERROR]                                                           ^
+[2025-06-30T06:19:36.392Z] [ERROR] [successor_finder.py ERROR] SyntaxError: unterminated triple-quoted string literal (detected at line 1146)
+[2025-06-30T06:19:36.397Z] [ERROR] ❌ Successor Finder failed after 0.1s: Python script successor_finder.py failed with code 1
+[2025-06-30T06:19:36.840Z] [WARN] ⚠️  Completed 0 of 4 updates with 4 failures in 0.7 minutes
+[2025-06-30T06:19:46.399Z] [WARN] ⚠️  Completed 0 of 4 updates with 4 failures in 0.7 minutes
+[2025-06-30T17:26:08.512Z] [INFO] Starting data update daemon...
+[2025-06-30T17:26:08.515Z] [INFO] Will run updates every 10 hours
+[2025-06-30T17:26:08.515Z] [INFO] Starting scheduled data updates...
+[2025-06-30T17:26:08.515Z] [INFO] Starting Employee Utilization Analysis (employee_utilization_analyzer.py --update)...
+[2025-06-30T17:26:08.516Z] [INFO] Executing: "python3" "/Users/sim/TestingPig/employee_utilization_analyzer.py" "--update"
+[2025-06-30T17:26:08.617Z] [ERROR] [employee_utilization_analyzer.py ERROR] Traceback (most recent call last):
+[2025-06-30T17:26:08.620Z] [ERROR] [employee_utilization_analyzer.py ERROR] File [35m"/Users/sim/TestingPig/employee_utilization_analyzer.py"[0m, line [35m5[0m, in [35m<module>[0m
+[2025-06-30T17:26:08.621Z] [ERROR] [employee_utilization_analyzer.py ERROR]     from pymongo import MongoClient, UpdateOne
+[2025-06-30T17:26:08.621Z] [ERROR] [employee_utilization_analyzer.py ERROR] [1;35mModuleNotFoundError[0m: [35mNo module named 'pymongo'[0m
+[2025-06-30T17:26:08.645Z] [ERROR] ❌ Employee Utilization Analysis failed after 0.1s: Python script employee_utilization_analyzer.py failed with code 1
+[2025-06-30T17:26:18.647Z] [INFO] Starting Attrition Score Calculation (attrition_score.py )...
+[2025-06-30T17:26:18.648Z] [INFO] Executing: "python3" "/Users/sim/TestingPig/attrition_score.py"
+[2025-06-30T17:26:18.711Z] [ERROR] [attrition_score.py ERROR] Traceback (most recent call last):
+[2025-06-30T17:26:18.713Z] [ERROR] [attrition_score.py ERROR] File [35m"/Users/sim/TestingPig/attrition_score.py"[0m, line [35m6[0m, in [35m<module>[0m
+[2025-06-30T17:26:18.713Z] [ERROR] [attrition_score.py ERROR]     import numpy as np
+[2025-06-30T17:26:18.713Z] [ERROR] [attrition_score.py ERROR] [1;35mModuleNotFoundError[0m: [35mNo module named 'numpy'[0m
+[2025-06-30T17:26:18.718Z] [ERROR] ❌ Attrition Score Calculation failed after 0.1s: Python script attrition_score.py failed with code 1
+[2025-06-30T17:26:28.720Z] [INFO] Starting Successor Identification (successor_identification.py --batch)...
+[2025-06-30T17:26:28.721Z] [INFO] Executing: "python3" "/Users/sim/TestingPig/successor_identification.py" "--batch"
+[2025-06-30T17:26:28.788Z] [ERROR] [successor_identification.py ERROR] Traceback (most recent call last):
+[2025-06-30T17:26:28.790Z] [ERROR] [successor_identification.py ERROR] File [35m"/Users/sim/TestingPig/successor_identification.py"[0m, line [35m6[0m, in [35m<module>[0m
+[2025-06-30T17:26:28.790Z] [ERROR] [successor_identification.py ERROR]     import numpy as np
+[2025-06-30T17:26:28.790Z] [ERROR] [successor_identification.py ERROR] [1;35mModuleNotFoundError[0m: [35mNo module named 'numpy'[0m
+[2025-06-30T17:26:28.796Z] [ERROR] ❌ Successor Identification failed after 0.1s: Python script successor_identification.py failed with code 1
+[2025-06-30T17:26:38.798Z] [INFO] Starting Successor Finder (successor_finder.py --refresh)...
+[2025-06-30T17:26:38.800Z] [INFO] Executing: "python3" "/Users/sim/TestingPig/successor_finder.py" "--refresh"
+[2025-06-30T17:26:38.854Z] [ERROR] [successor_finder.py ERROR] File [35m"/Users/sim/TestingPig/successor_finder.py"[0m, line [35m1080[0m
+[2025-06-30T17:26:38.855Z] [ERROR] [successor_finder.py ERROR]     """Main function for running the successor finder tool[1;31m"[0m""
+[2025-06-30T17:26:38.855Z] [ERROR] [successor_finder.py ERROR]                                                           [1;31m^[0m
+[2025-06-30T17:26:38.855Z] [ERROR] [successor_finder.py ERROR] [1;35mSyntaxError[0m: [35munterminated triple-quoted string literal (detected at line 1146)[0m
+[2025-06-30T17:26:38.858Z] [ERROR] ❌ Successor Finder failed after 0.1s: Python script successor_finder.py failed with code 1
+[2025-06-30T17:26:48.858Z] [WARN] ⚠️  Completed 0 of 4 updates with 4 failures in 0.7 minutes
+[2025-06-30T19:08:07.431Z] [INFO] Starting data update daemon...
+[2025-06-30T19:08:07.435Z] [INFO] Will run updates every 10 hours
+[2025-06-30T19:08:07.435Z] [INFO] Starting scheduled data updates...
+[2025-06-30T19:08:07.436Z] [INFO] Starting Employee Utilization Analysis (employee_utilization_analyzer.py --update)...
+[2025-06-30T19:08:07.436Z] [INFO] Executing: "python3" "/Users/sim/TestingPig/employee_utilization_analyzer.py" "--update"
+[2025-06-30T19:08:07.555Z] [ERROR] [employee_utilization_analyzer.py ERROR] Traceback (most recent call last):
+[2025-06-30T19:08:07.558Z] [ERROR] [employee_utilization_analyzer.py ERROR] File [35m"/Users/sim/TestingPig/employee_utilization_analyzer.py"[0m, line [35m5[0m, in [35m<module>[0m
+[2025-06-30T19:08:07.558Z] [ERROR] [employee_utilization_analyzer.py ERROR]     from pymongo import MongoClient, UpdateOne
+[2025-06-30T19:08:07.558Z] [ERROR] [employee_utilization_analyzer.py ERROR] [1;35mModuleNotFoundError[0m: [35mNo module named 'pymongo'[0m
+[2025-06-30T19:08:07.571Z] [ERROR] ❌ Employee Utilization Analysis failed after 0.1s: Python script employee_utilization_analyzer.py failed with code 1
+[2025-06-30T19:08:17.573Z] [INFO] Starting Attrition Score Calculation (attrition_score.py )...
+[2025-06-30T19:08:17.575Z] [INFO] Executing: "python3" "/Users/sim/TestingPig/attrition_score.py"
+[2025-06-30T19:08:17.699Z] [ERROR] [attrition_score.py ERROR] Traceback (most recent call last):
+[2025-06-30T19:08:17.701Z] [ERROR] [attrition_score.py ERROR] File [35m"/Users/sim/TestingPig/attrition_score.py"[0m, line [35m6[0m, in [35m<module>[0m
+[2025-06-30T19:08:17.701Z] [ERROR] [attrition_score.py ERROR]     import numpy as np
+[2025-06-30T19:08:17.702Z] [ERROR] [attrition_score.py ERROR] [1;35mModuleNotFoundError[0m: [35mNo module named 'numpy'[0m
+[2025-06-30T19:08:17.708Z] [ERROR] ❌ Attrition Score Calculation failed after 0.1s: Python script attrition_score.py failed with code 1
+[2025-06-30T19:08:27.710Z] [INFO] Starting Successor Identification (successor_identification.py --batch)...
+[2025-06-30T19:08:27.712Z] [INFO] Executing: "python3" "/Users/sim/TestingPig/successor_identification.py" "--batch"
+[2025-06-30T19:08:27.788Z] [ERROR] [successor_identification.py ERROR] Traceback (most recent call last):
+[2025-06-30T19:08:27.790Z] [ERROR] [successor_identification.py ERROR] File [35m"/Users/sim/TestingPig/successor_identification.py"[0m, line [35m6[0m, in [35m<module>[0m
+[2025-06-30T19:08:27.791Z] [ERROR] [successor_identification.py ERROR]     import numpy as np
+[2025-06-30T19:08:27.791Z] [ERROR] [successor_identification.py ERROR] [1;35mModuleNotFoundError[0m: [35mNo module named 'numpy'[0m
+[2025-06-30T19:08:27.796Z] [ERROR] ❌ Successor Identification failed after 0.1s: Python script successor_identification.py failed with code 1
+[2025-06-30T19:08:37.798Z] [INFO] Starting Successor Finder (successor_finder.py --refresh)...
+[2025-06-30T19:08:37.799Z] [INFO] Executing: "python3" "/Users/sim/TestingPig/successor_finder.py" "--refresh"
+[2025-06-30T19:08:37.871Z] [ERROR] [successor_finder.py ERROR] File [35m"/Users/sim/TestingPig/successor_finder.py"[0m, line [35m1080[0m
+[2025-06-30T19:08:37.872Z] [ERROR] [successor_finder.py ERROR]     """Main function for running the successor finder tool[1;31m"[0m""
+[2025-06-30T19:08:37.872Z] [ERROR] [successor_finder.py ERROR]                                                           [1;31m^[0m
+[2025-06-30T19:08:37.872Z] [ERROR] [successor_finder.py ERROR] [1;35mSyntaxError[0m: [35munterminated triple-quoted string literal (detected at line 1146)[0m
+[2025-06-30T19:08:37.875Z] [ERROR] ❌ Successor Finder failed after 0.1s: Python script successor_finder.py failed with code 1
+[2025-06-30T19:08:47.876Z] [WARN] ⚠️  Completed 0 of 4 updates with 4 failures in 0.7 minutes

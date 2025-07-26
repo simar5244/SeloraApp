@@ -1,0 +1,36 @@
+# Use Debian-based Node image (not Alpine)
+FROM node:20-bullseye
+
+# Set working dir
+WORKDIR /app
+# Accept build-time env variables (maybe?)
+ARG MONGODB_URI
+ARG MONGODB_URI_BASE
+ARG NEXT_PUBLIC_APP_URL
+
+# Install system deps for canvas and node-gyp
+RUN apt-get update && apt-get install -y \
+  python3 \
+  python3-pip \
+  python3-dev \
+  build-essential \
+  libcairo2-dev \
+  libpango1.0-dev \
+  libjpeg-dev \
+  libgif-dev \
+  librsvg2-dev \
+  libpixman-1-dev \
+  pkg-config \
+  && rm -rf /var/lib/apt/lists/*
+
+# Copy only package files and install dependencies
+COPY package*.json ./
+
+
+RUN npm ci --legacy-peer-deps
+
+# Copy rest of app (Next.js code)
+COPY . .
+
+# Build the Next.js app
+RUN npm run build

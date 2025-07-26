@@ -1,0 +1,50 @@
+{
+    "software_development": [
+        "software", "developer", "engineer", "programmer", "coder", "application",
+        "web", "mobile", "frontend", "backend", "fullstack", "architect", "coding"
+    ],
+    "data_science": [
+        "data", "scientist", "analyst", "analytics", "machine learning", "ai", 
+        "artificial intelligence", "statistics", "statistical", "big data"
+    ],
+    "design": [
+        "designer", "ux", "ui", "user experience", "user interface", "graphic", 
+        "visual", "creative", "art", "artist"
+    ],
+    "management": [
+        "manager", "director", "head", "chief", "lead", "coordinator", "supervisor",
+        "executive", "vp", "vice president", "c-level"
+    ],
+    "administrative": [
+        "admin", "administrative", "receptionist", "secretary", "assistant", "clerk",
+        "office", "support", "coordinator"
+    ],
+    "customer_service": [
+        "customer", "service", "support", "help desk", "call center", "call centre",
+        "care", "representative", "agent", "concierge"
+    ],
+    "sales": [
+        "sales", "account", "business development", "relationship", "client", 
+        "revenue", "deal", "territory"
+    ],
+    "marketing": [
+        "marketing", "brand", "content", "social media", "seo", "ppc", "advertising",
+        "campaign", "market research", "communications", "pr", "public relations"
+    ],
+    "finance": [
+        "finance", "financial", "accounting", "accountant", "controller", "budget",
+        "banking", "investment", "analyst", "treasury", "auditor"
+    ],
+    "hr": [
+        "hr", "human resources", "recruiter", "recruiting", "talent", "training",
+        "personnel", "benefits", "compensation", "learning", "development"
+    ],
+    "operations": [
+        "operations", "logistics", "supply chain", "procurement", "purchasing",
+        "inventory", "warehouse", "shipping", "receiving", "distribution"
+    ],
+    "it": [
+        "it", "information technology", "network", "system", "infrastructure",
+        "support", "help desk", "security", "database", "server", "cloud"
+    ]
+}

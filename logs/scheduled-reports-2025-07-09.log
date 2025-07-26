@@ -1,0 +1,17 @@
+[2025-07-09T04:57:02.740Z] [INFO] Starting scheduled reports daemon with check interval of 86400000ms
+[2025-07-09T04:57:02.741Z] [INFO] Checking for scheduled reports...
+[2025-07-09T04:57:03.836Z] [DEBUG] Connected to MongoDB
+[2025-07-09T04:57:03.911Z] [INFO] Found 2 company databases
+[2025-07-09T04:57:03.911Z] [DEBUG] Processing company database: company_pyat1tbz
+[2025-07-09T04:57:03.977Z] [DEBUG] Skipping company_pyat1tbz: No scheduled reports collection found
+[2025-07-09T04:57:03.978Z] [DEBUG] Processing company database: company_ry0iwbpw
+[2025-07-09T04:57:04.045Z] [DEBUG] Finding reports to execute in company_ry0iwbpw (current time: 2025-07-09T04:57:04.045Z)
+[2025-07-09T04:57:04.110Z] [INFO] Found 1 reports to execute in company_ry0iwbpw
+[2025-07-09T04:57:04.110Z] [INFO] Processing report: 686a1369eb7f664ec49c59e6 - Employee performance report 
+[2025-07-09T04:57:04.110Z] [DEBUG] Report frequency: daily, Custom minutes: N/A, Custom hours: N/A
+[2025-07-09T04:57:04.110Z] [INFO] Executing report: 686a1369eb7f664ec49c59e6 - Employee performance report  for company company_ry0iwbpw
+[2025-07-09T04:57:32.470Z] [INFO] Successfully executed report 686a1369eb7f664ec49c59e6. Generated report ID: 1752037024906
+[2025-07-09T04:57:32.543Z] [INFO] Updated scheduled report 686a1369eb7f664ec49c59e6 with next execution time: 2025-07-10T04:57:32.472Z
+[2025-07-09T04:57:32.543Z] [INFO] Scheduled reports check completed
+[2025-07-09T04:57:32.550Z] [DEBUG] MongoDB connection closed
+[2025-07-09T04:57:32.551Z] [INFO] Daemon is now running continuously...

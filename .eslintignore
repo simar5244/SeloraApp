@@ -1,0 +1,25 @@
+# Ignore all files by default
+*
+
+# Only check these directories
+!/src/
+!/pages/
+!/components/
+!/lib/
+!/utils/
+!/scripts/
+
+# Include only TypeScript and JavaScript files
+!*.js
+!*.jsx
+!*.ts
+!*.tsx
+
+# Exclude common directories
+node_modules/
+.next/
+out/
+build/
+dist/
+public/
+coverage/

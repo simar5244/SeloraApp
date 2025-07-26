@@ -1,0 +1,823 @@
+[2025-07-25T00:45:24.198Z] [DEBUG] [2025-07-25T00:45:24.198Z] Daemon is running...
+[2025-07-25T00:45:24.200Z] [INFO] [RESOURCE] Memory: 4.05MB used, 5.31MB total, 26.00MB RSS | Load: 2.71, 3.13, 2.88
+[2025-07-25T00:45:24.201Z] [WARN] [WARNING] High memory usage: 76.1% of heap used
+[2025-07-25T01:45:24.163Z] [DEBUG] [2025-07-25T01:45:24.163Z] Daemon is running...
+[2025-07-25T01:45:24.165Z] [INFO] [RESOURCE] Memory: 4.06MB used, 5.31MB total, 25.44MB RSS | Load: 0.99, 1.98, 2.54
+[2025-07-25T01:45:24.167Z] [WARN] [WARNING] High memory usage: 76.4% of heap used
+[2025-07-25T02:45:24.171Z] [DEBUG] [2025-07-25T02:45:24.171Z] Daemon is running...
+[2025-07-25T02:45:24.174Z] [INFO] [RESOURCE] Memory: 4.07MB used, 5.31MB total, 25.58MB RSS | Load: 1.08, 1.28, 1.63
+[2025-07-25T02:45:24.175Z] [WARN] [WARNING] High memory usage: 76.7% of heap used
+[2025-07-25T03:29:21.010Z] [INFO] 🚀 Starting data update daemon... {
+  "nodeVersion": "v20.19.3",
+  "platform": "darwin",
+  "arch": "arm64",
+  "pid": 56678,
+  "cwd": "/Users/sim/TestingPig",
+  "system": {
+    "cpus": 8,
+    "memory": {
+      "total": "16.00 GB",
+      "free": "1.73 GB",
+      "usage": "89.17%"
+    },
+    "load": [
+      2.53369140625,
+      2.06103515625,
+      1.97216796875
+    ]
+  },
+  "env": "production"
+}
+[2025-07-25T03:29:21.011Z] [INFO] [RESOURCE] Memory: 4.25MB used, 4.56MB total, 38.22MB RSS | Load: 2.53, 2.06, 1.97
+[2025-07-25T03:29:21.011Z] [WARN] [WARNING] High memory usage: 93.3% of heap used
+[2025-07-25T03:29:21.011Z] [WARN] [WARNING] Critical memory usage - consider increasing Node.js memory limit
+[2025-07-25T03:29:21.011Z] [INFO] Performing initial data update...
+[2025-07-25T03:29:21.012Z] [INFO] 🚀 Starting scheduled data updates... {
+  "system": {
+    "platform": "darwin",
+    "arch": "arm64",
+    "node": "v20.19.3",
+    "pid": 56678,
+    "cpus": 8,
+    "memory": {
+      "total": "16.00 GB",
+      "free": "1.73 GB",
+      "usage": "89.17%"
+    }
+  },
+  "totalScripts": 3,
+  "logLevel": "INFO"
+}
+[2025-07-25T03:29:21.012Z] [INFO] 
+📋 [1/3] Starting script: Employee Utilization Analysis {
+  "script": "employee_utilization_analyzer.py",
+  "args": "",
+  "timeout": "1800s",
+  "maxRetries": 2,
+  "retryDelay": "10000ms"
+}
+[2025-07-25T03:29:21.012Z] [DEBUG] Executing script: employee_utilization_analyzer.py {
+  "args": [],
+  "pid": 56678,
+  "cwd": "/Users/sim/TestingPig",
+  "pythonPath": "python3",
+  "timeout": 1800000,
+  "maxRetries": 2
+}
+[2025-07-25T03:29:21.063Z] [WARN] Script attempt 1 failed, will retry: employee_utilization_analyzer.py {
+  "script": "employee_utilization_analyzer.py",
+  "duration": "51ms",
+  "exitCode": 1,
+  "signal": null,
+  "attempt": 1,
+  "maxAttempts": 3,
+  "error": "Command failed: \"python3\" \"/Users/sim/TestingPig/employee_utilization_analyzer.py\"\nTraceback (most recent call last):\n  File \u001b[35m\"/Users/sim/TestingPig/employee_utilization_analyzer.py\"\u001b[0m, line \u001b[35m5\u001b[0m, in \u001b[35m<module>\u001b[0m\n    from pymongo import MongoClient, UpdateOne\n\u001b[1;35mModuleNotFoundError\u001b[0m: \u001b[35mNo module named 'pymongo'\u001b[0m\n"
+}
+[2025-07-25T03:29:21.063Z] [WARN] Retry attempt 2 of 2 after 10000ms... {
+  "script": "employee_utilization_analyzer.py",
+  "previousError": "Command failed: \"python3\" \"/Users/sim/TestingPig/employee_utilization_analyzer.py\"\nTraceback (most recent call last):\n  File \u001b[35m\"/Users/sim/TestingPig/employee_utilization_analyzer.py\"\u001b[0m, line \u001b[35m5\u001b[0m, in \u001b[35m<module>\u001b[0m\n    from pymongo import MongoClient, UpdateOne\n\u001b[1;35mModuleNotFoundError\u001b[0m: \u001b[35mNo module named 'pymongo'\u001b[0m\n"
+}
+[2025-07-25T03:29:31.110Z] [WARN] Script attempt 2 failed, will retry: employee_utilization_analyzer.py {
+  "script": "employee_utilization_analyzer.py",
+  "duration": "10098ms",
+  "exitCode": 1,
+  "signal": null,
+  "attempt": 2,
+  "maxAttempts": 3,
+  "error": "Command failed: \"python3\" \"/Users/sim/TestingPig/employee_utilization_analyzer.py\"\nTraceback (most recent call last):\n  File \u001b[35m\"/Users/sim/TestingPig/employee_utilization_analyzer.py\"\u001b[0m, line \u001b[35m5\u001b[0m, in \u001b[35m<module>\u001b[0m\n    from pymongo import MongoClient, UpdateOne\n\u001b[1;35mModuleNotFoundError\u001b[0m: \u001b[35mNo module named 'pymongo'\u001b[0m\n"
+}
+[2025-07-25T03:29:31.111Z] [WARN] Retry attempt 3 of 2 after 10000ms... {
+  "script": "employee_utilization_analyzer.py",
+  "previousError": "Command failed: \"python3\" \"/Users/sim/TestingPig/employee_utilization_analyzer.py\"\nTraceback (most recent call last):\n  File \u001b[35m\"/Users/sim/TestingPig/employee_utilization_analyzer.py\"\u001b[0m, line \u001b[35m5\u001b[0m, in \u001b[35m<module>\u001b[0m\n    from pymongo import MongoClient, UpdateOne\n\u001b[1;35mModuleNotFoundError\u001b[0m: \u001b[35mNo module named 'pymongo'\u001b[0m\n"
+}
+[2025-07-25T03:29:41.163Z] [ERROR] Script failed after 3 attempts: employee_utilization_analyzer.py {
+  "script": "employee_utilization_analyzer.py",
+  "duration": "20151ms",
+  "exitCode": 1,
+  "signal": null,
+  "attempt": 3,
+  "maxAttempts": 3,
+  "error": "Command failed: \"python3\" \"/Users/sim/TestingPig/employee_utilization_analyzer.py\"\nTraceback (most recent call last):\n  File \u001b[35m\"/Users/sim/TestingPig/employee_utilization_analyzer.py\"\u001b[0m, line \u001b[35m5\u001b[0m, in \u001b[35m<module>\u001b[0m\n    from pymongo import MongoClient, UpdateOne\n\u001b[1;35mModuleNotFoundError\u001b[0m: \u001b[35mNo module named 'pymongo'\u001b[0m\n"
+}
+[2025-07-25T03:29:41.164Z] [ERROR] [employee_utilization_analyzer.py STDERR] Traceback (most recent call last):
+  File [35m"/Users/sim/TestingPig/employee_utilization_analyzer.py"[0m, line [35m5[0m, in [35m<module>[0m
+    from pymongo import MongoClient, UpdateOne
+[1;35mModuleNotFoundError[0m: [35mNo module named 'pymongo'[0m
+
+[2025-07-25T03:29:41.164Z] [ERROR] ❌ [1/3] Employee Utilization Analysis failed after 20.2s (attempt 1) {
+  "script": "employee_utilization_analyzer.py",
+  "duration": "20152ms",
+  "attempts": 1,
+  "startTime": "2025-07-25T03:29:21.012Z",
+  "endTime": "2025-07-25T03:29:41.164Z"
+}
+[2025-07-25T03:29:41.164Z] [ERROR] 💥 Script failed: employee_utilization_analyzer.py (attempt 1/3) {
+  "duration": "20152ms",
+  "error": "Script failed after 3 attempts: Command failed: \"python3\" \"/Users/sim/TestingPig/employee_utilization_analyzer.py\"\nTraceback (most recent call last):\n  File \u001b[35m\"/Users/sim/TestingPig/employee_utilization_analyzer.py\"\u001b[0m, line \u001b[35m5\u001b[0m, in \u001b[35m<module>\u001b[0m\n    from pymongo import MongoClient, UpdateOne\n\u001b[1;35mModuleNotFoundError\u001b[0m: \u001b[35mNo module named 'pymongo'\u001b[0m\n",
+  "code": "N/A",
+  "signal": "N/A"
+}
+[2025-07-25T03:29:41.164Z] [INFO] ⏳ Waiting 5s before next script...
+[2025-07-25T03:29:46.166Z] [INFO] [RESOURCE] Memory: 3.86MB used, 4.81MB total, 39.44MB RSS | Load: 2.35, 2.05, 1.97
+[2025-07-25T03:29:46.167Z] [WARN] [WARNING] High memory usage: 80.2% of heap used
+[2025-07-25T03:29:46.168Z] [INFO] 
+📋 [2/3] Starting script: Attrition Score Calculation {
+  "script": "attrition_score.py",
+  "args": "",
+  "timeout": "3600s",
+  "maxRetries": 2,
+  "retryDelay": "15000ms"
+}
+[2025-07-25T03:29:46.169Z] [DEBUG] Executing script: attrition_score.py {
+  "args": [],
+  "pid": 56678,
+  "cwd": "/Users/sim/TestingPig",
+  "pythonPath": "python3",
+  "timeout": 3600000,
+  "maxRetries": 2
+}
+[2025-07-25T03:29:46.238Z] [WARN] Script attempt 1 failed, will retry: attrition_score.py {
+  "script": "attrition_score.py",
+  "duration": "70ms",
+  "exitCode": 1,
+  "signal": null,
+  "attempt": 1,
+  "maxAttempts": 3,
+  "error": "Command failed: \"python3\" \"/Users/sim/TestingPig/attrition_score.py\"\nTraceback (most recent call last):\n  File \u001b[35m\"/Users/sim/TestingPig/attrition_score.py\"\u001b[0m, line \u001b[35m6\u001b[0m, in \u001b[35m<module>\u001b[0m\n    import numpy as np\n\u001b[1;35mModuleNotFoundError\u001b[0m: \u001b[35mNo module named 'numpy'\u001b[0m\n"
+}
+[2025-07-25T03:29:46.238Z] [WARN] Retry attempt 2 of 2 after 15000ms... {
+  "script": "attrition_score.py",
+  "previousError": "Command failed: \"python3\" \"/Users/sim/TestingPig/attrition_score.py\"\nTraceback (most recent call last):\n  File \u001b[35m\"/Users/sim/TestingPig/attrition_score.py\"\u001b[0m, line \u001b[35m6\u001b[0m, in \u001b[35m<module>\u001b[0m\n    import numpy as np\n\u001b[1;35mModuleNotFoundError\u001b[0m: \u001b[35mNo module named 'numpy'\u001b[0m\n"
+}
+[2025-07-25T03:30:01.308Z] [WARN] Script attempt 2 failed, will retry: attrition_score.py {
+  "script": "attrition_score.py",
+  "duration": "15140ms",
+  "exitCode": 1,
+  "signal": null,
+  "attempt": 2,
+  "maxAttempts": 3,
+  "error": "Command failed: \"python3\" \"/Users/sim/TestingPig/attrition_score.py\"\nTraceback (most recent call last):\n  File \u001b[35m\"/Users/sim/TestingPig/attrition_score.py\"\u001b[0m, line \u001b[35m6\u001b[0m, in \u001b[35m<module>\u001b[0m\n    import numpy as np\n\u001b[1;35mModuleNotFoundError\u001b[0m: \u001b[35mNo module named 'numpy'\u001b[0m\n"
+}
+[2025-07-25T03:30:01.308Z] [WARN] Retry attempt 3 of 2 after 15000ms... {
+  "script": "attrition_score.py",
+  "previousError": "Command failed: \"python3\" \"/Users/sim/TestingPig/attrition_score.py\"\nTraceback (most recent call last):\n  File \u001b[35m\"/Users/sim/TestingPig/attrition_score.py\"\u001b[0m, line \u001b[35m6\u001b[0m, in \u001b[35m<module>\u001b[0m\n    import numpy as np\n\u001b[1;35mModuleNotFoundError\u001b[0m: \u001b[35mNo module named 'numpy'\u001b[0m\n"
+}
+[2025-07-25T03:30:16.376Z] [ERROR] Script failed after 3 attempts: attrition_score.py {
+  "script": "attrition_score.py",
+  "duration": "30208ms",
+  "exitCode": 1,
+  "signal": null,
+  "attempt": 3,
+  "maxAttempts": 3,
+  "error": "Command failed: \"python3\" \"/Users/sim/TestingPig/attrition_score.py\"\nTraceback (most recent call last):\n  File \u001b[35m\"/Users/sim/TestingPig/attrition_score.py\"\u001b[0m, line \u001b[35m6\u001b[0m, in \u001b[35m<module>\u001b[0m\n    import numpy as np\n\u001b[1;35mModuleNotFoundError\u001b[0m: \u001b[35mNo module named 'numpy'\u001b[0m\n"
+}
+[2025-07-25T03:30:16.377Z] [INFO] [RESOURCE] Memory: 4.34MB used, 5.06MB total, 39.86MB RSS | Load: 2.15, 2.03, 1.97
+[2025-07-25T03:30:16.377Z] [WARN] [WARNING] High memory usage: 85.7% of heap used
+[2025-07-25T03:30:16.377Z] [ERROR] [attrition_score.py STDERR] Traceback (most recent call last):
+  File [35m"/Users/sim/TestingPig/attrition_score.py"[0m, line [35m6[0m, in [35m<module>[0m
+    import numpy as np
+[1;35mModuleNotFoundError[0m: [35mNo module named 'numpy'[0m
+
+[2025-07-25T03:30:16.377Z] [ERROR] ❌ [2/3] Attrition Score Calculation failed after 30.2s (attempt 1) {
+  "script": "attrition_score.py",
+  "duration": "30210ms",
+  "attempts": 1,
+  "startTime": "2025-07-25T03:29:46.168Z",
+  "endTime": "2025-07-25T03:30:16.377Z"
+}
+[2025-07-25T03:30:16.377Z] [ERROR] 💥 Script failed: attrition_score.py (attempt 1/3) {
+  "duration": "30210ms",
+  "error": "Script failed after 3 attempts: Command failed: \"python3\" \"/Users/sim/TestingPig/attrition_score.py\"\nTraceback (most recent call last):\n  File \u001b[35m\"/Users/sim/TestingPig/attrition_score.py\"\u001b[0m, line \u001b[35m6\u001b[0m, in \u001b[35m<module>\u001b[0m\n    import numpy as np\n\u001b[1;35mModuleNotFoundError\u001b[0m: \u001b[35mNo module named 'numpy'\u001b[0m\n",
+  "code": "N/A",
+  "signal": "N/A"
+}
+[2025-07-25T03:30:16.377Z] [INFO] ⏳ Waiting 5s before next script...
+[2025-07-25T03:30:21.379Z] [INFO] [RESOURCE] Memory: 4.38MB used, 5.06MB total, 39.89MB RSS | Load: 1.98, 2.00, 1.95
+[2025-07-25T03:30:21.380Z] [WARN] [WARNING] High memory usage: 86.5% of heap used
+[2025-07-25T03:30:21.380Z] [INFO] 
+📋 [3/3] Starting script: Successor Identification {
+  "script": "successor_identification.py",
+  "args": "--refresh --batch-size=10",
+  "timeout": "2700s",
+  "maxRetries": 1,
+  "retryDelay": "20000ms"
+}
+[2025-07-25T03:30:21.382Z] [DEBUG] Executing script: successor_identification.py {
+  "args": [
+    "--refresh",
+    "--batch-size=10"
+  ],
+  "pid": 56678,
+  "cwd": "/Users/sim/TestingPig",
+  "pythonPath": "python3",
+  "timeout": 2700000,
+  "maxRetries": 1
+}
+[2025-07-25T03:30:21.449Z] [WARN] Script attempt 1 failed, will retry: successor_identification.py {
+  "script": "successor_identification.py",
+  "duration": "68ms",
+  "exitCode": 1,
+  "signal": null,
+  "attempt": 1,
+  "maxAttempts": 2,
+  "error": "Command failed: \"python3\" \"/Users/sim/TestingPig/successor_identification.py\" \"--refresh\" \"--batch-size=10\"\nTraceback (most recent call last):\n  File \u001b[35m\"/Users/sim/TestingPig/successor_identification.py\"\u001b[0m, line \u001b[35m6\u001b[0m, in \u001b[35m<module>\u001b[0m\n    import numpy as np\n\u001b[1;35mModuleNotFoundError\u001b[0m: \u001b[35mNo module named 'numpy'\u001b[0m\n"
+}
+[2025-07-25T03:30:21.449Z] [WARN] Retry attempt 2 of 1 after 20000ms... {
+  "script": "successor_identification.py",
+  "previousError": "Command failed: \"python3\" \"/Users/sim/TestingPig/successor_identification.py\" \"--refresh\" \"--batch-size=10\"\nTraceback (most recent call last):\n  File \u001b[35m\"/Users/sim/TestingPig/successor_identification.py\"\u001b[0m, line \u001b[35m6\u001b[0m, in \u001b[35m<module>\u001b[0m\n    import numpy as np\n\u001b[1;35mModuleNotFoundError\u001b[0m: \u001b[35mNo module named 'numpy'\u001b[0m\n"
+}
+[2025-07-25T03:30:41.518Z] [ERROR] Script failed after 2 attempts: successor_identification.py {
+  "script": "successor_identification.py",
+  "duration": "20137ms",
+  "exitCode": 1,
+  "signal": null,
+  "attempt": 2,
+  "maxAttempts": 2,
+  "error": "Command failed: \"python3\" \"/Users/sim/TestingPig/successor_identification.py\" \"--refresh\" \"--batch-size=10\"\nTraceback (most recent call last):\n  File \u001b[35m\"/Users/sim/TestingPig/successor_identification.py\"\u001b[0m, line \u001b[35m6\u001b[0m, in \u001b[35m<module>\u001b[0m\n    import numpy as np\n\u001b[1;35mModuleNotFoundError\u001b[0m: \u001b[35mNo module named 'numpy'\u001b[0m\n"
+}
+[2025-07-25T03:30:41.518Z] [ERROR] [successor_identification.py STDERR] Traceback (most recent call last):
+  File [35m"/Users/sim/TestingPig/successor_identification.py"[0m, line [35m6[0m, in [35m<module>[0m
+    import numpy as np
+[1;35mModuleNotFoundError[0m: [35mNo module named 'numpy'[0m
+
+[2025-07-25T03:30:41.518Z] [ERROR] ❌ [3/3] Successor Identification failed after 20.1s (attempt 1) {
+  "script": "successor_identification.py",
+  "duration": "20138ms",
+  "attempts": 1,
+  "startTime": "2025-07-25T03:30:21.381Z",
+  "endTime": "2025-07-25T03:30:41.518Z"
+}
+[2025-07-25T03:30:41.518Z] [ERROR] 💥 Script failed: successor_identification.py (attempt 1/2) {
+  "duration": "20138ms",
+  "error": "Script failed after 2 attempts: Command failed: \"python3\" \"/Users/sim/TestingPig/successor_identification.py\" \"--refresh\" \"--batch-size=10\"\nTraceback (most recent call last):\n  File \u001b[35m\"/Users/sim/TestingPig/successor_identification.py\"\u001b[0m, line \u001b[35m6\u001b[0m, in \u001b[35m<module>\u001b[0m\n    import numpy as np\n\u001b[1;35mModuleNotFoundError\u001b[0m: \u001b[35mNo module named 'numpy'\u001b[0m\n",
+  "code": "N/A",
+  "signal": "N/A"
+}
+[2025-07-25T03:30:41.519Z] [INFO] ⏳ Waiting 5s before next script...
+[2025-07-25T03:30:46.520Z] [INFO] [RESOURCE] Memory: 4.60MB used, 5.06MB total, 40.19MB RSS | Load: 1.72, 1.93, 1.93
+[2025-07-25T03:30:46.520Z] [WARN] [WARNING] High memory usage: 90.8% of heap used
+[2025-07-25T03:30:46.520Z] [WARN] [WARNING] Critical memory usage - consider increasing Node.js memory limit
+[2025-07-25T03:30:46.520Z] [INFO] 
+📊 ====== DATA UPDATE SUMMARY ======
+[2025-07-25T03:30:46.521Z] [INFO] 📅 Started: 2025-07-25T03:29:21.012Z
+[2025-07-25T03:30:46.521Z] [INFO] 🏁 Finished: 2025-07-25T03:30:46.520Z
+[2025-07-25T03:30:46.521Z] [INFO] ⏱️  Total Duration: 1.4 minutes
+[2025-07-25T03:30:46.521Z] [INFO] 📋 Scripts: 3 total, 0 successful, 3 failed
+[2025-07-25T03:30:46.521Z] [INFO] 📈 Success Rate: 0.0%
+[2025-07-25T03:30:46.521Z] [INFO] 
+📋 SCRIPT EXECUTION STATUS:
+[2025-07-25T03:30:46.522Z] [INFO] 
+💾 SYSTEM RESOURCE USAGE:
+[2025-07-25T03:30:46.522Z] [INFO] Memory: 4.71MB used / 5.06MB total
+[2025-07-25T03:30:46.523Z] [INFO] RSS: 40.58MB
+[2025-07-25T03:30:46.523Z] [INFO] Load: 1.72, 1.93, 1.93
+[2025-07-25T03:30:46.523Z] [WARN] 
+⚠️  COMPLETED WITH 3 OF 3 SCRIPTS FAILING
+[2025-07-25T03:30:46.523Z] [INFO] [RESOURCE] Memory: 4.73MB used, 5.06MB total, 40.61MB RSS | Load: 1.72, 1.93, 1.93
+[2025-07-25T03:30:46.523Z] [WARN] [WARNING] High memory usage: 93.4% of heap used
+[2025-07-25T03:30:46.523Z] [WARN] [WARNING] Critical memory usage - consider increasing Node.js memory limit
+[2025-07-25T03:30:46.523Z] [WARN] Initial update completed with 3 failures
+[2025-07-25T03:30:46.523Z] [INFO] Initial update completed. Next update in 1440 minutes.
+[2025-07-25T15:04:29.758Z] [INFO] 🚀 Starting data update daemon... {
+  "nodeVersion": "v20.19.3",
+  "platform": "darwin",
+  "arch": "arm64",
+  "pid": 57929,
+  "cwd": "/Users/sim/TestingPig",
+  "system": {
+    "cpus": 8,
+    "memory": {
+      "total": "16.00 GB",
+      "free": "6.04 GB",
+      "usage": "62.22%"
+    },
+    "load": [
+      1.69580078125,
+      2.0556640625,
+      2.0009765625
+    ]
+  },
+  "env": "production"
+}
+[2025-07-25T15:04:29.760Z] [INFO] [RESOURCE] Memory: 4.25MB used, 4.56MB total, 37.89MB RSS | Load: 1.70, 2.06, 2.00
+[2025-07-25T15:04:29.760Z] [WARN] [WARNING] High memory usage: 93.3% of heap used
+[2025-07-25T15:04:29.760Z] [WARN] [WARNING] Critical memory usage - consider increasing Node.js memory limit
+[2025-07-25T15:04:29.761Z] [INFO] Performing initial data update...
+[2025-07-25T15:04:29.761Z] [INFO] 🚀 Starting scheduled data updates... {
+  "system": {
+    "platform": "darwin",
+    "arch": "arm64",
+    "node": "v20.19.3",
+    "pid": 57929,
+    "cpus": 8,
+    "memory": {
+      "total": "16.00 GB",
+      "free": "6.04 GB",
+      "usage": "62.27%"
+    }
+  },
+  "totalScripts": 3,
+  "logLevel": "INFO"
+}
+[2025-07-25T15:04:29.761Z] [INFO] 
+📋 [1/3] Starting script: Employee Utilization Analysis {
+  "script": "employee_utilization_analyzer.py",
+  "args": "",
+  "timeout": "1800s",
+  "maxRetries": 2,
+  "retryDelay": "10000ms"
+}
+[2025-07-25T15:04:29.761Z] [DEBUG] Executing script: employee_utilization_analyzer.py {
+  "args": [],
+  "pid": 57929,
+  "cwd": "/Users/sim/TestingPig",
+  "pythonPath": "python3",
+  "timeout": 1800000,
+  "maxRetries": 2
+}
+[2025-07-25T15:04:29.814Z] [WARN] Script attempt 1 failed, will retry: employee_utilization_analyzer.py {
+  "script": "employee_utilization_analyzer.py",
+  "duration": "53ms",
+  "exitCode": 1,
+  "signal": null,
+  "attempt": 1,
+  "maxAttempts": 3,
+  "error": "Command failed: \"python3\" \"/Users/sim/TestingPig/employee_utilization_analyzer.py\"\nTraceback (most recent call last):\n  File \u001b[35m\"/Users/sim/TestingPig/employee_utilization_analyzer.py\"\u001b[0m, line \u001b[35m5\u001b[0m, in \u001b[35m<module>\u001b[0m\n    from pymongo import MongoClient, UpdateOne\n\u001b[1;35mModuleNotFoundError\u001b[0m: \u001b[35mNo module named 'pymongo'\u001b[0m\n"
+}
+[2025-07-25T15:04:29.814Z] [WARN] Retry attempt 2 of 2 after 10000ms... {
+  "script": "employee_utilization_analyzer.py",
+  "previousError": "Command failed: \"python3\" \"/Users/sim/TestingPig/employee_utilization_analyzer.py\"\nTraceback (most recent call last):\n  File \u001b[35m\"/Users/sim/TestingPig/employee_utilization_analyzer.py\"\u001b[0m, line \u001b[35m5\u001b[0m, in \u001b[35m<module>\u001b[0m\n    from pymongo import MongoClient, UpdateOne\n\u001b[1;35mModuleNotFoundError\u001b[0m: \u001b[35mNo module named 'pymongo'\u001b[0m\n"
+}
+[2025-07-25T15:04:39.874Z] [WARN] Script attempt 2 failed, will retry: employee_utilization_analyzer.py {
+  "script": "employee_utilization_analyzer.py",
+  "duration": "10113ms",
+  "exitCode": 1,
+  "signal": null,
+  "attempt": 2,
+  "maxAttempts": 3,
+  "error": "Command failed: \"python3\" \"/Users/sim/TestingPig/employee_utilization_analyzer.py\"\nTraceback (most recent call last):\n  File \u001b[35m\"/Users/sim/TestingPig/employee_utilization_analyzer.py\"\u001b[0m, line \u001b[35m5\u001b[0m, in \u001b[35m<module>\u001b[0m\n    from pymongo import MongoClient, UpdateOne\n\u001b[1;35mModuleNotFoundError\u001b[0m: \u001b[35mNo module named 'pymongo'\u001b[0m\n"
+}
+[2025-07-25T15:04:39.875Z] [WARN] Retry attempt 3 of 2 after 10000ms... {
+  "script": "employee_utilization_analyzer.py",
+  "previousError": "Command failed: \"python3\" \"/Users/sim/TestingPig/employee_utilization_analyzer.py\"\nTraceback (most recent call last):\n  File \u001b[35m\"/Users/sim/TestingPig/employee_utilization_analyzer.py\"\u001b[0m, line \u001b[35m5\u001b[0m, in \u001b[35m<module>\u001b[0m\n    from pymongo import MongoClient, UpdateOne\n\u001b[1;35mModuleNotFoundError\u001b[0m: \u001b[35mNo module named 'pymongo'\u001b[0m\n"
+}
+[2025-07-25T15:04:49.928Z] [ERROR] Script failed after 3 attempts: employee_utilization_analyzer.py {
+  "script": "employee_utilization_analyzer.py",
+  "duration": "20167ms",
+  "exitCode": 1,
+  "signal": null,
+  "attempt": 3,
+  "maxAttempts": 3,
+  "error": "Command failed: \"python3\" \"/Users/sim/TestingPig/employee_utilization_analyzer.py\"\nTraceback (most recent call last):\n  File \u001b[35m\"/Users/sim/TestingPig/employee_utilization_analyzer.py\"\u001b[0m, line \u001b[35m5\u001b[0m, in \u001b[35m<module>\u001b[0m\n    from pymongo import MongoClient, UpdateOne\n\u001b[1;35mModuleNotFoundError\u001b[0m: \u001b[35mNo module named 'pymongo'\u001b[0m\n"
+}
+[2025-07-25T15:04:49.928Z] [ERROR] [employee_utilization_analyzer.py STDERR] Traceback (most recent call last):
+  File [35m"/Users/sim/TestingPig/employee_utilization_analyzer.py"[0m, line [35m5[0m, in [35m<module>[0m
+    from pymongo import MongoClient, UpdateOne
+[1;35mModuleNotFoundError[0m: [35mNo module named 'pymongo'[0m
+
+[2025-07-25T15:04:49.929Z] [ERROR] ❌ [1/3] Employee Utilization Analysis failed after 20.2s (attempt 1) {
+  "script": "employee_utilization_analyzer.py",
+  "duration": "20167ms",
+  "attempts": 1,
+  "startTime": "2025-07-25T15:04:29.761Z",
+  "endTime": "2025-07-25T15:04:49.928Z"
+}
+[2025-07-25T15:04:49.929Z] [ERROR] 💥 Script failed: employee_utilization_analyzer.py (attempt 1/3) {
+  "duration": "20167ms",
+  "error": "Script failed after 3 attempts: Command failed: \"python3\" \"/Users/sim/TestingPig/employee_utilization_analyzer.py\"\nTraceback (most recent call last):\n  File \u001b[35m\"/Users/sim/TestingPig/employee_utilization_analyzer.py\"\u001b[0m, line \u001b[35m5\u001b[0m, in \u001b[35m<module>\u001b[0m\n    from pymongo import MongoClient, UpdateOne\n\u001b[1;35mModuleNotFoundError\u001b[0m: \u001b[35mNo module named 'pymongo'\u001b[0m\n",
+  "code": "N/A",
+  "signal": "N/A"
+}
+[2025-07-25T15:04:49.929Z] [INFO] ⏳ Waiting 5s before next script...
+[2025-07-25T15:04:54.931Z] [INFO] [RESOURCE] Memory: 3.89MB used, 5.06MB total, 39.34MB RSS | Load: 1.63, 2.02, 1.99
+[2025-07-25T15:04:54.932Z] [WARN] [WARNING] High memory usage: 76.9% of heap used
+[2025-07-25T15:04:54.933Z] [INFO] 
+📋 [2/3] Starting script: Attrition Score Calculation {
+  "script": "attrition_score.py",
+  "args": "",
+  "timeout": "3600s",
+  "maxRetries": 2,
+  "retryDelay": "15000ms"
+}
+[2025-07-25T15:04:54.934Z] [DEBUG] Executing script: attrition_score.py {
+  "args": [],
+  "pid": 57929,
+  "cwd": "/Users/sim/TestingPig",
+  "pythonPath": "python3",
+  "timeout": 3600000,
+  "maxRetries": 2
+}
+[2025-07-25T15:04:54.994Z] [WARN] Script attempt 1 failed, will retry: attrition_score.py {
+  "script": "attrition_score.py",
+  "duration": "61ms",
+  "exitCode": 1,
+  "signal": null,
+  "attempt": 1,
+  "maxAttempts": 3,
+  "error": "Command failed: \"python3\" \"/Users/sim/TestingPig/attrition_score.py\"\nTraceback (most recent call last):\n  File \u001b[35m\"/Users/sim/TestingPig/attrition_score.py\"\u001b[0m, line \u001b[35m6\u001b[0m, in \u001b[35m<module>\u001b[0m\n    import numpy as np\n\u001b[1;35mModuleNotFoundError\u001b[0m: \u001b[35mNo module named 'numpy'\u001b[0m\n"
+}
+[2025-07-25T15:04:54.994Z] [WARN] Retry attempt 2 of 2 after 15000ms... {
+  "script": "attrition_score.py",
+  "previousError": "Command failed: \"python3\" \"/Users/sim/TestingPig/attrition_score.py\"\nTraceback (most recent call last):\n  File \u001b[35m\"/Users/sim/TestingPig/attrition_score.py\"\u001b[0m, line \u001b[35m6\u001b[0m, in \u001b[35m<module>\u001b[0m\n    import numpy as np\n\u001b[1;35mModuleNotFoundError\u001b[0m: \u001b[35mNo module named 'numpy'\u001b[0m\n"
+}
+[2025-07-25T15:05:10.052Z] [WARN] Script attempt 2 failed, will retry: attrition_score.py {
+  "script": "attrition_score.py",
+  "duration": "15119ms",
+  "exitCode": 1,
+  "signal": null,
+  "attempt": 2,
+  "maxAttempts": 3,
+  "error": "Command failed: \"python3\" \"/Users/sim/TestingPig/attrition_score.py\"\nTraceback (most recent call last):\n  File \u001b[35m\"/Users/sim/TestingPig/attrition_score.py\"\u001b[0m, line \u001b[35m6\u001b[0m, in \u001b[35m<module>\u001b[0m\n    import numpy as np\n\u001b[1;35mModuleNotFoundError\u001b[0m: \u001b[35mNo module named 'numpy'\u001b[0m\n"
+}
+[2025-07-25T15:05:10.052Z] [WARN] Retry attempt 3 of 2 after 15000ms... {
+  "script": "attrition_score.py",
+  "previousError": "Command failed: \"python3\" \"/Users/sim/TestingPig/attrition_score.py\"\nTraceback (most recent call last):\n  File \u001b[35m\"/Users/sim/TestingPig/attrition_score.py\"\u001b[0m, line \u001b[35m6\u001b[0m, in \u001b[35m<module>\u001b[0m\n    import numpy as np\n\u001b[1;35mModuleNotFoundError\u001b[0m: \u001b[35mNo module named 'numpy'\u001b[0m\n"
+}
+[2025-07-25T15:05:25.111Z] [ERROR] Script failed after 3 attempts: attrition_score.py {
+  "script": "attrition_score.py",
+  "duration": "30178ms",
+  "exitCode": 1,
+  "signal": null,
+  "attempt": 3,
+  "maxAttempts": 3,
+  "error": "Command failed: \"python3\" \"/Users/sim/TestingPig/attrition_score.py\"\nTraceback (most recent call last):\n  File \u001b[35m\"/Users/sim/TestingPig/attrition_score.py\"\u001b[0m, line \u001b[35m6\u001b[0m, in \u001b[35m<module>\u001b[0m\n    import numpy as np\n\u001b[1;35mModuleNotFoundError\u001b[0m: \u001b[35mNo module named 'numpy'\u001b[0m\n"
+}
+[2025-07-25T15:05:25.111Z] [INFO] [RESOURCE] Memory: 4.37MB used, 5.31MB total, 39.75MB RSS | Load: 1.77, 2.01, 1.99
+[2025-07-25T15:05:25.112Z] [WARN] [WARNING] High memory usage: 82.3% of heap used
+[2025-07-25T15:05:25.112Z] [ERROR] [attrition_score.py STDERR] Traceback (most recent call last):
+  File [35m"/Users/sim/TestingPig/attrition_score.py"[0m, line [35m6[0m, in [35m<module>[0m
+    import numpy as np
+[1;35mModuleNotFoundError[0m: [35mNo module named 'numpy'[0m
+
+[2025-07-25T15:05:25.112Z] [ERROR] ❌ [2/3] Attrition Score Calculation failed after 30.2s (attempt 1) {
+  "script": "attrition_score.py",
+  "duration": "30179ms",
+  "attempts": 1,
+  "startTime": "2025-07-25T15:04:54.933Z",
+  "endTime": "2025-07-25T15:05:25.112Z"
+}
+[2025-07-25T15:05:25.112Z] [ERROR] 💥 Script failed: attrition_score.py (attempt 1/3) {
+  "duration": "30179ms",
+  "error": "Script failed after 3 attempts: Command failed: \"python3\" \"/Users/sim/TestingPig/attrition_score.py\"\nTraceback (most recent call last):\n  File \u001b[35m\"/Users/sim/TestingPig/attrition_score.py\"\u001b[0m, line \u001b[35m6\u001b[0m, in \u001b[35m<module>\u001b[0m\n    import numpy as np\n\u001b[1;35mModuleNotFoundError\u001b[0m: \u001b[35mNo module named 'numpy'\u001b[0m\n",
+  "code": "N/A",
+  "signal": "N/A"
+}
+[2025-07-25T15:05:25.112Z] [INFO] ⏳ Waiting 5s before next script...
+[2025-07-25T15:05:30.113Z] [INFO] [RESOURCE] Memory: 4.41MB used, 5.31MB total, 39.78MB RSS | Load: 1.71, 2.00, 1.98
+[2025-07-25T15:05:30.113Z] [WARN] [WARNING] High memory usage: 83.0% of heap used
+[2025-07-25T15:05:30.114Z] [INFO] 
+📋 [3/3] Starting script: Successor Identification {
+  "script": "successor_identification.py",
+  "args": "--refresh --batch-size=10",
+  "timeout": "2700s",
+  "maxRetries": 1,
+  "retryDelay": "20000ms"
+}
+[2025-07-25T15:05:30.114Z] [DEBUG] Executing script: successor_identification.py {
+  "args": [
+    "--refresh",
+    "--batch-size=10"
+  ],
+  "pid": 57929,
+  "cwd": "/Users/sim/TestingPig",
+  "pythonPath": "python3",
+  "timeout": 2700000,
+  "maxRetries": 1
+}
+[2025-07-25T15:05:30.148Z] [WARN] Script attempt 1 failed, will retry: successor_identification.py {
+  "script": "successor_identification.py",
+  "duration": "34ms",
+  "exitCode": 1,
+  "signal": null,
+  "attempt": 1,
+  "maxAttempts": 2,
+  "error": "Command failed: \"python3\" \"/Users/sim/TestingPig/successor_identification.py\" \"--refresh\" \"--batch-size=10\"\nTraceback (most recent call last):\n  File \u001b[35m\"/Users/sim/TestingPig/successor_identification.py\"\u001b[0m, line \u001b[35m6\u001b[0m, in \u001b[35m<module>\u001b[0m\n    import numpy as np\n\u001b[1;35mModuleNotFoundError\u001b[0m: \u001b[35mNo module named 'numpy'\u001b[0m\n"
+}
+[2025-07-25T15:05:30.148Z] [WARN] Retry attempt 2 of 1 after 20000ms... {
+  "script": "successor_identification.py",
+  "previousError": "Command failed: \"python3\" \"/Users/sim/TestingPig/successor_identification.py\" \"--refresh\" \"--batch-size=10\"\nTraceback (most recent call last):\n  File \u001b[35m\"/Users/sim/TestingPig/successor_identification.py\"\u001b[0m, line \u001b[35m6\u001b[0m, in \u001b[35m<module>\u001b[0m\n    import numpy as np\n\u001b[1;35mModuleNotFoundError\u001b[0m: \u001b[35mNo module named 'numpy'\u001b[0m\n"
+}
+[2025-07-25T15:05:50.201Z] [ERROR] Script failed after 2 attempts: successor_identification.py {
+  "script": "successor_identification.py",
+  "duration": "20087ms",
+  "exitCode": 1,
+  "signal": null,
+  "attempt": 2,
+  "maxAttempts": 2,
+  "error": "Command failed: \"python3\" \"/Users/sim/TestingPig/successor_identification.py\" \"--refresh\" \"--batch-size=10\"\nTraceback (most recent call last):\n  File \u001b[35m\"/Users/sim/TestingPig/successor_identification.py\"\u001b[0m, line \u001b[35m6\u001b[0m, in \u001b[35m<module>\u001b[0m\n    import numpy as np\n\u001b[1;35mModuleNotFoundError\u001b[0m: \u001b[35mNo module named 'numpy'\u001b[0m\n"
+}
+[2025-07-25T15:05:50.201Z] [ERROR] [successor_identification.py STDERR] Traceback (most recent call last):
+  File [35m"/Users/sim/TestingPig/successor_identification.py"[0m, line [35m6[0m, in [35m<module>[0m
+    import numpy as np
+[1;35mModuleNotFoundError[0m: [35mNo module named 'numpy'[0m
+
+[2025-07-25T15:05:50.202Z] [ERROR] ❌ [3/3] Successor Identification failed after 20.1s (attempt 1) {
+  "script": "successor_identification.py",
+  "duration": "20088ms",
+  "attempts": 1,
+  "startTime": "2025-07-25T15:05:30.114Z",
+  "endTime": "2025-07-25T15:05:50.202Z"
+}
+[2025-07-25T15:05:50.202Z] [ERROR] 💥 Script failed: successor_identification.py (attempt 1/2) {
+  "duration": "20088ms",
+  "error": "Script failed after 2 attempts: Command failed: \"python3\" \"/Users/sim/TestingPig/successor_identification.py\" \"--refresh\" \"--batch-size=10\"\nTraceback (most recent call last):\n  File \u001b[35m\"/Users/sim/TestingPig/successor_identification.py\"\u001b[0m, line \u001b[35m6\u001b[0m, in \u001b[35m<module>\u001b[0m\n    import numpy as np\n\u001b[1;35mModuleNotFoundError\u001b[0m: \u001b[35mNo module named 'numpy'\u001b[0m\n",
+  "code": "N/A",
+  "signal": "N/A"
+}
+[2025-07-25T15:05:50.202Z] [INFO] ⏳ Waiting 5s before next script...
+[2025-07-25T15:05:55.204Z] [INFO] [RESOURCE] Memory: 4.63MB used, 5.31MB total, 40.08MB RSS | Load: 1.55, 1.93, 1.96
+[2025-07-25T15:05:55.204Z] [WARN] [WARNING] High memory usage: 87.2% of heap used
+[2025-07-25T15:05:55.205Z] [INFO] 
+📊 ====== DATA UPDATE SUMMARY ======
+[2025-07-25T15:05:55.205Z] [INFO] 📅 Started: 2025-07-25T15:04:29.761Z
+[2025-07-25T15:05:55.205Z] [INFO] 🏁 Finished: 2025-07-25T15:05:55.205Z
+[2025-07-25T15:05:55.206Z] [INFO] ⏱️  Total Duration: 1.4 minutes
+[2025-07-25T15:05:55.206Z] [INFO] 📋 Scripts: 3 total, 0 successful, 3 failed
+[2025-07-25T15:05:55.206Z] [INFO] 📈 Success Rate: 0.0%
+[2025-07-25T15:05:55.206Z] [INFO] 
+📋 SCRIPT EXECUTION STATUS:
+[2025-07-25T15:05:55.208Z] [INFO] 
+💾 SYSTEM RESOURCE USAGE:
+[2025-07-25T15:05:55.208Z] [INFO] Memory: 4.73MB used / 5.31MB total
+[2025-07-25T15:05:55.209Z] [INFO] RSS: 40.50MB
+[2025-07-25T15:05:55.209Z] [INFO] Load: 1.55, 1.93, 1.96
+[2025-07-25T15:05:55.209Z] [WARN] 
+⚠️  COMPLETED WITH 3 OF 3 SCRIPTS FAILING
+[2025-07-25T15:05:55.209Z] [INFO] [RESOURCE] Memory: 4.75MB used, 5.31MB total, 40.53MB RSS | Load: 1.55, 1.93, 1.96
+[2025-07-25T15:05:55.209Z] [WARN] [WARNING] High memory usage: 89.5% of heap used
+[2025-07-25T15:05:55.209Z] [WARN] Initial update completed with 3 failures
+[2025-07-25T15:05:55.209Z] [INFO] Initial update completed. Next update in 1440 minutes.
+[2025-07-25T16:05:55.108Z] [DEBUG] [2025-07-25T16:05:55.108Z] Daemon is running...
+[2025-07-25T16:05:55.115Z] [INFO] [RESOURCE] Memory: 4.03MB used, 5.31MB total, 27.75MB RSS | Load: 1.59, 1.88, 1.89
+[2025-07-25T16:05:55.117Z] [WARN] [WARNING] High memory usage: 75.8% of heap used
+[2025-07-25T17:01:22.934Z] [INFO] 🚀 Starting data update daemon... {
+  "nodeVersion": "v20.19.3",
+  "platform": "darwin",
+  "arch": "arm64",
+  "pid": 81486,
+  "cwd": "/Users/sim/TestingPig",
+  "system": {
+    "cpus": 8,
+    "memory": {
+      "total": "16.00 GB",
+      "free": "4.50 GB",
+      "usage": "71.88%"
+    },
+    "load": [
+      1.75830078125,
+      1.79736328125,
+      2.0634765625
+    ]
+  },
+  "env": "production"
+}
+[2025-07-25T17:01:22.935Z] [INFO] [RESOURCE] Memory: 4.25MB used, 4.56MB total, 38.41MB RSS | Load: 1.76, 1.80, 2.06
+[2025-07-25T17:01:22.935Z] [WARN] [WARNING] High memory usage: 93.3% of heap used
+[2025-07-25T17:01:22.936Z] [WARN] [WARNING] Critical memory usage - consider increasing Node.js memory limit
+[2025-07-25T17:01:22.936Z] [INFO] Performing initial data update...
+[2025-07-25T17:01:22.936Z] [INFO] 🚀 Starting scheduled data updates... {
+  "system": {
+    "platform": "darwin",
+    "arch": "arm64",
+    "node": "v20.19.3",
+    "pid": 81486,
+    "cpus": 8,
+    "memory": {
+      "total": "16.00 GB",
+      "free": "4.50 GB",
+      "usage": "71.88%"
+    }
+  },
+  "totalScripts": 3,
+  "logLevel": "INFO"
+}
+[2025-07-25T17:01:22.936Z] [INFO] 
+📋 [1/3] Starting script: Employee Utilization Analysis {
+  "script": "employee_utilization_analyzer.py",
+  "args": "",
+  "timeout": "1800s",
+  "maxRetries": 2,
+  "retryDelay": "10000ms"
+}
+[2025-07-25T17:01:22.937Z] [DEBUG] Executing script: employee_utilization_analyzer.py {
+  "args": [],
+  "pid": 81486,
+  "cwd": "/Users/sim/TestingPig",
+  "pythonPath": "python3",
+  "timeout": 1800000,
+  "maxRetries": 2
+}
+[2025-07-25T17:01:22.989Z] [WARN] Script attempt 1 failed, will retry: employee_utilization_analyzer.py {
+  "script": "employee_utilization_analyzer.py",
+  "duration": "52ms",
+  "exitCode": 1,
+  "signal": null,
+  "attempt": 1,
+  "maxAttempts": 3,
+  "error": "Command failed: \"python3\" \"/Users/sim/TestingPig/employee_utilization_analyzer.py\"\nTraceback (most recent call last):\n  File \u001b[35m\"/Users/sim/TestingPig/employee_utilization_analyzer.py\"\u001b[0m, line \u001b[35m5\u001b[0m, in \u001b[35m<module>\u001b[0m\n    from pymongo import MongoClient, UpdateOne\n\u001b[1;35mModuleNotFoundError\u001b[0m: \u001b[35mNo module named 'pymongo'\u001b[0m\n"
+}
+[2025-07-25T17:01:22.989Z] [WARN] Retry attempt 2 of 2 after 10000ms... {
+  "script": "employee_utilization_analyzer.py",
+  "previousError": "Command failed: \"python3\" \"/Users/sim/TestingPig/employee_utilization_analyzer.py\"\nTraceback (most recent call last):\n  File \u001b[35m\"/Users/sim/TestingPig/employee_utilization_analyzer.py\"\u001b[0m, line \u001b[35m5\u001b[0m, in \u001b[35m<module>\u001b[0m\n    from pymongo import MongoClient, UpdateOne\n\u001b[1;35mModuleNotFoundError\u001b[0m: \u001b[35mNo module named 'pymongo'\u001b[0m\n"
+}
+[2025-07-25T17:01:33.064Z] [WARN] Script attempt 2 failed, will retry: employee_utilization_analyzer.py {
+  "script": "employee_utilization_analyzer.py",
+  "duration": "10127ms",
+  "exitCode": 1,
+  "signal": null,
+  "attempt": 2,
+  "maxAttempts": 3,
+  "error": "Command failed: \"python3\" \"/Users/sim/TestingPig/employee_utilization_analyzer.py\"\nTraceback (most recent call last):\n  File \u001b[35m\"/Users/sim/TestingPig/employee_utilization_analyzer.py\"\u001b[0m, line \u001b[35m5\u001b[0m, in \u001b[35m<module>\u001b[0m\n    from pymongo import MongoClient, UpdateOne\n\u001b[1;35mModuleNotFoundError\u001b[0m: \u001b[35mNo module named 'pymongo'\u001b[0m\n"
+}
+[2025-07-25T17:01:33.064Z] [WARN] Retry attempt 3 of 2 after 10000ms... {
+  "script": "employee_utilization_analyzer.py",
+  "previousError": "Command failed: \"python3\" \"/Users/sim/TestingPig/employee_utilization_analyzer.py\"\nTraceback (most recent call last):\n  File \u001b[35m\"/Users/sim/TestingPig/employee_utilization_analyzer.py\"\u001b[0m, line \u001b[35m5\u001b[0m, in \u001b[35m<module>\u001b[0m\n    from pymongo import MongoClient, UpdateOne\n\u001b[1;35mModuleNotFoundError\u001b[0m: \u001b[35mNo module named 'pymongo'\u001b[0m\n"
+}
+[2025-07-25T17:01:43.140Z] [ERROR] Script failed after 3 attempts: employee_utilization_analyzer.py {
+  "script": "employee_utilization_analyzer.py",
+  "duration": "20203ms",
+  "exitCode": 1,
+  "signal": null,
+  "attempt": 3,
+  "maxAttempts": 3,
+  "error": "Command failed: \"python3\" \"/Users/sim/TestingPig/employee_utilization_analyzer.py\"\nTraceback (most recent call last):\n  File \u001b[35m\"/Users/sim/TestingPig/employee_utilization_analyzer.py\"\u001b[0m, line \u001b[35m5\u001b[0m, in \u001b[35m<module>\u001b[0m\n    from pymongo import MongoClient, UpdateOne\n\u001b[1;35mModuleNotFoundError\u001b[0m: \u001b[35mNo module named 'pymongo'\u001b[0m\n"
+}
+[2025-07-25T17:01:43.141Z] [ERROR] [employee_utilization_analyzer.py STDERR] Traceback (most recent call last):
+  File [35m"/Users/sim/TestingPig/employee_utilization_analyzer.py"[0m, line [35m5[0m, in [35m<module>[0m
+    from pymongo import MongoClient, UpdateOne
+[1;35mModuleNotFoundError[0m: [35mNo module named 'pymongo'[0m
+
+[2025-07-25T17:01:43.141Z] [ERROR] ❌ [1/3] Employee Utilization Analysis failed after 20.2s (attempt 1) {
+  "script": "employee_utilization_analyzer.py",
+  "duration": "20205ms",
+  "attempts": 1,
+  "startTime": "2025-07-25T17:01:22.936Z",
+  "endTime": "2025-07-25T17:01:43.141Z"
+}
+[2025-07-25T17:01:43.141Z] [ERROR] 💥 Script failed: employee_utilization_analyzer.py (attempt 1/3) {
+  "duration": "20205ms",
+  "error": "Script failed after 3 attempts: Command failed: \"python3\" \"/Users/sim/TestingPig/employee_utilization_analyzer.py\"\nTraceback (most recent call last):\n  File \u001b[35m\"/Users/sim/TestingPig/employee_utilization_analyzer.py\"\u001b[0m, line \u001b[35m5\u001b[0m, in \u001b[35m<module>\u001b[0m\n    from pymongo import MongoClient, UpdateOne\n\u001b[1;35mModuleNotFoundError\u001b[0m: \u001b[35mNo module named 'pymongo'\u001b[0m\n",
+  "code": "N/A",
+  "signal": "N/A"
+}
+[2025-07-25T17:01:43.141Z] [INFO] ⏳ Waiting 5s before next script...
+[2025-07-25T17:01:48.142Z] [INFO] [RESOURCE] Memory: 3.86MB used, 4.81MB total, 39.22MB RSS | Load: 2.44, 2.00, 2.13
+[2025-07-25T17:01:48.143Z] [WARN] [WARNING] High memory usage: 80.3% of heap used
+[2025-07-25T17:01:48.143Z] [INFO] 
+📋 [2/3] Starting script: Attrition Score Calculation {
+  "script": "attrition_score.py",
+  "args": "",
+  "timeout": "3600s",
+  "maxRetries": 2,
+  "retryDelay": "15000ms"
+}
+[2025-07-25T17:01:48.144Z] [DEBUG] Executing script: attrition_score.py {
+  "args": [],
+  "pid": 81486,
+  "cwd": "/Users/sim/TestingPig",
+  "pythonPath": "python3",
+  "timeout": 3600000,
+  "maxRetries": 2
+}
+[2025-07-25T17:01:48.192Z] [WARN] Script attempt 1 failed, will retry: attrition_score.py {
+  "script": "attrition_score.py",
+  "duration": "48ms",
+  "exitCode": 1,
+  "signal": null,
+  "attempt": 1,
+  "maxAttempts": 3,
+  "error": "Command failed: \"python3\" \"/Users/sim/TestingPig/attrition_score.py\"\nTraceback (most recent call last):\n  File \u001b[35m\"/Users/sim/TestingPig/attrition_score.py\"\u001b[0m, line \u001b[35m6\u001b[0m, in \u001b[35m<module>\u001b[0m\n    import numpy as np\n\u001b[1;35mModuleNotFoundError\u001b[0m: \u001b[35mNo module named 'numpy'\u001b[0m\n"
+}
+[2025-07-25T17:01:48.192Z] [WARN] Retry attempt 2 of 2 after 15000ms... {
+  "script": "attrition_score.py",
+  "previousError": "Command failed: \"python3\" \"/Users/sim/TestingPig/attrition_score.py\"\nTraceback (most recent call last):\n  File \u001b[35m\"/Users/sim/TestingPig/attrition_score.py\"\u001b[0m, line \u001b[35m6\u001b[0m, in \u001b[35m<module>\u001b[0m\n    import numpy as np\n\u001b[1;35mModuleNotFoundError\u001b[0m: \u001b[35mNo module named 'numpy'\u001b[0m\n"
+}
+[2025-07-25T17:02:03.261Z] [WARN] Script attempt 2 failed, will retry: attrition_score.py {
+  "script": "attrition_score.py",
+  "duration": "15117ms",
+  "exitCode": 1,
+  "signal": null,
+  "attempt": 2,
+  "maxAttempts": 3,
+  "error": "Command failed: \"python3\" \"/Users/sim/TestingPig/attrition_score.py\"\nTraceback (most recent call last):\n  File \u001b[35m\"/Users/sim/TestingPig/attrition_score.py\"\u001b[0m, line \u001b[35m6\u001b[0m, in \u001b[35m<module>\u001b[0m\n    import numpy as np\n\u001b[1;35mModuleNotFoundError\u001b[0m: \u001b[35mNo module named 'numpy'\u001b[0m\n"
+}
+[2025-07-25T17:02:03.261Z] [WARN] Retry attempt 3 of 2 after 15000ms... {
+  "script": "attrition_score.py",
+  "previousError": "Command failed: \"python3\" \"/Users/sim/TestingPig/attrition_score.py\"\nTraceback (most recent call last):\n  File \u001b[35m\"/Users/sim/TestingPig/attrition_score.py\"\u001b[0m, line \u001b[35m6\u001b[0m, in \u001b[35m<module>\u001b[0m\n    import numpy as np\n\u001b[1;35mModuleNotFoundError\u001b[0m: \u001b[35mNo module named 'numpy'\u001b[0m\n"
+}
+[2025-07-25T17:02:18.318Z] [ERROR] Script failed after 3 attempts: attrition_score.py {
+  "script": "attrition_score.py",
+  "duration": "30174ms",
+  "exitCode": 1,
+  "signal": null,
+  "attempt": 3,
+  "maxAttempts": 3,
+  "error": "Command failed: \"python3\" \"/Users/sim/TestingPig/attrition_score.py\"\nTraceback (most recent call last):\n  File \u001b[35m\"/Users/sim/TestingPig/attrition_score.py\"\u001b[0m, line \u001b[35m6\u001b[0m, in \u001b[35m<module>\u001b[0m\n    import numpy as np\n\u001b[1;35mModuleNotFoundError\u001b[0m: \u001b[35mNo module named 'numpy'\u001b[0m\n"
+}
+[2025-07-25T17:02:18.318Z] [INFO] [RESOURCE] Memory: 4.34MB used, 5.06MB total, 39.67MB RSS | Load: 2.62, 2.09, 2.16
+[2025-07-25T17:02:18.318Z] [WARN] [WARNING] High memory usage: 85.8% of heap used
+[2025-07-25T17:02:18.318Z] [ERROR] [attrition_score.py STDERR] Traceback (most recent call last):
+  File [35m"/Users/sim/TestingPig/attrition_score.py"[0m, line [35m6[0m, in [35m<module>[0m
+    import numpy as np
+[1;35mModuleNotFoundError[0m: [35mNo module named 'numpy'[0m
+
+[2025-07-25T17:02:18.318Z] [ERROR] ❌ [2/3] Attrition Score Calculation failed after 30.2s (attempt 1) {
+  "script": "attrition_score.py",
+  "duration": "30175ms",
+  "attempts": 1,
+  "startTime": "2025-07-25T17:01:48.144Z",
+  "endTime": "2025-07-25T17:02:18.318Z"
+}
+[2025-07-25T17:02:18.319Z] [ERROR] 💥 Script failed: attrition_score.py (attempt 1/3) {
+  "duration": "30175ms",
+  "error": "Script failed after 3 attempts: Command failed: \"python3\" \"/Users/sim/TestingPig/attrition_score.py\"\nTraceback (most recent call last):\n  File \u001b[35m\"/Users/sim/TestingPig/attrition_score.py\"\u001b[0m, line \u001b[35m6\u001b[0m, in \u001b[35m<module>\u001b[0m\n    import numpy as np\n\u001b[1;35mModuleNotFoundError\u001b[0m: \u001b[35mNo module named 'numpy'\u001b[0m\n",
+  "code": "N/A",
+  "signal": "N/A"
+}
+[2025-07-25T17:02:18.319Z] [INFO] ⏳ Waiting 5s before next script...
+[2025-07-25T17:02:23.320Z] [INFO] [RESOURCE] Memory: 4.38MB used, 5.06MB total, 39.69MB RSS | Load: 2.65, 2.10, 2.16
+[2025-07-25T17:02:23.321Z] [WARN] [WARNING] High memory usage: 86.5% of heap used
+[2025-07-25T17:02:23.322Z] [INFO] 
+📋 [3/3] Starting script: Successor Identification {
+  "script": "successor_identification.py",
+  "args": "--refresh --batch-size=10",
+  "timeout": "2700s",
+  "maxRetries": 1,
+  "retryDelay": "20000ms"
+}
+[2025-07-25T17:02:23.323Z] [DEBUG] Executing script: successor_identification.py {
+  "args": [
+    "--refresh",
+    "--batch-size=10"
+  ],
+  "pid": 81486,
+  "cwd": "/Users/sim/TestingPig",
+  "pythonPath": "python3",
+  "timeout": 2700000,
+  "maxRetries": 1
+}
+[2025-07-25T17:02:23.388Z] [WARN] Script attempt 1 failed, will retry: successor_identification.py {
+  "script": "successor_identification.py",
+  "duration": "65ms",
+  "exitCode": 1,
+  "signal": null,
+  "attempt": 1,
+  "maxAttempts": 2,
+  "error": "Command failed: \"python3\" \"/Users/sim/TestingPig/successor_identification.py\" \"--refresh\" \"--batch-size=10\"\nTraceback (most recent call last):\n  File \u001b[35m\"/Users/sim/TestingPig/successor_identification.py\"\u001b[0m, line \u001b[35m6\u001b[0m, in \u001b[35m<module>\u001b[0m\n    import numpy as np\n\u001b[1;35mModuleNotFoundError\u001b[0m: \u001b[35mNo module named 'numpy'\u001b[0m\n"
+}
+[2025-07-25T17:02:23.388Z] [WARN] Retry attempt 2 of 1 after 20000ms... {
+  "script": "successor_identification.py",
+  "previousError": "Command failed: \"python3\" \"/Users/sim/TestingPig/successor_identification.py\" \"--refresh\" \"--batch-size=10\"\nTraceback (most recent call last):\n  File \u001b[35m\"/Users/sim/TestingPig/successor_identification.py\"\u001b[0m, line \u001b[35m6\u001b[0m, in \u001b[35m<module>\u001b[0m\n    import numpy as np\n\u001b[1;35mModuleNotFoundError\u001b[0m: \u001b[35mNo module named 'numpy'\u001b[0m\n"
+}
+[2025-07-25T17:02:43.459Z] [ERROR] Script failed after 2 attempts: successor_identification.py {
+  "script": "successor_identification.py",
+  "duration": "20136ms",
+  "exitCode": 1,
+  "signal": null,
+  "attempt": 2,
+  "maxAttempts": 2,
+  "error": "Command failed: \"python3\" \"/Users/sim/TestingPig/successor_identification.py\" \"--refresh\" \"--batch-size=10\"\nTraceback (most recent call last):\n  File \u001b[35m\"/Users/sim/TestingPig/successor_identification.py\"\u001b[0m, line \u001b[35m6\u001b[0m, in \u001b[35m<module>\u001b[0m\n    import numpy as np\n\u001b[1;35mModuleNotFoundError\u001b[0m: \u001b[35mNo module named 'numpy'\u001b[0m\n"
+}
+[2025-07-25T17:02:43.459Z] [ERROR] [successor_identification.py STDERR] Traceback (most recent call last):
+  File [35m"/Users/sim/TestingPig/successor_identification.py"[0m, line [35m6[0m, in [35m<module>[0m
+    import numpy as np
+[1;35mModuleNotFoundError[0m: [35mNo module named 'numpy'[0m
+
+[2025-07-25T17:02:43.459Z] [ERROR] ❌ [3/3] Successor Identification failed after 20.1s (attempt 1) {
+  "script": "successor_identification.py",
+  "duration": "20137ms",
+  "attempts": 1,
+  "startTime": "2025-07-25T17:02:23.322Z",
+  "endTime": "2025-07-25T17:02:43.459Z"
+}
+[2025-07-25T17:02:43.459Z] [ERROR] 💥 Script failed: successor_identification.py (attempt 1/2) {
+  "duration": "20137ms",
+  "error": "Script failed after 2 attempts: Command failed: \"python3\" \"/Users/sim/TestingPig/successor_identification.py\" \"--refresh\" \"--batch-size=10\"\nTraceback (most recent call last):\n  File \u001b[35m\"/Users/sim/TestingPig/successor_identification.py\"\u001b[0m, line \u001b[35m6\u001b[0m, in \u001b[35m<module>\u001b[0m\n    import numpy as np\n\u001b[1;35mModuleNotFoundError\u001b[0m: \u001b[35mNo module named 'numpy'\u001b[0m\n",
+  "code": "N/A",
+  "signal": "N/A"
+}
+[2025-07-25T17:02:43.459Z] [INFO] ⏳ Waiting 5s before next script...
+[2025-07-25T17:02:48.461Z] [INFO] [RESOURCE] Memory: 4.60MB used, 5.06MB total, 40.00MB RSS | Load: 2.08, 2.01, 2.13
+[2025-07-25T17:02:48.462Z] [WARN] [WARNING] High memory usage: 90.9% of heap used
+[2025-07-25T17:02:48.463Z] [WARN] [WARNING] Critical memory usage - consider increasing Node.js memory limit
+[2025-07-25T17:02:48.463Z] [INFO] 
+📊 ====== DATA UPDATE SUMMARY ======
+[2025-07-25T17:02:48.464Z] [INFO] 📅 Started: 2025-07-25T17:01:22.936Z
+[2025-07-25T17:02:48.464Z] [INFO] 🏁 Finished: 2025-07-25T17:02:48.463Z
+[2025-07-25T17:02:48.465Z] [INFO] ⏱️  Total Duration: 1.4 minutes
+[2025-07-25T17:02:48.465Z] [INFO] 📋 Scripts: 3 total, 0 successful, 3 failed
+[2025-07-25T17:02:48.466Z] [INFO] 📈 Success Rate: 0.0%
+[2025-07-25T17:02:48.466Z] [INFO] 
+📋 SCRIPT EXECUTION STATUS:
+[2025-07-25T17:02:48.471Z] [INFO] 
+💾 SYSTEM RESOURCE USAGE:
+[2025-07-25T17:02:48.472Z] [INFO] Memory: 4.71MB used / 5.06MB total
+[2025-07-25T17:02:48.472Z] [INFO] RSS: 40.50MB
+[2025-07-25T17:02:48.472Z] [INFO] Load: 2.08, 2.01, 2.13
+[2025-07-25T17:02:48.473Z] [WARN] 
+⚠️  COMPLETED WITH 3 OF 3 SCRIPTS FAILING
+[2025-07-25T17:02:48.473Z] [INFO] [RESOURCE] Memory: 4.73MB used, 5.06MB total, 40.52MB RSS | Load: 2.08, 2.01, 2.13
+[2025-07-25T17:02:48.474Z] [WARN] [WARNING] High memory usage: 93.4% of heap used
+[2025-07-25T17:02:48.474Z] [WARN] [WARNING] Critical memory usage - consider increasing Node.js memory limit
+[2025-07-25T17:02:48.474Z] [WARN] Initial update completed with 3 failures
+[2025-07-25T17:02:48.475Z] [INFO] Initial update completed. Next update in 1440 minutes.

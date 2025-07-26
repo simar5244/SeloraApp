@@ -1,0 +1,78 @@
+2025-07-06 18:01:19.260 | INFO     | stripe_webhook       | ================================================================================
+2025-07-06 18:01:19.260 | INFO     | stripe_webhook       | 🚀 STRIPE WEBHOOK SERVICE INITIALIZATION STARTING
+2025-07-06 18:01:19.260 | INFO     | stripe_webhook       | ================================================================================
+2025-07-06 18:01:19.261 | INFO     | stripe_webhook       | 📁 Starting environment variable loading process...
+2025-07-06 18:01:19.261 | DEBUG    | stripe_webhook       | 🔍 Searching for .env.local in 4 possible locations:
+2025-07-06 18:01:19.261 | DEBUG    | stripe_webhook       |    1. /Users/sim/TestingPig/.env.local
+2025-07-06 18:01:19.261 | DEBUG    | stripe_webhook       |    2. /Users/sim/TestingPig/./scripts/.env.local
+2025-07-06 18:01:19.261 | DEBUG    | stripe_webhook       |    3. /Users/sim/TestingPig/./.env.local
+2025-07-06 18:01:19.261 | DEBUG    | stripe_webhook       |    4. /Users/sim/TestingPig/.env.local
+2025-07-06 18:01:19.261 | DEBUG    | stripe_webhook       | 🔎 Checking path: /Users/sim/TestingPig/.env.local
+2025-07-06 18:01:19.261 | INFO     | stripe_webhook       | ✅ Found .env.local at: /Users/sim/TestingPig/.env.local
+2025-07-06 18:01:19.261 | DEBUG    | stripe_webhook       | 📊 File size: 1631 bytes
+2025-07-06 18:01:19.261 | DEBUG    | stripe_webhook       | 📅 Last modified: 2025-07-04 17:39:07.684862
+2025-07-06 18:01:19.263 | INFO     | stripe_webhook       | 🔄 Successfully loaded environment variables from /Users/sim/TestingPig/.env.local
+2025-07-06 18:01:19.263 | DEBUG    | stripe_webhook       | 📝 .env.local contains 39 lines:
+2025-07-06 18:01:19.263 | DEBUG    | stripe_webhook       |    Line 1: # Application URL
+2025-07-06 18:01:19.263 | DEBUG    | stripe_webhook       |    Line 2: NEXT_PUBLIC_APP_URL=***REDACTED***
+2025-07-06 18:01:19.263 | DEBUG    | stripe_webhook       |    Line 3: NEXT_PUBLIC_API_URL=***REDACTED***
+2025-07-06 18:01:19.263 | DEBUG    | stripe_webhook       |    Line 4: HOST=***REDACTED***
+2025-07-06 18:01:19.263 | DEBUG    | stripe_webhook       |    Line 5: BASE_URL=***REDACTED***
+2025-07-06 18:01:19.263 | DEBUG    | stripe_webhook       |    Line 6: NODE_ENV=***REDACTED***
+2025-07-06 18:01:19.263 | DEBUG    | stripe_webhook       |    Line 7: NEXT_PUBLIC_BASE_URL=***REDACTED***
+2025-07-06 18:01:19.263 | DEBUG    | stripe_webhook       |    Line 8: 
+2025-07-06 18:01:19.263 | DEBUG    | stripe_webhook       |    Line 9: # SMTP Settings
+2025-07-06 18:01:19.263 | DEBUG    | stripe_webhook       |    Line 10: SMTP_USER=***REDACTED***
+2025-07-06 18:01:19.263 | DEBUG    | stripe_webhook       |    Line 11: SMTP_PASS=***REDACTED***
+2025-07-06 18:01:19.263 | DEBUG    | stripe_webhook       |    Line 12: EMAIL_FROM=***REDACTED***
+2025-07-06 18:01:19.263 | DEBUG    | stripe_webhook       |    Line 13: SMTP_HOST=***REDACTED***
+2025-07-06 18:01:19.263 | DEBUG    | stripe_webhook       |    Line 14: SMTP_PORT=***REDACTED***
+2025-07-06 18:01:19.263 | DEBUG    | stripe_webhook       |    Line 15: 
+2025-07-06 18:01:19.263 | DEBUG    | stripe_webhook       |    Line 16: # MongoDB Connection
+2025-07-06 18:01:19.263 | DEBUG    | stripe_webhook       |    Line 17: MONGODB_URI_BASE=***REDACTED***
+2025-07-06 18:01:19.263 | DEBUG    | stripe_webhook       |    Line 18: MONGODB_URI=***REDACTED***
+2025-07-06 18:01:19.263 | DEBUG    | stripe_webhook       |    Line 19: 
+2025-07-06 18:01:19.263 | DEBUG    | stripe_webhook       |    Line 20: # Redis URL
+2025-07-06 18:01:19.263 | DEBUG    | stripe_webhook       |    Line 21: REDIS_URL=***REDACTED***
+2025-07-06 18:01:19.263 | DEBUG    | stripe_webhook       |    Line 22: 
+2025-07-06 18:01:19.263 | DEBUG    | stripe_webhook       |    Line 23: # JWT Secret for Application Authentication
+2025-07-06 18:01:19.264 | DEBUG    | stripe_webhook       |    Line 24: JWT_SECRET=***REDACTED***
+2025-07-06 18:01:19.264 | DEBUG    | stripe_webhook       |    Line 25: 
+2025-07-06 18:01:19.264 | DEBUG    | stripe_webhook       |    Line 26: # LLM API Keys
+2025-07-06 18:01:19.264 | DEBUG    | stripe_webhook       |    Line 27: NEXT_PUBLIC_GEMINI_API_KEY=***REDACTED***
+2025-07-06 18:01:19.264 | DEBUG    | stripe_webhook       |    Line 28: USE_MOCK_REDIS=***REDACTED***
+2025-07-06 18:01:19.264 | DEBUG    | stripe_webhook       |    Line 29: NEXT_PUBLIC_CLAUDE_API_KEY=***REDACTED***
+2025-07-06 18:01:19.264 | DEBUG    | stripe_webhook       |    Line 30: NEXT_PUBLIC_OPENAI_API_KEY=***REDACTED***
+2025-07-06 18:01:19.264 | DEBUG    | stripe_webhook       |    Line 31: GEMINI_API_KEY=***REDACTED***
+2025-07-06 18:01:19.264 | DEBUG    | stripe_webhook       |    Line 32: CLAUDE_API_KEY=***REDACTED***
+2025-07-06 18:01:19.264 | DEBUG    | stripe_webhook       |    Line 33: NEXT_PUBLIC_COMPANY_CODE=***REDACTED***
+2025-07-06 18:01:19.264 | DEBUG    | stripe_webhook       |    Line 34: 
+2025-07-06 18:01:19.264 | DEBUG    | stripe_webhook       |    Line 35: # Stripe API Keys (Sandbox Mode)
+2025-07-06 18:01:19.264 | DEBUG    | stripe_webhook       |    Line 36: STRIPE_SECRET_KEY=***REDACTED***
+2025-07-06 18:01:19.264 | DEBUG    | stripe_webhook       |    Line 37: NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=***REDACTED***
+2025-07-06 18:01:19.264 | DEBUG    | stripe_webhook       |    Line 38: STRIPE_WEBHOOK_SECRET=***REDACTED***
+2025-07-06 18:01:19.264 | DEBUG    | stripe_webhook       |    Line 39: WEBHOOK_PORT=***REDACTED***
+2025-07-06 18:01:19.264 | INFO     | stripe_webhook       | ⚙️ Initializing configuration...
+2025-07-06 18:01:19.264 | INFO     | stripe_webhook       | 🌐 WEBHOOK_PORT: 3333 (source: env var)
+2025-07-06 18:01:19.264 | INFO     | stripe_webhook       | 🔑 STRIPE_SECRET_KEY: Found (length: 107 chars, starts with: sk_test...)
+2025-07-06 18:01:19.264 | INFO     | stripe_webhook       | 🔐 STRIPE_WEBHOOK_SECRET: Found (length: 38 chars, starts with: whsec_H...)
+2025-07-06 18:01:19.264 | INFO     | stripe_webhook       | 🗄️ MONGODB_URI: Found (connects to: cluster0.nen0dzs.mongodb.net/)
+2025-07-06 18:01:19.264 | INFO     | stripe_webhook       | 🏠 HOST: 0.0.0.0
+2025-07-06 18:01:19.264 | INFO     | stripe_webhook       | ✅ Configuration initialization complete
+2025-07-06 18:01:19.264 | INFO     | stripe_webhook       | 💳 Initializing Stripe API...
+2025-07-06 18:01:19.264 | INFO     | stripe_webhook       | ✅ Stripe API key configured successfully
+2025-07-06 18:01:19.264 | INFO     | stripe_webhook       | 🚀 Initializing FastAPI application...
+2025-07-06 18:01:19.265 | INFO     | stripe_webhook       | ✅ FastAPI application initialized
+2025-07-06 18:01:19.265 | INFO     | stripe_webhook       | 🌐 Adding CORS middleware...
+2025-07-06 18:01:19.265 | INFO     | stripe_webhook       | ✅ CORS middleware configured
+2025-07-06 18:01:19.267 | INFO     | stripe_webhook       | 🚀 Starting Stripe Webhook Service with retry-on-bind...
+2025-07-06 18:01:19.267 | INFO     | stripe_webhook       | 🌐 Listening on http://0.0.0.0:3333
+2025-07-06 18:01:19.279 | INFO     | stripe_webhook       | 🚀 APPLICATION STARTUP EVENT
+2025-07-06 18:01:19.279 | INFO     | stripe_webhook       | ============================================================
+2025-07-06 18:01:19.279 | INFO     | stripe_webhook       | 🧪 Testing database connectivity...
+2025-07-06 18:01:19.279 | INFO     | stripe_webhook       | 🗄 Connecting to MongoDB at mongodb+srv://simarjotsingh5244:NUMotMgntP7AcNrQ@cluster0.nen0dzs.mongodb.net/, DB: company_test
+2025-07-06 18:01:19.337 | INFO     | stripe_webhook       | ✅ Database connectivity test passed
+2025-07-06 18:01:19.337 | INFO     | stripe_webhook       | 🧪 Testing Stripe API connectivity...
+2025-07-06 18:01:19.696 | INFO     | stripe_webhook       | ✅ Stripe API test passed - Account ID: acct_1RLudEQY3NVUyJal
+2025-07-06 18:01:19.696 | INFO     | stripe_webhook       | 🎉 Application startup completed
+2025-07-06 18:01:19.696 | INFO     | stripe_webhook       | ============================================================

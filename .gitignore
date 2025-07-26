@@ -1,0 +1,6 @@
+node_modules/
+.next/
+*.mov
+*.mp4
+# Model cache
+model_cache/

@@ -1,0 +1,12 @@
+[2025-07-10T00:13:45.182Z] [INFO] Starting scheduled reports daemon with check interval of 86400000ms
+[2025-07-10T00:13:45.183Z] [INFO] Checking for scheduled reports...
+[2025-07-10T00:13:46.029Z] [DEBUG] Connected to MongoDB
+[2025-07-10T00:13:46.111Z] [INFO] Found 2 company databases
+[2025-07-10T00:13:46.113Z] [DEBUG] Processing company database: company_pyat1tbz
+[2025-07-10T00:13:46.217Z] [DEBUG] Skipping company_pyat1tbz: No scheduled reports collection found
+[2025-07-10T00:13:46.218Z] [DEBUG] Processing company database: company_ry0iwbpw
+[2025-07-10T00:13:46.342Z] [DEBUG] Finding reports to execute in company_ry0iwbpw (current time: 2025-07-10T00:13:46.342Z)
+[2025-07-10T00:13:46.418Z] [INFO] Found 0 reports to execute in company_ry0iwbpw
+[2025-07-10T00:13:46.418Z] [INFO] Scheduled reports check completed
+[2025-07-10T00:13:46.421Z] [DEBUG] MongoDB connection closed
+[2025-07-10T00:13:46.421Z] [INFO] Daemon is now running continuously...

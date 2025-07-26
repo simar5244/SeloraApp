@@ -1,0 +1,643 @@
+[2025-07-03T00:43:48.975Z] [INFO] 🚀 Starting data update daemon... {
+  "nodeVersion": "v20.19.3",
+  "platform": "darwin",
+  "arch": "arm64",
+  "pid": 98969,
+  "cwd": "/Users/sim/TestingPig",
+  "system": {
+    "cpus": 8,
+    "memory": {
+      "total": "16.00 GB",
+      "free": "0.08 GB",
+      "usage": "99.48%"
+    },
+    "load": [
+      1.32861328125,
+      1.70166015625,
+      1.91552734375
+    ]
+  },
+  "env": "production"
+}
+[2025-07-03T00:43:48.976Z] [INFO] [RESOURCE] Memory: 4.26MB used, 4.56MB total, 38.88MB RSS | Load: 1.33, 1.70, 1.92
+[2025-07-03T00:43:48.976Z] [WARN] [WARNING] High memory usage: 93.3% of heap used
+[2025-07-03T00:43:48.977Z] [WARN] [WARNING] Critical memory usage - consider increasing Node.js memory limit
+[2025-07-03T00:43:48.977Z] [INFO] Performing initial data update...
+[2025-07-03T00:43:48.978Z] [INFO] 🚀 Starting scheduled data updates... {
+  "system": {
+    "platform": "darwin",
+    "arch": "arm64",
+    "node": "v20.19.3",
+    "pid": 98969,
+    "cpus": 8,
+    "memory": {
+      "total": "16.00 GB",
+      "free": "0.08 GB",
+      "usage": "99.48%"
+    }
+  },
+  "totalScripts": 4,
+  "logLevel": "INFO"
+}
+[2025-07-03T00:43:48.978Z] [INFO] 
+📋 [1/4] Starting script: Employee Utilization Analysis {
+  "script": "employee_utilization_analyzer.py",
+  "args": "",
+  "timeout": "1800s",
+  "maxRetries": 2,
+  "retryDelay": "10000ms"
+}
+[2025-07-03T00:43:48.979Z] [DEBUG] Executing script: employee_utilization_analyzer.py {
+  "args": [],
+  "pid": 98969,
+  "cwd": "/Users/sim/TestingPig",
+  "pythonPath": "python3",
+  "timeout": 1800000,
+  "maxRetries": 2
+}
+[2025-07-03T00:43:49.078Z] [WARN] Script attempt 1 failed, will retry: employee_utilization_analyzer.py {
+  "script": "employee_utilization_analyzer.py",
+  "duration": "99ms",
+  "exitCode": 1,
+  "signal": null,
+  "attempt": 1,
+  "maxAttempts": 3,
+  "error": "Command failed: \"python3\" \"/Users/sim/TestingPig/employee_utilization_analyzer.py\"\nTraceback (most recent call last):\n  File \u001b[35m\"/Users/sim/TestingPig/employee_utilization_analyzer.py\"\u001b[0m, line \u001b[35m5\u001b[0m, in \u001b[35m<module>\u001b[0m\n    from pymongo import MongoClient, UpdateOne\n\u001b[1;35mModuleNotFoundError\u001b[0m: \u001b[35mNo module named 'pymongo'\u001b[0m\n"
+}
+[2025-07-03T00:43:49.079Z] [WARN] Retry attempt 2 of 2 after 10000ms... {
+  "script": "employee_utilization_analyzer.py",
+  "previousError": "Command failed: \"python3\" \"/Users/sim/TestingPig/employee_utilization_analyzer.py\"\nTraceback (most recent call last):\n  File \u001b[35m\"/Users/sim/TestingPig/employee_utilization_analyzer.py\"\u001b[0m, line \u001b[35m5\u001b[0m, in \u001b[35m<module>\u001b[0m\n    from pymongo import MongoClient, UpdateOne\n\u001b[1;35mModuleNotFoundError\u001b[0m: \u001b[35mNo module named 'pymongo'\u001b[0m\n"
+}
+[2025-07-03T00:43:59.156Z] [WARN] Script attempt 2 failed, will retry: employee_utilization_analyzer.py {
+  "script": "employee_utilization_analyzer.py",
+  "duration": "10177ms",
+  "exitCode": 1,
+  "signal": null,
+  "attempt": 2,
+  "maxAttempts": 3,
+  "error": "Command failed: \"python3\" \"/Users/sim/TestingPig/employee_utilization_analyzer.py\"\nTraceback (most recent call last):\n  File \u001b[35m\"/Users/sim/TestingPig/employee_utilization_analyzer.py\"\u001b[0m, line \u001b[35m5\u001b[0m, in \u001b[35m<module>\u001b[0m\n    from pymongo import MongoClient, UpdateOne\n\u001b[1;35mModuleNotFoundError\u001b[0m: \u001b[35mNo module named 'pymongo'\u001b[0m\n"
+}
+[2025-07-03T00:43:59.157Z] [WARN] Retry attempt 3 of 2 after 10000ms... {
+  "script": "employee_utilization_analyzer.py",
+  "previousError": "Command failed: \"python3\" \"/Users/sim/TestingPig/employee_utilization_analyzer.py\"\nTraceback (most recent call last):\n  File \u001b[35m\"/Users/sim/TestingPig/employee_utilization_analyzer.py\"\u001b[0m, line \u001b[35m5\u001b[0m, in \u001b[35m<module>\u001b[0m\n    from pymongo import MongoClient, UpdateOne\n\u001b[1;35mModuleNotFoundError\u001b[0m: \u001b[35mNo module named 'pymongo'\u001b[0m\n"
+}
+[2025-07-03T00:44:09.271Z] [ERROR] Script failed after 3 attempts: employee_utilization_analyzer.py {
+  "script": "employee_utilization_analyzer.py",
+  "duration": "20292ms",
+  "exitCode": 1,
+  "signal": null,
+  "attempt": 3,
+  "maxAttempts": 3,
+  "error": "Command failed: \"python3\" \"/Users/sim/TestingPig/employee_utilization_analyzer.py\"\nTraceback (most recent call last):\n  File \u001b[35m\"/Users/sim/TestingPig/employee_utilization_analyzer.py\"\u001b[0m, line \u001b[35m5\u001b[0m, in \u001b[35m<module>\u001b[0m\n    from pymongo import MongoClient, UpdateOne\n\u001b[1;35mModuleNotFoundError\u001b[0m: \u001b[35mNo module named 'pymongo'\u001b[0m\n"
+}
+[2025-07-03T00:44:09.271Z] [ERROR] [employee_utilization_analyzer.py STDERR] Traceback (most recent call last):
+  File [35m"/Users/sim/TestingPig/employee_utilization_analyzer.py"[0m, line [35m5[0m, in [35m<module>[0m
+    from pymongo import MongoClient, UpdateOne
+[1;35mModuleNotFoundError[0m: [35mNo module named 'pymongo'[0m
+
+[2025-07-03T00:44:09.272Z] [ERROR] ❌ [1/4] Employee Utilization Analysis failed after 20.3s (attempt 1) {
+  "script": "employee_utilization_analyzer.py",
+  "duration": "20294ms",
+  "attempts": 1,
+  "startTime": "2025-07-03T00:43:48.978Z",
+  "endTime": "2025-07-03T00:44:09.272Z"
+}
+[2025-07-03T00:44:09.272Z] [ERROR] 💥 Script failed: employee_utilization_analyzer.py (attempt 1/3) {
+  "duration": "20294ms",
+  "error": "Script failed after 3 attempts: Command failed: \"python3\" \"/Users/sim/TestingPig/employee_utilization_analyzer.py\"\nTraceback (most recent call last):\n  File \u001b[35m\"/Users/sim/TestingPig/employee_utilization_analyzer.py\"\u001b[0m, line \u001b[35m5\u001b[0m, in \u001b[35m<module>\u001b[0m\n    from pymongo import MongoClient, UpdateOne\n\u001b[1;35mModuleNotFoundError\u001b[0m: \u001b[35mNo module named 'pymongo'\u001b[0m\n",
+  "code": "N/A",
+  "signal": "N/A"
+}
+[2025-07-03T00:44:09.272Z] [INFO] ⏳ Waiting 5s before next script...
+[2025-07-03T00:44:14.274Z] [INFO] [RESOURCE] Memory: 3.92MB used, 5.06MB total, 37.00MB RSS | Load: 1.46, 1.71, 1.91
+[2025-07-03T00:44:14.275Z] [WARN] [WARNING] High memory usage: 77.4% of heap used
+[2025-07-03T00:44:14.276Z] [INFO] 
+📋 [2/4] Starting script: Attrition Score Calculation {
+  "script": "attrition_score.py",
+  "args": "",
+  "timeout": "3600s",
+  "maxRetries": 2,
+  "retryDelay": "15000ms"
+}
+[2025-07-03T00:44:14.277Z] [DEBUG] Executing script: attrition_score.py {
+  "args": [],
+  "pid": 98969,
+  "cwd": "/Users/sim/TestingPig",
+  "pythonPath": "python3",
+  "timeout": 3600000,
+  "maxRetries": 2
+}
+[2025-07-03T00:44:14.348Z] [WARN] Script attempt 1 failed, will retry: attrition_score.py {
+  "script": "attrition_score.py",
+  "duration": "71ms",
+  "exitCode": 1,
+  "signal": null,
+  "attempt": 1,
+  "maxAttempts": 3,
+  "error": "Command failed: \"python3\" \"/Users/sim/TestingPig/attrition_score.py\"\nTraceback (most recent call last):\n  File \u001b[35m\"/Users/sim/TestingPig/attrition_score.py\"\u001b[0m, line \u001b[35m6\u001b[0m, in \u001b[35m<module>\u001b[0m\n    import numpy as np\n\u001b[1;35mModuleNotFoundError\u001b[0m: \u001b[35mNo module named 'numpy'\u001b[0m\n"
+}
+[2025-07-03T00:44:14.348Z] [WARN] Retry attempt 2 of 2 after 15000ms... {
+  "script": "attrition_score.py",
+  "previousError": "Command failed: \"python3\" \"/Users/sim/TestingPig/attrition_score.py\"\nTraceback (most recent call last):\n  File \u001b[35m\"/Users/sim/TestingPig/attrition_score.py\"\u001b[0m, line \u001b[35m6\u001b[0m, in \u001b[35m<module>\u001b[0m\n    import numpy as np\n\u001b[1;35mModuleNotFoundError\u001b[0m: \u001b[35mNo module named 'numpy'\u001b[0m\n"
+}
+[2025-07-03T00:44:44.581Z] [INFO] 🚀 Starting data update daemon... {
+  "nodeVersion": "v20.19.3",
+  "platform": "darwin",
+  "arch": "arm64",
+  "pid": 99416,
+  "cwd": "/Users/sim/TestingPig",
+  "system": {
+    "cpus": 8,
+    "memory": {
+      "total": "16.00 GB",
+      "free": "0.09 GB",
+      "usage": "99.47%"
+    },
+    "load": [
+      1.58154296875,
+      1.7060546875,
+      1.90283203125
+    ]
+  },
+  "env": "production"
+}
+[2025-07-03T00:44:44.585Z] [INFO] [RESOURCE] Memory: 4.26MB used, 4.56MB total, 38.44MB RSS | Load: 1.58, 1.71, 1.90
+[2025-07-03T00:44:44.586Z] [WARN] [WARNING] High memory usage: 93.3% of heap used
+[2025-07-03T00:44:44.586Z] [WARN] [WARNING] Critical memory usage - consider increasing Node.js memory limit
+[2025-07-03T00:44:44.587Z] [INFO] Performing initial data update...
+[2025-07-03T00:44:44.588Z] [INFO] 🚀 Starting scheduled data updates... {
+  "system": {
+    "platform": "darwin",
+    "arch": "arm64",
+    "node": "v20.19.3",
+    "pid": 99416,
+    "cpus": 8,
+    "memory": {
+      "total": "16.00 GB",
+      "free": "0.09 GB",
+      "usage": "99.47%"
+    }
+  },
+  "totalScripts": 4,
+  "logLevel": "INFO"
+}
+[2025-07-03T00:44:44.588Z] [INFO] 
+📋 [1/4] Starting script: Employee Utilization Analysis {
+  "script": "employee_utilization_analyzer.py",
+  "args": "",
+  "timeout": "1800s",
+  "maxRetries": 2,
+  "retryDelay": "10000ms"
+}
+[2025-07-03T00:44:44.589Z] [DEBUG] Executing script: employee_utilization_analyzer.py {
+  "args": [],
+  "pid": 99416,
+  "cwd": "/Users/sim/TestingPig",
+  "pythonPath": "python3",
+  "timeout": 1800000,
+  "maxRetries": 2
+}
+[2025-07-03T00:45:11.850Z] [INFO] Script completed successfully: employee_utilization_analyzer.py {
+  "duration": "27261ms",
+  "exitCode": 0,
+  "attempt": 1
+}
+[2025-07-03T00:45:11.851Z] [WARN] [employee_utilization_analyzer.py STDERR] 2025-07-02 19:44:49,975 - INFO - Starting Attrition Score Analyzer (Multi-Database Version)...
+2025-07-02 19:44:49,977 - INFO - MongoDB URI loaded: mongodb+srv://simarjotsingh5244:NUMotMgntP7AcNrQ@cluster0.nen0dzs.mongodb.net/
+2025-07-02 19:44:49,978 - INFO - Employee Utilization Analyzer starting up...
+2025-07-02 19:44:49,980 - INFO - MongoDB URI: mongodb+srv://simarjotsingh5244:NUMotMgntP7AcNrQ@cluster0.nen0dzs.mongodb.net/
+2025-07-02 19:44:49,981 - INFO - Starting Employee Utilization Analyzer...
+2025-07-02 19:44:49,981 - INFO - [MEMORY] Before MongoDB connection
+2025-07-02 19:44:49,981 - INFO -   • RSS: 397.50 MB
+2025-07-02 19:44:49,981 - INFO -   • VMS: 402570.83 MB
+2025-07-02 19:44:49,983 - INFO -   • USS: 311.06 MB
+2025-07-02 19:44:49,983 - INFO - [CPU] Before MongoDB connection
+2025-07-02 19:44:50,089 - INFO -   • CPU %: 0.1%
+2025-07-02 19:44:50,089 - INFO -   • Threads: 1
+2025-07-02 19:44:50,089 - INFO -   • Open files: 0
+2025-07-02 19:44:50,090 - INFO -   • Python allocated blocks: 1594261
+2025-07-02 19:44:50,090 - INFO - [GC] Before MongoDB connection
+2025-07-02 19:44:50,112 - WARNING - Could not get GC info: object of type 'function' has no len()
+2025-07-02 19:44:50,112 - INFO - --------------------------------------------------------------------------------
+2025-07-02 19:44:50,112 - INFO - Attempting MongoDB connection (attempt 1/3)
+2025-07-02 19:44:50,867 - INFO - Successfully connected to MongoDB at mongodb+srv://simarjotsingh5244:NUMotMgntP7AcNrQ@cluster0.nen0dzs.mongodb.net/
+2025-07-02 19:44:50,919 - INFO - MongoDB server version: 8.0.11
+2025-07-02 19:44:50,920 - INFO - MongoDB connections: 53
+2025-07-02 19:44:50,920 - INFO - [MEMORY] After MongoDB connection
+2025-07-02 19:44:50,921 - INFO -   • RSS: 401.42 MB
+2025-07-02 19:44:50,921 - INFO -   • VMS: 402686.59 MB
+2025-07-02 19:44:50,925 - INFO -   • USS: 312.50 MB
+2025-07-02 19:44:50,925 - INFO - [CPU] After MongoDB connection
+2025-07-02 19:44:51,029 - INFO -   • CPU %: 0.3%
+2025-07-02 19:44:51,030 - INFO -   • Threads: 8
+2025-07-02 19:44:51,030 - INFO -   • Open files: 0
+2025-07-02 19:44:51,030 - INFO -   • Python allocated blocks: 1615881
+2025-07-02 19:44:51,030 - INFO - [GC] After MongoDB connection
+2025-07-02 19:44:51,062 - WARNING - Could not get GC info: object of type 'Parameter' has no len()
+2025-07-02 19:44:51,062 - INFO - --------------------------------------------------------------------------------
+2025-07-02 19:44:51,064 - INFO - [RESOURCE] Database Connection
+2025-07-02 19:44:51,064 - INFO -   • Duration: 1.0814 seconds
+2025-07-02 19:44:51,064 - INFO -   • Memory (RSS): 397.50MB -> 404.38MB (Δ+6.88MB)
+2025-07-02 19:44:51,064 - INFO -   • CPU Usage: 37.2% -> 26.7%
+2025-07-02 19:44:51,064 - INFO -   • Tracemalloc - Current: 2.73MB, Peak: 5.88MB
+2025-07-02 19:44:51,179 - INFO -   • GC Stats: [{'collections': 310, 'collected': 7564, 'uncollectable': 0}, {'collections': 28, 'collected': 712, 'uncollectable': 0}, {'collections': 3, 'collected': 500, 'uncollectable': 0}]
+2025-07-02 19:44:51,180 - INFO - [MEMORY] Before model loading
+2025-07-02 19:44:51,180 - INFO -   • RSS: 402.61 MB
+2025-07-02 19:44:51,180 - INFO -   • VMS: 402686.59 MB
+2025-07-02 19:44:51,182 - INFO -   • USS: 309.47 MB
+2025-07-02 19:44:51,182 - INFO - [CPU] Before model loading
+2025-07-02 19:44:51,286 - INFO -   • CPU %: 0.2%
+2025-07-02 19:44:51,286 - INFO -   • Threads: 5
+2025-07-02 19:44:51,286 - INFO -   • Open files: 0
+2025-07-02 19:44:51,287 - INFO -   • Python allocated blocks: 1614113
+2025-07-02 19:44:51,287 - INFO - [GC] Before model loading
+2025-07-02 19:44:51,310 - INFO -   • Gen 0: 4 objects
+2025-07-02 19:44:51,314 - WARNING - Could not get GC info: object of type 'Process' has no len()
+2025-07-02 19:44:51,314 - INFO - --------------------------------------------------------------------------------
+2025-07-02 19:44:51,314 - INFO - Loading model: all-MiniLM-L6-v2
+2025-07-02 19:44:51,314 - INFO - Available memory before loading: 4117.92 MB
+2025-07-02 19:44:51,343 - INFO - Use pytorch device_name: mps
+2025-07-02 19:44:51,343 - INFO - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2025-07-02 19:44:54,754 - INFO - Use pytorch device_name: mps
+2025-07-02 19:44:54,754 - INFO - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2025-07-02 19:44:56,016 - INFO - Model loaded in 4.70 seconds
+2025-07-02 19:44:56,016 - INFO - Pre-computing benchmark task embeddings...
+2025-07-02 19:44:56,023 - INFO - [RESOURCE] Model Loading
+2025-07-02 19:44:56,023 - INFO -   • Duration: 4.8370 seconds
+2025-07-02 19:44:56,023 - INFO -   • Memory (RSS): 402.61MB -> 429.02MB (Δ+26.41MB)
+2025-07-02 19:44:56,023 - INFO -   • CPU Usage: 27.7% -> 23.6%
+2025-07-02 19:44:56,023 - INFO -   • Tracemalloc - Current: 10.90MB, Peak: 15.86MB
+2025-07-02 19:44:56,143 - INFO -   • GC Stats: [{'collections': 323, 'collected': 9456, 'uncollectable': 0}, {'collections': 29, 'collected': 712, 'uncollectable': 0}, {'collections': 4, 'collected': 4214, 'uncollectable': 0}]
+2025-07-02 19:44:56,143 - INFO - [MEMORY] Before MongoDB connection
+2025-07-02 19:44:56,143 - INFO -   • RSS: 433.81 MB
+2025-07-02 19:44:56,143 - INFO -   • VMS: 403800.56 MB
+2025-07-02 19:44:56,145 - INFO -   • USS: 316.83 MB
+2025-07-02 19:44:56,145 - INFO - [CPU] Before MongoDB connection
+2025-07-02 19:44:56,251 - INFO -   • CPU %: 0.0%
+2025-07-02 19:44:56,251 - INFO -   • Threads: 4
+2025-07-02 19:44:56,251 - INFO -   • Open files: 2
+2025-07-02 19:44:56,251 - INFO -   • Python allocated blocks: 1665787
+2025-07-02 19:44:56,251 - INFO - [GC] Before MongoDB connection
+2025-07-02 19:44:56,274 - INFO -   • Gen 0: 4 objects
+2025-07-02 19:44:56,278 - WARNING - Could not get GC info: object of type 'Process' has no len()
+2025-07-02 19:44:56,278 - INFO - --------------------------------------------------------------------------------
+2025-07-02 19:44:56,278 - INFO - Attempting MongoDB connection (attempt 1/3)
+2025-07-02 19:44:56,838 - INFO - Successfully connected to MongoDB at mongodb+srv://simarjotsingh5244:NUMotMgntP7AcNrQ@cluster0.nen0dzs.mongodb.net/
+2025-07-02 19:44:56,891 - INFO - MongoDB server version: 8.0.11
+2025-07-02 19:44:56,892 - INFO - MongoDB connections: 61
+2025-07-02 19:44:56,892 - INFO - [MEMORY] After MongoDB connection
+2025-07-02 19:44:56,893 - INFO -   • RSS: 437.91 MB
+2025-07-02 19:44:56,893 - INFO -   • VMS: 403913.00 MB
+2025-07-02 19:44:56,900 - INFO -   • USS: 318.00 MB
+2025-07-02 19:44:56,900 - INFO - [CPU] After MongoDB connection
+2025-07-02 19:44:57,003 - INFO -   • CPU %: 0.5%
+2025-07-02 19:44:57,004 - INFO -   • Threads: 11
+2025-07-02 19:44:57,004 - INFO -   • Open files: 2
+2025-07-02 19:44:57,005 - INFO -   • Python allocated blocks: 1667142
+2025-07-02 19:44:57,005 - INFO - [GC] After MongoDB connection
+2025-07-02 19:44:57,043 - INFO -   • Gen 0: 4 objects
+2025-07-02 19:44:57,048 - WARNING - Could not get GC info: object of type 'MongoClient' has no len()
+2025-07-02 19:44:57,048 - INFO - --------------------------------------------------------------------------------
+2025-07-02 19:44:57,049 - INFO - [RESOURCE] Database Connection
+2025-07-02 19:44:57,049 - INFO -   • Duration: 0.9059 seconds
+2025-07-02 19:44:57,049 - INFO -   • Memory (RSS): 433.81MB -> 441.36MB (Δ+7.55MB)
+2025-07-02 19:44:57,049 - INFO -   • CPU Usage: 27.6% -> 22.9%
+2025-07-02 19:44:57,049 - INFO -   • Tracemalloc - Current: 0.15MB, Peak: 3.31MB
+2025-07-02 19:44:57,161 - INFO -   • GC Stats: [{'collections': 323, 'collected': 9456, 'uncollectable': 0}, {'collections': 29, 'collected': 712, 'uncollectable': 0}, {'collections': 5, 'collected': 4224, 'uncollectable': 0}]
+2025-07-02 19:44:57,161 - INFO - [MEMORY] Before model loading
+2025-07-02 19:44:57,161 - INFO -   • RSS: 441.36 MB
+2025-07-02 19:44:57,161 - INFO -   • VMS: 403913.00 MB
+2025-07-02 19:44:57,164 - INFO -   • USS: 318.20 MB
+2025-07-02 19:44:57,164 - INFO - [CPU] Before model loading
+2025-07-02 19:44:57,269 - INFO -   • CPU %: 0.3%
+2025-07-02 19:44:57,269 - INFO -   • Threads: 8
+2025-07-02 19:44:57,269 - INFO -   • Open files: 2
+2025-07-02 19:44:57,270 - INFO -   • Python allocated blocks: 1666527
+2025-07-02 19:44:57,270 - INFO - [GC] Before model loading
+2025-07-02 19:44:57,292 - INFO -   • Gen 0: 4 objects
+2025-07-02 19:44:57,295 - WARNING - Could not get GC info: object of type 'Process' has no len()
+2025-07-02 19:44:57,296 - INFO - --------------------------------------------------------------------------------
+2025-07-02 19:44:57,296 - INFO - Loading model: all-MiniLM-L6-v2
+2025-07-02 19:44:57,296 - INFO - Available memory before loading: 3348.38 MB
+2025-07-02 19:44:57,297 - INFO - Use pytorch device_name: mps
+2025-07-02 19:44:57,297 - INFO - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2025-07-02 19:44:58,683 - INFO - Use pytorch device_name: mps
+2025-07-02 19:44:58,683 - INFO - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2025-07-02 19:44:59,832 - INFO - Model loaded in 2.54 seconds
+2025-07-02 19:44:59,832 - INFO - Pre-computing benchmark task embeddings...
+2025-07-02 19:44:59,835 - INFO - [RESOURCE] Model Loading
+2025-07-02 19:44:59,835 - INFO -   • Duration: 2.6710 seconds
+2025-07-02 19:44:59,835 - INFO -   • Memory (RSS): 441.36MB -> 453.95MB (Δ+12.59MB)
+2025-07-02 19:44:59,835 - INFO -   • CPU Usage: 34.5% -> 19.4%
+2025-07-02 19:44:59,835 - INFO -   • Tracemalloc - Current: 0.67MB, Peak: 5.64MB
+2025-07-02 19:44:59,952 - INFO -   • GC Stats: [{'collections': 325, 'collected': 9476, 'uncollectable': 0}, {'collections': 29, 'collected': 712, 'uncollectable': 0}, {'collections': 6, 'collected': 7935, 'uncollectable': 0}]
+2025-07-02 19:44:59,952 - INFO - [MEMORY] Before MongoDB connection
+2025-07-02 19:44:59,952 - INFO -   • RSS: 453.95 MB
+2025-07-02 19:44:59,952 - INFO -   • VMS: 403803.02 MB
+2025-07-02 19:44:59,954 - INFO -   • USS: 319.86 MB
+2025-07-02 19:44:59,954 - INFO - [CPU] Before MongoDB connection
+2025-07-02 19:45:00,060 - INFO -   • CPU %: 0.0%
+2025-07-02 19:45:00,060 - INFO -   • Threads: 3
+2025-07-02 19:45:00,060 - INFO -   • Open files: 2
+2025-07-02 19:45:00,060 - INFO -   • Python allocated blocks: 1666363
+2025-07-02 19:45:00,060 - INFO - [GC] Before MongoDB connection
+2025-07-02 19:45:00,083 - INFO -   • Gen 0: 4 objects
+2025-07-02 19:45:00,086 - WARNING - Could not get GC info: object of type 'Process' has no len()
+2025-07-02 19:45:00,086 - INFO - --------------------------------------------------------------------------------
+2025-07-02 19:45:00,086 - INFO - Attempting MongoDB connection (attempt 1/3)
+2025-07-02 19:45:00,686 - INFO - Successfully connected to MongoDB at mongodb+srv://simarjotsingh5244:NUMotMgntP7AcNrQ@cluster0.nen0dzs.mongodb.net/
+2025-07-02 19:45:00,738 - INFO - MongoDB server version: 8.0.11
+2025-07-02 19:45:00,738 - INFO - MongoDB connections: 62
+2025-07-02 19:45:00,739 - INFO - [MEMORY] After MongoDB connection
+2025-07-02 19:45:00,739 - INFO -   • RSS: 454.36 MB
+2025-07-02 19:45:00,739 - INFO -   • VMS: 403915.45 MB
+2025-07-02 19:45:00,741 - INFO -   • USS: 320.27 MB
+2025-07-02 19:45:00,741 - INFO - [CPU] After MongoDB connection
+2025-07-02 19:45:00,846 - INFO -   • CPU %: 0.4%
+2025-07-02 19:45:00,847 - INFO -   • Threads: 10
+2025-07-02 19:45:00,847 - INFO -   • Open files: 2
+2025-07-02 19:45:00,849 - INFO -   • Python allocated blocks: 1667771
+2025-07-02 19:45:00,850 - INFO - [GC] After MongoDB connection
+2025-07-02 19:45:00,868 - INFO -   • Gen 0: 4 objects
+2025-07-02 19:45:00,871 - WARNING - Could not get GC info: object of type 'MongoClient' has no len()
+2025-07-02 19:45:00,872 - INFO - --------------------------------------------------------------------------------
+2025-07-02 19:45:00,872 - INFO - [RESOURCE] Database Connection
+2025-07-02 19:45:00,872 - INFO -   • Duration: 0.9200 seconds
+2025-07-02 19:45:00,872 - INFO -   • Memory (RSS): 453.95MB -> 458.48MB (Δ+4.53MB)
+2025-07-02 19:45:00,872 - INFO -   • CPU Usage: 21.3% -> 29.3%
+2025-07-02 19:45:00,872 - INFO -   • Tracemalloc - Current: 0.15MB, Peak: 3.30MB
+2025-07-02 19:45:00,989 - INFO -   • GC Stats: [{'collections': 325, 'collected': 9476, 'uncollectable': 0}, {'collections': 29, 'collected': 712, 'uncollectable': 0}, {'collections': 7, 'collected': 7945, 'uncollectable': 0}]
+2025-07-02 19:45:01,059 - INFO - Found tenant DBs: ['company_9jxwph8g', 'company_9txtcvbl', 'company_pyat1tbz', 'company_ry0iwbpw', 'test']
+2025-07-02 19:45:01,059 - INFO - Processing all documents in company_9jxwph8g.users...
+2025-07-02 19:45:01,147 - INFO - Ensured users index in company_9jxwph8g
+2025-07-02 19:45:01,147 - INFO - Starting to process documents in users...
+2025-07-02 19:45:06,726 - INFO - Bulk update completed: 5 documents modified in users
+2025-07-02 19:45:06,726 - INFO - Completed processing 3 documents
+2025-07-02 19:45:06,726 - INFO - Processing all documents in company_9txtcvbl.users...
+2025-07-02 19:45:06,805 - INFO - Ensured users index in company_9txtcvbl
+2025-07-02 19:45:06,805 - INFO - Starting to process documents in users...
+2025-07-02 19:45:06,855 - INFO - Completed processing 0 documents
+2025-07-02 19:45:06,855 - INFO - Processing all documents in company_pyat1tbz.users...
+2025-07-02 19:45:06,929 - INFO - Ensured users index in company_pyat1tbz
+2025-07-02 19:45:06,929 - INFO - Starting to process documents in users...
+2025-07-02 19:45:07,287 - INFO - Bulk update completed: 1 documents modified in users
+2025-07-02 19:45:07,287 - INFO - Completed processing 1 documents
+2025-07-02 19:45:07,287 - INFO - Processing all documents in company_ry0iwbpw.users...
+2025-07-02 19:45:07,363 - INFO - Ensured users index in company_ry0iwbpw
+2025-07-02 19:45:07,363 - INFO - Starting to process documents in users...
+2025-07-02 19:45:08,607 - INFO - Bulk update completed: 3 documents modified in users
+2025-07-02 19:45:08,607 - INFO - Completed processing 2 documents
+2025-07-02 19:45:08,608 - INFO - Processing all documents in test.users...
+2025-07-02 19:45:08,683 - INFO - Ensured users index in test
+2025-07-02 19:45:08,683 - INFO - Starting to process documents in users...
+2025-07-02 19:45:08,732 - INFO - Completed processing 0 documents
+2025-07-02 19:45:08,732 - INFO - Processing completed. Exiting.
+
+[2025-07-03T00:45:11.852Z] [SUCCESS] ✅ [1/4] Employee Utilization Analysis completed successfully in 27.3s {
+  "script": "employee_utilization_analyzer.py",
+  "duration": "27264ms",
+  "attempts": 1,
+  "startTime": "2025-07-03T00:44:44.588Z",
+  "endTime": "2025-07-03T00:45:11.852Z"
+}
+[2025-07-03T00:45:11.852Z] [INFO] ⏳ Waiting 5s before next script...
+[2025-07-03T00:45:16.854Z] [INFO] [RESOURCE] Memory: 3.97MB used, 4.81MB total, 34.73MB RSS | Load: 2.72, 2.00, 2.00
+[2025-07-03T00:45:16.855Z] [WARN] [WARNING] High memory usage: 82.5% of heap used
+[2025-07-03T00:45:16.856Z] [INFO] 
+📋 [2/4] Starting script: Attrition Score Calculation {
+  "script": "attrition_score.py",
+  "args": "",
+  "timeout": "3600s",
+  "maxRetries": 2,
+  "retryDelay": "15000ms"
+}
+[2025-07-03T00:45:16.857Z] [DEBUG] Executing script: attrition_score.py {
+  "args": [],
+  "pid": 99416,
+  "cwd": "/Users/sim/TestingPig",
+  "pythonPath": "python3",
+  "timeout": 3600000,
+  "maxRetries": 2
+}
+[2025-07-03T00:45:28.248Z] [INFO] Script completed successfully: attrition_score.py {
+  "duration": "11391ms",
+  "exitCode": 0,
+  "attempt": 1
+}
+[2025-07-03T00:45:28.248Z] [WARN] [attrition_score.py STDERR] 2025-07-02 19:45:21,521 - INFO - Starting Attrition Score Analyzer (Multi-Database Version)...
+2025-07-02 19:45:21,524 - INFO - MongoDB URI loaded: mongodb+srv://simarjotsingh5244:NUMotMgntP7AcNrQ@cluster0.nen0dzs.mongodb.net/
+2025-07-02 19:45:21,524 - INFO - Starting Attrition Score Analyzer (Multi-Database Version)...
+2025-07-02 19:45:21,524 - INFO - Connecting to MongoDB at mongodb+srv://simarjotsingh5244:NUMotMgntP7AcNrQ@cluster0.nen0dzs.mongodb.net/...
+2025-07-02 19:45:22,227 - INFO - MongoDB connection successful.
+2025-07-02 19:45:22,284 - INFO - Found 5 databases: company_9jxwph8g, company_9txtcvbl, company_pyat1tbz, company_ry0iwbpw, test
+2025-07-02 19:45:22,411 - INFO - Added database company_9jxwph8g to active databases
+2025-07-02 19:45:22,536 - INFO - Added database company_9txtcvbl to active databases
+2025-07-02 19:45:22,661 - INFO - Added database company_pyat1tbz to active databases
+2025-07-02 19:45:22,785 - INFO - Added database company_ry0iwbpw to active databases
+2025-07-02 19:45:22,909 - INFO - Added database test to active databases
+2025-07-02 19:45:22,909 - INFO - Active databases for processing: 5
+2025-07-02 19:45:22,910 - INFO - Loading sentence transformer model...
+2025-07-02 19:45:22,957 - INFO - Use pytorch device_name: mps
+2025-07-02 19:45:22,957 - INFO - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2025-07-02 19:45:25,057 - INFO - Model loaded in 2.15 seconds
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00,  3.81it/s]Batches: 100%|██████████| 1/1 [00:00<00:00,  3.81it/s]
+2025-07-02 19:45:25,345 - INFO - Initialized role vector index with 11 items
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|██████████| 1/1 [00:00<00:00,  6.99it/s]Batches: 100%|██████████| 1/1 [00:00<00:00,  6.98it/s]
+2025-07-02 19:45:25,490 - INFO - Initialized responsibility vector index with 3 items
+2025-07-02 19:45:25,549 - INFO - Found 5 databases: company_9jxwph8g, company_9txtcvbl, company_pyat1tbz, company_ry0iwbpw, test
+2025-07-02 19:45:25,549 - INFO - Active databases for processing: 5
+2025-07-02 19:45:25,550 - INFO - Processing documents in company_9jxwph8g database...
+2025-07-02 19:45:25,648 - INFO - Starting Attrition Score Analyzer (Multi-Database Version)...
+2025-07-02 19:45:25,651 - INFO - MongoDB URI loaded: mongodb+srv://simarjotsingh5244:NUMotMgntP7AcNrQ@cluster0.nen0dzs.mongodb.net/
+2025-07-02 19:45:25,705 - INFO - Processed 3/3 documents in company_9jxwph8g
+2025-07-02 19:45:25,959 - INFO - Completed processing 3 documents in company_9jxwph8g
+2025-07-02 19:45:25,959 - INFO - Processing documents in company_9txtcvbl database...
+2025-07-02 19:45:26,007 - INFO - No documents found in company_9txtcvbl
+2025-07-02 19:45:26,007 - INFO - Processing documents in company_pyat1tbz database...
+2025-07-02 19:45:26,155 - INFO - Processed 1/1 documents in company_pyat1tbz
+2025-07-02 19:45:26,277 - INFO - Completed processing 1 documents in company_pyat1tbz
+2025-07-02 19:45:26,277 - INFO - Processing documents in company_ry0iwbpw database...
+2025-07-02 19:45:26,856 - INFO - Processed 2/2 documents in company_ry0iwbpw
+2025-07-02 19:45:26,981 - INFO - Completed processing 2 documents in company_ry0iwbpw
+2025-07-02 19:45:26,981 - INFO - Processing documents in test database...
+2025-07-02 19:45:27,030 - INFO - No documents found in test
+2025-07-02 19:45:27,030 - INFO - Total documents processed across all databases: 6
+2025-07-02 19:45:27,030 - INFO - Initial processing completed. Exiting.
+
+[2025-07-03T00:45:28.249Z] [SUCCESS] ✅ [2/4] Attrition Score Calculation completed successfully in 11.4s {
+  "script": "attrition_score.py",
+  "duration": "11393ms",
+  "attempts": 1,
+  "startTime": "2025-07-03T00:45:16.857Z",
+  "endTime": "2025-07-03T00:45:28.249Z"
+}
+[2025-07-03T00:45:28.249Z] [INFO] ⏳ Waiting 5s before next script...
+[2025-07-03T00:45:33.250Z] [INFO] [RESOURCE] Memory: 4.17MB used, 4.81MB total, 32.86MB RSS | Load: 3.50, 2.19, 2.07
+[2025-07-03T00:45:33.251Z] [WARN] [WARNING] High memory usage: 86.6% of heap used
+[2025-07-03T00:45:33.251Z] [INFO] 
+📋 [3/4] Starting script: Successor Identification {
+  "script": "successor_identification.py",
+  "args": "--refresh --batch-size=10",
+  "timeout": "2700s",
+  "maxRetries": 1,
+  "retryDelay": "20000ms"
+}
+[2025-07-03T00:45:33.252Z] [DEBUG] Executing script: successor_identification.py {
+  "args": [
+    "--refresh",
+    "--batch-size=10"
+  ],
+  "pid": 99416,
+  "cwd": "/Users/sim/TestingPig",
+  "pythonPath": "python3",
+  "timeout": 2700000,
+  "maxRetries": 1
+}
+[2025-07-03T00:45:51.692Z] [INFO] Script completed successfully: successor_identification.py {
+  "duration": "18441ms",
+  "exitCode": 0,
+  "attempt": 1
+}
+[2025-07-03T00:45:51.693Z] [DEBUG] [successor_identification.py OUTPUT] Refreshed successor analysis for {'status': 'completed', 'total_processed': 6, 'total_errors': 0, 'duration_seconds': 3.4288110733032227, 'processing_rate': 1.7498776898838477} employees across all databases
+
+[2025-07-03T00:45:51.693Z] [WARN] [successor_identification.py STDERR] 2025-07-02 19:45:37,992 - INFO - ================================================================================
+2025-07-02 19:45:37,993 - INFO - Successor Identification System starting up...
+2025-07-02 19:45:37,993 - INFO - Python version: 3.13.5 (main, Jun 11 2025, 15:36:57) [Clang 17.0.0 (clang-1700.0.13.3)]
+2025-07-02 19:45:38,027 - INFO - Platform: macOS-15.5-arm64-arm-64bit-Mach-O
+2025-07-02 19:45:38,027 - INFO - Process ID: 99466
+2025-07-02 19:45:38,287 - INFO - [Memory] Initial memory usage | RSS: 398.81MB | VMS: 402555.38MB | CPU: 0.1% | GC Objects: 375,776
+2025-07-02 19:45:38,294 - INFO - MongoDB URI loaded: mongodb+srv://simarjotsingh5244:NUMotMgntP7AcNrQ@cluster0.nen0dzs.mongodb.net/
+2025-07-02 19:45:38,560 - INFO - [Memory] Application startup | RSS: 398.88MB | VMS: 402555.38MB | CPU: 0.1% | GC Objects: 375,796
+2025-07-02 19:45:38,812 - INFO - [Memory] Before database connection | RSS: 401.03MB | VMS: 402555.38MB | CPU: 0.1% | GC Objects: 375,832
+2025-07-02 19:45:38,812 - INFO - [Resource] Starting connect_db...
+2025-07-02 19:45:39,038 - INFO - [Memory] Before connect_db | RSS: 403.09MB | VMS: 402555.38MB | CPU: 0.0% | GC Objects: 375,832
+2025-07-02 19:45:39,039 - INFO - Connecting to MongoDB at mongodb+srv://simarjotsingh5244:NUMotMgntP7AcNrQ@cluster0.nen0dzs.mongodb.net/... (attempt 1/3)
+2025-07-02 19:45:39,697 - INFO - MongoDB connection successful.
+2025-07-02 19:45:39,754 - INFO - Found 6 databases: company_9jxwph8g, company_9txtcvbl, company_pyat1tbz, company_ry0iwbpw, org_sim_db, test
+2025-07-02 19:45:39,888 - INFO - Added database company_9jxwph8g to active databases
+2025-07-02 19:45:40,019 - INFO - Added database company_9txtcvbl to active databases
+2025-07-02 19:45:40,153 - INFO - Added database company_pyat1tbz to active databases
+2025-07-02 19:45:40,286 - INFO - Added database company_ry0iwbpw to active databases
+2025-07-02 19:45:40,336 - INFO - Skipping database org_sim_db: No 'users' collection
+2025-07-02 19:45:40,463 - INFO - Added database test to active databases
+2025-07-02 19:45:40,463 - INFO - Active databases for processing: 5
+2025-07-02 19:45:40,699 - INFO - [Memory] After connect_db (1.42s) | RSS: 406.86MB | VMS: 402670.14MB | CPU: 0.1% | GC Objects: 381,506
+2025-07-02 19:45:40,919 - INFO - [Memory] After database connection | RSS: 395.22MB | VMS: 402670.14MB | CPU: 0.1% | GC Objects: 381,494
+2025-07-02 19:45:41,142 - INFO - [Memory] Before model loading | RSS: 394.19MB | VMS: 402670.14MB | CPU: 0.0% | GC Objects: 381,494
+2025-07-02 19:45:41,142 - INFO - [Resource] Starting load_model...
+2025-07-02 19:45:41,358 - INFO - [Memory] Before load_model | RSS: 394.19MB | VMS: 402670.14MB | CPU: 0.1% | GC Objects: 381,494
+2025-07-02 19:45:41,358 - INFO - Loading sentence transformer model...
+2025-07-02 19:45:41,602 - INFO - [Memory] Before model loading | RSS: 393.56MB | VMS: 402670.14MB | CPU: 0.2% | GC Objects: 381,494
+2025-07-02 19:45:41,625 - INFO - Use pytorch device_name: mps
+2025-07-02 19:45:41,625 - INFO - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2025-07-02 19:45:45,168 - INFO - [Memory] After model loading (3.57s) | RSS: 386.61MB | VMS: 403871.56MB | CPU: 0.1% | GC Objects: 398,200
+2025-07-02 19:45:45,497 - INFO - [Memory] After GC | RSS: 397.88MB | VMS: 403871.56MB | CPU: 0.1% | GC Objects: 398,200
+2025-07-02 19:45:45,728 - INFO - [Memory] After load_model (4.14s) | RSS: 397.89MB | VMS: 403871.55MB | CPU: 0.1% | GC Objects: 398,200
+2025-07-02 19:45:45,959 - INFO - [Memory] After model loading | RSS: 401.09MB | VMS: 403871.55MB | CPU: 0.1% | GC Objects: 398,200
+2025-07-02 19:45:45,959 - INFO - [Resource] Starting refresh_successor_analysis...
+2025-07-02 19:45:46,253 - INFO - [Memory] Before refresh_successor_analysis | RSS: 403.84MB | VMS: 403871.55MB | CPU: 0.2% | GC Objects: 398,200
+2025-07-02 19:45:46,486 - INFO - [Memory] Starting refresh_successor_analysis | RSS: 406.7MB | VMS: 403871.55MB | CPU: 0.1% | GC Objects: 398,200
+2025-07-02 19:45:46,543 - INFO - Found 6 databases: company_9jxwph8g, company_9txtcvbl, company_pyat1tbz, company_ry0iwbpw, org_sim_db, test
+2025-07-02 19:45:46,593 - INFO - Skipping database org_sim_db: No 'users' collection
+2025-07-02 19:45:46,594 - INFO - Active databases for processing: 5
+2025-07-02 19:45:46,594 - INFO - Processing successor analysis in company_9jxwph8g database...
+2025-07-02 19:45:46,848 - INFO - [Memory] Starting processing database: company_9jxwph8g | RSS: 411.84MB | VMS: 403871.55MB | CPU: 0.1% | GC Objects: 398,202
+2025-07-02 19:45:46,901 - INFO - Processing 3 employees in database: company_9jxwph8g
+2025-07-02 19:45:47,104 - WARNING - Employee with email a@testing2.com not found in database company_9jxwph8g
+2025-07-02 19:45:47,381 - INFO - [Memory] company_9jxwph8g: 1/3 (33.3%) - 4.9 docs/sec | RSS: 413.02MB | VMS: 403865.55MB | CPU: 0.1% | GC Objects: 398,307
+2025-07-02 19:45:47,434 - WARNING - Employee with email user1@testing2.com not found in database company_9jxwph8g
+2025-07-02 19:45:47,482 - WARNING - Employee with email a@testing32.com not found in database company_9jxwph8g
+2025-07-02 19:45:47,482 - INFO - Completed processing 3 employees in company_9jxwph8g in 0.6 seconds
+2025-07-02 19:45:47,483 - INFO - Processing successor analysis in company_9txtcvbl database...
+2025-07-02 19:45:47,764 - INFO - [Memory] Starting processing database: company_9txtcvbl | RSS: 409.06MB | VMS: 403865.55MB | CPU: 0.3% | GC Objects: 398,237
+2025-07-02 19:45:47,813 - INFO - Processing 0 employees in database: company_9txtcvbl
+2025-07-02 19:45:47,862 - INFO - Completed processing 0 employees in company_9txtcvbl in 0.0 seconds
+2025-07-02 19:45:47,862 - INFO - Processing successor analysis in company_pyat1tbz database...
+2025-07-02 19:45:48,119 - INFO - [Memory] Starting processing database: company_pyat1tbz | RSS: 412.12MB | VMS: 403865.55MB | CPU: 0.2% | GC Objects: 398,237
+2025-07-02 19:45:48,168 - INFO - Processing 1 employees in database: company_pyat1tbz
+2025-07-02 19:45:48,268 - WARNING - Employee with email kanthony010@gmail.com not found in database company_pyat1tbz
+2025-07-02 19:45:48,578 - INFO - [Memory] company_pyat1tbz: 1/1 (100.0%) - 10.0 docs/sec | RSS: 414.98MB | VMS: 403865.55MB | CPU: 0.4% | GC Objects: 398,219
+2025-07-02 19:45:48,578 - INFO - Completed processing 1 employees in company_pyat1tbz in 0.4 seconds
+2025-07-02 19:45:48,578 - INFO - Processing successor analysis in company_ry0iwbpw database...
+2025-07-02 19:45:48,920 - INFO - [Memory] Starting processing database: company_ry0iwbpw | RSS: 418.06MB | VMS: 403865.55MB | CPU: 0.4% | GC Objects: 398,215
+2025-07-02 19:45:48,970 - INFO - Processing 2 employees in database: company_ry0iwbpw
+2025-07-02 19:45:49,069 - WARNING - Employee with email user1@testingdemo.com not found in database company_ry0iwbpw
+2025-07-02 19:45:49,345 - INFO - [Memory] company_ry0iwbpw: 1/2 (50.0%) - 10.1 docs/sec | RSS: 420.78MB | VMS: 403865.55MB | CPU: 0.2% | GC Objects: 398,244
+2025-07-02 19:45:49,395 - WARNING - Employee with email user2@testingdemo.com not found in database company_ry0iwbpw
+2025-07-02 19:45:49,395 - INFO - Completed processing 2 employees in company_ry0iwbpw in 0.4 seconds
+2025-07-02 19:45:49,395 - INFO - Processing successor analysis in test database...
+2025-07-02 19:45:49,817 - INFO - [Memory] Starting processing database: test | RSS: 420.78MB | VMS: 403865.55MB | CPU: 2.8% | GC Objects: 398,213
+2025-07-02 19:45:49,866 - INFO - Processing 0 employees in database: test
+2025-07-02 19:45:49,915 - INFO - Completed processing 0 employees in test in 0.0 seconds
+2025-07-02 19:45:49,915 - INFO - Completed refresh_successor_analysis in 3.4 seconds. Processed 6 employees with 0 errors.
+2025-07-02 19:45:50,471 - INFO - [Memory] Completed refresh_successor_analysis | RSS: 417.98MB | VMS: 403865.0MB | CPU: 2.3% | GC Objects: 398,211
+2025-07-02 19:45:50,768 - INFO - [Memory] After refresh_successor_analysis (4.22s) | RSS: 402.86MB | VMS: 403865.0MB | CPU: 0.2% | GC Objects: 398,191
+
+[2025-07-03T00:45:51.693Z] [SUCCESS] ✅ [3/4] Successor Identification completed successfully in 18.4s {
+  "script": "successor_identification.py",
+  "duration": "18442ms",
+  "attempts": 1,
+  "startTime": "2025-07-03T00:45:33.251Z",
+  "endTime": "2025-07-03T00:45:51.693Z"
+}
+[2025-07-03T00:45:51.693Z] [INFO] ⏳ Waiting 5s before next script...
+[2025-07-03T00:45:56.694Z] [INFO] [RESOURCE] Memory: 4.42MB used, 4.81MB total, 33.59MB RSS | Load: 3.70, 2.35, 2.13
+[2025-07-03T00:45:56.695Z] [WARN] [WARNING] High memory usage: 91.9% of heap used
+[2025-07-03T00:45:56.696Z] [WARN] [WARNING] Critical memory usage - consider increasing Node.js memory limit
+[2025-07-03T00:45:56.696Z] [INFO] 
+📋 [4/4] Starting script: Successor Finder {
+  "script": "successor_finder.py",
+  "args": "--refresh-all --batch-size=10 --verbose",
+  "timeout": "3600s",
+  "maxRetries": 2,
+  "retryDelay": "10000ms"
+}
+[2025-07-03T00:45:56.697Z] [DEBUG] Executing script: successor_finder.py {
+  "args": [
+    "--refresh-all",
+    "--batch-size=10",
+    "--verbose"
+  ],
+  "pid": 99416,
+  "cwd": "/Users/sim/TestingPig",
+  "pythonPath": "python3",
+  "timeout": 3600000,
+  "maxRetries": 2
+}
+[2025-07-03T00:46:02.434Z] [INFO] Script completed successfully: successor_finder.py {
+  "duration": "5737ms",
+  "exitCode": 0,
+  "attempt": 1
+}
+[2025-07-03T00:46:02.435Z] [WARN] [successor_finder.py STDERR] 2025-07-02 19:46:01,832 - INFO - Successor Finder starting up...
+2025-07-02 19:46:01,834 - INFO - MongoDB URI loaded: mongodb+srv://simarjotsingh5244:NUMotMgntP7AcNrQ@cluster0.nen0dzs.mongodb.net/
+
+[2025-07-03T00:46:02.435Z] [SUCCESS] ✅ [4/4] Successor Finder completed successfully in 5.7s {
+  "script": "successor_finder.py",
+  "duration": "5739ms",
+  "attempts": 1,
+  "startTime": "2025-07-03T00:45:56.697Z",
+  "endTime": "2025-07-03T00:46:02.435Z"
+}
+[2025-07-03T00:46:02.435Z] [INFO] ⏳ Waiting 5s before next script...
+[2025-07-03T00:46:07.436Z] [INFO] [RESOURCE] Memory: 4.02MB used, 5.06MB total, 34.42MB RSS | Load: 12.14, 4.15, 2.77
+[2025-07-03T00:46:07.437Z] [WARN] [WARNING] High memory usage: 79.3% of heap used
+[2025-07-03T00:46:07.439Z] [INFO] 
+📊 ====== DATA UPDATE SUMMARY ======
+[2025-07-03T00:46:07.439Z] [INFO] 📅 Started: 2025-07-03T00:44:44.588Z
+[2025-07-03T00:46:07.439Z] [INFO] 🏁 Finished: 2025-07-03T00:46:07.438Z
+[2025-07-03T00:46:07.440Z] [INFO] ⏱️  Total Duration: 1.4 minutes
+[2025-07-03T00:46:07.440Z] [INFO] 📋 Scripts: 4 total, 4 successful, 0 failed
+[2025-07-03T00:46:07.440Z] [INFO] 📈 Success Rate: 100.0%
+[2025-07-03T00:46:07.440Z] [INFO] 
+📋 SCRIPT EXECUTION STATUS:
+[2025-07-03T00:46:07.445Z] [INFO] 
+💾 SYSTEM RESOURCE USAGE:
+[2025-07-03T00:46:07.446Z] [INFO] Memory: 4.12MB used / 5.06MB total
+[2025-07-03T00:46:07.446Z] [INFO] RSS: 35.31MB
+[2025-07-03T00:46:07.446Z] [INFO] Load: 12.14, 4.15, 2.77
+[2025-07-03T00:46:07.447Z] [SUCCESS] 
+🎉 ALL DATA UPDATES COMPLETED SUCCESSFULLY!
+[2025-07-03T00:46:07.447Z] [INFO] [RESOURCE] Memory: 4.14MB used, 5.06MB total, 35.34MB RSS | Load: 12.14, 4.15, 2.77
+[2025-07-03T00:46:07.448Z] [WARN] [WARNING] High memory usage: 81.7% of heap used
+[2025-07-03T00:46:07.448Z] [INFO] Initial update completed. Next update in 1440 minutes.
