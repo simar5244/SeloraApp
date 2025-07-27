@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { FiArrowLeft, FiRefreshCw, FiAlertTriangle, FiCheckCircle, FiLock } from 'react-icons/fi';
 import Link from 'next/link';
 import { UserRole, Permission, hasPermission } from '@/utils/roles';
+import { IntegrationTourLauncher } from '@/components/tour/IntegrationTourLauncher';
 
 interface ERPConnection {
   _id: string;
@@ -339,6 +340,8 @@ export default function EmployeesERPIntegrationPage() {
           </div>
         </div>
       )}
+
+      <IntegrationTourLauncher />
     </div>
   );
-} 
+}

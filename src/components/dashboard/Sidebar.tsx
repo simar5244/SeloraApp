@@ -6,7 +6,7 @@ import {
   Home, Users, LayoutGrid, Search, Coins, UserCog, Camera,
   User, Settings, LogOut, X, Menu, ChevronLeft, ChevronRight,
   LineChart, Database, Building2, Shield, MessageSquare, ListChecks, Briefcase,
-  ClipboardList, Plug, FileText, BarChart2
+  ClipboardList, Plug, FileText, BarChart2, Building, Target
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ROUTES, getUserAccessibleRoutes, hasRouteAccess } from '@/lib/permissions';
@@ -65,8 +65,10 @@ export default function Sidebar({ user, isOpen, toggleSidebar }: SidebarProps) {
     { name: 'Org AI', href: ROUTES.WEB_QUERY, icon: <Database className="w-5 h-5" />, order: 8 },
     { name: 'Report Generation', href: ROUTES.REPORT_GENERATION, icon: <FileText className="w-5 h-5" />, order: 9 },
     { name: 'User Management', href: ROUTES.USER_MANAGEMENT, icon: <Users className="w-5 h-5" />, order: 10 },
-    { name: 'User Approvals', href: ROUTES.USER_APPROVALS, icon: <Shield className="w-5 h-5" />, order: 11 },
-    { name: 'Platform Settings', href: ROUTES.PLATFORM_SETTINGS, icon: <Settings className="w-5 h-5" />, order: 12 },
+    { name: 'Department Management', href: ROUTES.DEPARTMENT_MANAGEMENT, icon: <Building className="w-5 h-5" />, order: 11 },
+    { name: 'Goals', href: ROUTES.GOALS, icon: <Target className="w-5 h-5" />, order: 12 },
+    { name: 'User Approvals', href: ROUTES.USER_APPROVALS, icon: <Shield className="w-5 h-5" />, order: 13 },
+    { name: 'Platform Settings', href: ROUTES.PLATFORM_SETTINGS, icon: <Settings className="w-5 h-5" />, order: 14 },
   ];
 
   // Get navigation items based on user role

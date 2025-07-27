@@ -6,11 +6,24 @@ import type { TourProps } from 'antd';
 
 const ProjectsTour = ({ open, onClose }: { open: boolean; onClose: () => void }) => {
   const [mounted, setMounted] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
 
   // Wait for DOM to be ready
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  useEffect(() => {
+    if (open) {
+      // Small delay before showing tour for fade-in effect
+      const timer = setTimeout(() => {
+        setIsVisible(true);
+      }, 100);
+      return () => clearTimeout(timer);
+    } else {
+      setIsVisible(false);
+    }
+  }, [open]);
 
   // Handle background click and escape key to close
   useEffect(() => {
@@ -63,15 +76,23 @@ const ProjectsTour = ({ open, onClose }: { open: boolean; onClose: () => void })
 
   return (
     <>
-      <Tour 
-        open={open} 
-        onClose={onClose} 
+      <Tour
+        open={open && isVisible}
+        onClose={onClose}
         steps={steps}
         type="primary"
         arrow={true}
-        rootClassName="classic-projects-tour"
+        rootClassName={`classic-projects-tour ${isVisible ? 'tour-fade-in' : ''}`}
         mask={{
-          color: 'rgba(0, 0, 0, 0.3)',
+          color: 'rgba(0, 0, 0, 0.5)',
+          style: {
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: 1000,
+          }
         }}
         onFinish={onClose}
         scrollIntoViewOptions={{
@@ -91,18 +112,18 @@ const ProjectsTour = ({ open, onClose }: { open: boolean; onClose: () => void })
         }
         
         .classic-projects-tour .ant-tour {
-          max-width: 260px;
-          min-width: 240px;
+          max-width: 220px;
+          min-width: 200px;
           border-radius: 12px;
           box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
           border: 1px solid #e5e7eb;
           background: white;
           overflow: hidden;
         }
-        
+
         .classic-projects-tour .ant-tour-inner {
           font-size: 14px;
-          padding: 16px;
+          padding: 12px;
           background: white !important;
           border-radius: 12px;
         }
@@ -133,10 +154,10 @@ const ProjectsTour = ({ open, onClose }: { open: boolean; onClose: () => void })
         .classic-projects-tour .ant-btn {
           border-radius: 6px;
           font-weight: 600;
-          height: 36px;
-          padding: 0 16px;
+          height: 32px;
+          padding: 0 12px;
           transition: all 0.2s ease;
-          font-size: 13px;
+          font-size: 12px;
         }
         
         .classic-projects-tour .ant-btn-primary {
@@ -194,27 +215,79 @@ const ProjectsTour = ({ open, onClose }: { open: boolean; onClose: () => void })
           border: 1px solid #e5e7eb;
         }
 
-        /* Blur everything in the background */
-        .classic-projects-tour.ant-tour-open body > *:not(.ant-tour):not(.ant-tour-mask) {
-          filter: blur(3px);
-          transition: filter 0.3s ease;
+        /* Ensure the mask covers everything including sidebar */
+        .classic-projects-tour .ant-tour-mask {
+          position: fixed !important;
+          top: 0 !important;
+          left: 0 !important;
+          right: 0 !important;
+          bottom: 0 !important;
+          width: 100vw !important;
+          height: 100vh !important;
+          z-index: 1050 !important;
+          background-color: rgba(0, 0, 0, 0.5) !important;
         }
 
-        /* Keep the focused element completely sharp */
+        /* Ensure tour content is above the mask and sidebar */
+        .classic-projects-tour .ant-tour {
+          z-index: 1060 !important;
+        }
+
+        /* Make sure highlighted elements are visible above everything */
         .classic-projects-tour [data-tour] {
-          filter: none !important;
           position: relative;
-          z-index: 1000;
+          z-index: 1070 !important;
         }
 
-        /* When tour is active, blur all main content except focused element */
-        .classic-projects-tour.ant-tour-open [data-tour]:not([data-tour-active]) {
-          filter: blur(3px);
+        /* Ensure the mask covers the sidebar specifically */
+        .classic-projects-tour.ant-tour-open ~ * .sidebar,
+        .classic-projects-tour.ant-tour-open ~ * [class*="sidebar"],
+        .classic-projects-tour.ant-tour-open ~ * nav {
+          z-index: 1040 !important;
         }
 
-        .classic-projects-tour.ant-tour-open [data-tour-active] {
-          filter: none !important;
-          z-index: 1001 !important;
+        /* Additional mask overlay to ensure complete coverage */
+        .classic-projects-tour.ant-tour-open::before {
+          content: '';
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          width: 100vw;
+          height: 100vh;
+          background-color: rgba(0, 0, 0, 0.5);
+          z-index: 1049;
+          pointer-events: none;
+        }
+
+        /* Tour fade-in animation */
+        .classic-projects-tour.tour-fade-in .ant-tour {
+          animation: tourFadeIn 0.5s ease-out forwards;
+        }
+
+        .classic-projects-tour.tour-fade-in .ant-tour-mask {
+          animation: maskFadeIn 0.5s ease-out forwards;
+        }
+
+        @keyframes tourFadeIn {
+          from {
+            opacity: 0;
+            transform: scale(0.95);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1);
+          }
+        }
+
+        @keyframes maskFadeIn {
+          from {
+            opacity: 0;
+          }
+          to {
+            opacity: 1;
+          }
         }
       `}</style>
     </>

@@ -6,6 +6,7 @@ export interface IUser extends Document {
   username: string;
   email: string;
   jobTitle?: string;
+  department?: string;
   jobResponsibilities?: { duty: string; hours: number }[];
   password: string;
   firstName?: string;
@@ -34,6 +35,16 @@ export interface IUser extends Document {
   comparePassword: (candidatePassword: string) => Promise<boolean>;
   toolsProficient?: string;
   notificationPreferences?: object;
+  tutorialPreferences?: {
+    enabled: boolean;
+    completedTutorials: string[];
+    lastUpdated: Date;
+  };
+  // Profile approval fields for department management
+  profileApproved?: boolean;
+  profileApprovedBy?: mongoose.Types.ObjectId;
+  profileApprovedAt?: Date;
+  profileApprovalStatus?: 'pending' | 'approved' | 'rejected';
   // Employment details
   salary?: string;
   totalduration?: string;
@@ -64,6 +75,11 @@ export interface IUser extends Document {
 
 const UserSchema: Schema = new Schema({
   jobTitle: {
+    type: String,
+    trim: true,
+    default: ''
+  },
+  department: {
     type: String,
     trim: true,
     default: ''
@@ -218,6 +234,19 @@ const UserSchema: Schema = new Schema({
   notificationPreferences: {
     type: Object
   },
+  tutorialPreferences: {
+    enabled: {
+      type: Boolean,
+      default: true
+    },
+    completedTutorials: [{
+      type: String
+    }],
+    lastUpdated: {
+      type: Date,
+      default: Date.now
+    }
+  },
   // Feedback metrics
   feedbackMetrics: {
     given: {
@@ -236,6 +265,25 @@ const UserSchema: Schema = new Schema({
   },
   position: { type: String },
   responsibilities: { type: [String] },
+  // Profile approval tracking for department management
+  profileApproved: {
+    type: Boolean,
+    default: false
+  },
+  profileApprovedBy: {
+    type: Schema.Types.ObjectId,
+    ref: 'User',
+    required: false // Optional field
+  },
+  profileApprovedAt: {
+    type: Date,
+    required: false // Optional field
+  },
+  profileApprovalStatus: {
+    type: String,
+    enum: ['pending', 'approved', 'rejected'],
+    default: 'pending'
+  },
 }, {
   timestamps: true
 });

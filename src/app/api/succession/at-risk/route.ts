@@ -32,10 +32,10 @@ export async function GET(req: NextRequest) {
       console.warn('Cloud MongoDB connection failed, falling back to local:', error);
       const localClient = new MongoClient(process.env.MONGODB_LOCAL_URI || 'mongodb://127.0.0.1:27017');
       await localClient.connect();
-      return handleRequest(localClient, companyCode);
+      return handleRequest(localClient, companyCode, user.email, user.role);
     }
-    
-    return await handleRequest(client, companyCode);
+
+    return await handleRequest(client, companyCode, user.email, user.role);
   } catch (error) {
     console.error('Error retrieving at-risk employees:', error);
     return NextResponse.json(
@@ -50,14 +50,31 @@ export async function GET(req: NextRequest) {
 /**
  * Handles the core request logic with the provided MongoDB client
  */
-async function handleRequest(client: MongoClient, companyCode: string) {
+async function handleRequest(client: MongoClient, companyCode: string, userEmail?: string, userRole?: string) {
   try {
     console.log('Connected to MongoDB for at-risk employees search');
-    
+
     // Only use company-specific database
     const dbName = `company_${companyCode.toLowerCase()}`;
-    
+
     let atRiskEmployees: EmployeeDocument[] = [];
+    let currentUserDepartment: string | null = null;
+
+    // Get current user's department for filtering (unless admin)
+    if (userEmail && userRole !== 'admin') {
+      try {
+        const db = client.db(dbName);
+        const currentUser = await db.collection(USERS_COLLECTION)
+          .findOne({ email: userEmail });
+
+        if (currentUser?.department) {
+          currentUserDepartment = currentUser.department;
+          console.log(`Current user department: ${currentUserDepartment}`);
+        }
+      } catch (error) {
+        console.error('Error fetching current user department:', error);
+      }
+    }
     
     try {
       const db = client.db(dbName);
@@ -69,10 +86,18 @@ async function handleRequest(client: MongoClient, companyCode: string) {
       if (await db.listCollections({ name: collectionName }).hasNext()) {
         console.log(`Checking ${dbName}.${collectionName} for at-risk employees`);
         
-        // Find all employees regardless of attrition assessment first
-        // We'll sort and filter properly after processing
+        // Build query with department filter if needed
+        let query: any = {};
+
+        // Add department filter for non-admin users
+        if (currentUserDepartment) {
+          query.department = { $regex: new RegExp(`^${currentUserDepartment}$`, 'i') };
+          console.log(`Filtering by department: ${currentUserDepartment}`);
+        }
+
+        // Find employees with department filtering
         const allEmployees = await db.collection(collectionName)
-          .find({})
+          .find(query)
           .toArray() as EmployeeDocument[];
         
         console.log(`Found ${allEmployees.length} employees in ${dbName}.${collectionName}`);

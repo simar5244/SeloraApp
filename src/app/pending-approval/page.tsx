@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { FiClock, FiLogOut, FiArrowLeft } from 'react-icons/fi';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
+import { initializeFirstTimeVisitTracking } from '@/utils/tutorialSettings';
 
 export default function PendingApprovalPage() {
   const router = useRouter();
@@ -66,6 +67,13 @@ export default function PendingApprovalPage() {
             // If active, redirect to dashboard with full page reload
             if (data.status === 'active') {
               console.log('User is active, redirecting to dashboard');
+
+              // Initialize first-time visit tracking for new account
+              if (data.user && data.user.createdAt) {
+                initializeFirstTimeVisitTracking(data.user.createdAt);
+                console.log('Initialized first-time visit tracking for new account');
+              }
+
               window.location.href = '/dashboard';
               return;
             }
@@ -128,6 +136,13 @@ export default function PendingApprovalPage() {
               // If active, redirect to dashboard with full page reload
               if (data.status === 'active') {
                 console.log('User is active, redirecting to dashboard');
+
+                // Initialize first-time visit tracking for new account
+                if (data.user && data.user.createdAt) {
+                  initializeFirstTimeVisitTracking(data.user.createdAt);
+                  console.log('Initialized first-time visit tracking for new account');
+                }
+
                 window.location.href = '/dashboard';
                 return;
               }

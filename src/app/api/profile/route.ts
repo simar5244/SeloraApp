@@ -193,6 +193,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       companyCode: userObj.companyCode,
       status: userObj.status,
       jobTitle: userObj.jobTitle || "",
+      department: userObj.department || "",
       jobResponsibilities: userObj.jobResponsibilities || [],
       toolsProficient: userObj.toolsProficient || "",
       salary: userObj.salary || "",

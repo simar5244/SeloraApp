@@ -102,7 +102,11 @@ export async function PATCH(request: NextRequest) {
     if (updateData.jobTitle !== undefined) {
       profileUpdate.jobTitle = updateData.jobTitle;
     }
-    
+
+    if (updateData.department !== undefined) {
+      profileUpdate.department = updateData.department;
+    }
+
     if (updateData.jobResponsibilities !== undefined) {
       profileUpdate.jobResponsibilities = updateData.jobResponsibilities;
     }
@@ -167,6 +171,7 @@ export async function PATCH(request: NextRequest) {
           { email: updatedUser.email },
           { $set: {
             jobTitle: profileUpdate.jobTitle,
+            department: profileUpdate.department,
             jobResponsibilities: profileUpdate.jobResponsibilities,
             toolsProficient: profileUpdate.toolsProficient,
             salary: profileUpdate.salary,

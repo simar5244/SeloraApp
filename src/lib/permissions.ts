@@ -26,6 +26,8 @@ export const ROUTES = {
   USER_MANAGEMENT: '/dashboard/user-management',
   USER_APPROVALS: '/dashboard/admin/approvals',
   PLATFORM_SETTINGS: '/dashboard/superadmin',
+  DEPARTMENT_MANAGEMENT: '/dashboard/department-management',
+  GOALS: '/dashboard/goals',
 };
 
 // Define route access by role
@@ -61,6 +63,8 @@ export const ROLE_PERMISSIONS: Record<UserRole, string[]> = {
     ROUTES.EVALUATION_METRICS,
     ROUTES.WEB_QUERY,
     ROUTES.REPORT_GENERATION,
+    ROUTES.DEPARTMENT_MANAGEMENT,
+    ROUTES.GOALS,
     ROUTES.PROFILE,
   ],
   top_management_tier_2: [
@@ -73,6 +77,8 @@ export const ROLE_PERMISSIONS: Record<UserRole, string[]> = {
     ROUTES.EVALUATION_METRICS,
     ROUTES.WEB_QUERY,
     ROUTES.REPORT_GENERATION,
+    ROUTES.DEPARTMENT_MANAGEMENT,
+    ROUTES.GOALS,
     ROUTES.PROFILE,
   ],
   top_management_tier_3: [
@@ -85,6 +91,8 @@ export const ROLE_PERMISSIONS: Record<UserRole, string[]> = {
     ROUTES.EVALUATION_METRICS,
     ROUTES.WEB_QUERY,
     ROUTES.REPORT_GENERATION,
+    ROUTES.DEPARTMENT_MANAGEMENT,
+    ROUTES.GOALS,
     ROUTES.PROFILE,
   ],
   
@@ -100,6 +108,8 @@ export const ROLE_PERMISSIONS: Record<UserRole, string[]> = {
     ROUTES.WEB_QUERY,
     ROUTES.REPORT_GENERATION,
     ROUTES.USER_MANAGEMENT,
+    ROUTES.DEPARTMENT_MANAGEMENT,
+    ROUTES.GOALS,
     ROUTES.BILLING,
     ROUTES.PROFILE,
   ],

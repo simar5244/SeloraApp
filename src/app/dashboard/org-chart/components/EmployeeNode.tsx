@@ -400,9 +400,10 @@ const EmployeeNode = ({ data, isConnectable }: NodeProps<EmployeeNodeData>) => {
         />
       </div>
 
-      <div 
+      <div
         className={`bg-white rounded-md shadow-md p-3 relative flex flex-col ${nodeBorderClass}`}
         style={cardStyles}
+        data-tour="employee-node"
       >
         {/* Role type indicator (top bar) */}
         <div 

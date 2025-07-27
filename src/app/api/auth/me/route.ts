@@ -128,9 +128,34 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    // 6. Return the user data
-    console.log(`[GET /api/auth/me] Successfully fetched user: ${user.email}`);
-    return NextResponse.json(user);
+    // 6. Enhance user with department info from merged_output
+    try {
+      const client = new MongoClient(uri);
+      await client.connect();
+
+      const dbToUse = companyCode ? `company_${companyCode}` : 'org_sim_db';
+      const db = client.db(dbToUse);
+
+      // Get additional info from merged_output
+      const mergedData = await db.collection('merged_output').findOne({ email: user.email });
+
+      await client.close();
+
+      const enhancedUser = {
+        ...user,
+        department: mergedData?.department || user.department || 'Unknown',
+        reportsTo: user.reportsTo || mergedData?.reportsTo || '',
+        utilization_score: mergedData?.utilization_score || 0
+      };
+
+      console.log(`[GET /api/auth/me] Successfully fetched user: ${user.email}, department: ${enhancedUser.department}`);
+      return NextResponse.json(enhancedUser);
+    } catch (error) {
+      console.error(`[GET /api/auth/me] Error enhancing user data:`, error);
+      // Return basic user data if enhancement fails
+      console.log(`[GET /api/auth/me] Successfully fetched user: ${user.email}`);
+      return NextResponse.json(user);
+    }
 
   } catch (error: any) {
     console.error('[GET /api/auth/me] Error fetching user data:', error);

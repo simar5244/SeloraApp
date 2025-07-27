@@ -106,6 +106,25 @@ const userSchema = new mongoose.Schema(
       type: Date,
       select: false,
     },
+    // Profile approval tracking for department management
+    profileApproved: {
+      type: Boolean,
+      default: false,
+    },
+    profileApprovedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: false,
+    },
+    profileApprovedAt: {
+      type: Date,
+      required: false,
+    },
+    profileApprovalStatus: {
+      type: String,
+      enum: ['pending', 'approved', 'rejected'],
+      default: 'pending',
+    },
   },
   {
     timestamps: true,

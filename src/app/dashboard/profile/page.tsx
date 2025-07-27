@@ -48,6 +48,7 @@ import { useFieldArray } from 'react-hook-form';
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { ProfileTourLauncher } from '@/components/tour/ProfileTourLauncher';
+import '@/utils/tutorialTestUtils'; // Import test utilities for browser console testing
 
 const basicInfoSchema = z.object({
   username: z.string().min(3, {
@@ -70,6 +71,7 @@ const basicInfoSchema = z.object({
 
 const jobProfileSchema = z.object({
   jobTitle: z.string().min(1, { message: "Job title is required." }),
+  department: z.string().min(1, { message: "Department is required." }),
   jobDuties: z.array(
     z.object({
       duty: z.string().min(1, { message: "Duty is required." }),
@@ -197,6 +199,7 @@ export default function ProfilePage() {
     resolver: zodResolver(jobProfileSchema),
     defaultValues: {
       jobTitle: "",
+      department: "",
       jobDuties: [{ duty: "", hours: 0 }],
       toolsProficient: "",
       salary: "",
@@ -280,6 +283,7 @@ export default function ProfilePage() {
       // Use jobTitle and jobResponsibilities from returned data
       jobProfileForm.reset({
         jobTitle: userData.jobTitle || "",
+        department: userData.department || "",
         jobDuties: userData.jobResponsibilities?.map((duty: any) => ({ duty: duty.duty, hours: duty.hours })) || [{ duty: "", hours: 0 }],
         toolsProficient: userData.toolsProficient || "",
         salary: userData.salary || "",
@@ -389,6 +393,7 @@ export default function ProfilePage() {
       // Format updated profile data
       const updatedProfile = {
         jobTitle: values.jobTitle,
+        department: values.department,
         jobResponsibilities: jobDuties,
         toolsProficient: values.toolsProficient,
         salary: values.salary,
@@ -816,19 +821,35 @@ export default function ProfilePage() {
                 {isJobProfileEditing ? (
                   <Form {...jobProfileForm}>
                     <form onSubmit={jobProfileForm.handleSubmit(handleJobProfileSubmit)} className="space-y-6">
-                      <FormField
-                        control={jobProfileForm.control}
-                        name="jobTitle"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Job Title <span className="text-red-500">*</span></FormLabel>
-                            <FormControl>
-                              <Input {...field} placeholder="e.g., Software Engineer" className="pl-10 border-purple-200 focus:border-purple-400" />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <FormField
+                          control={jobProfileForm.control}
+                          name="jobTitle"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Job Title <span className="text-red-500">*</span></FormLabel>
+                              <FormControl>
+                                <Input {...field} placeholder="e.g., Software Engineer" className="pl-10 border-purple-200 focus:border-purple-400" />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={jobProfileForm.control}
+                          name="department"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Department <span className="text-red-500">*</span></FormLabel>
+                              <FormControl>
+                                <Input {...field} placeholder="e.g., Engineering" className="pl-10 border-purple-200 focus:border-purple-400" />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
                       {dutyFields.map((field, index) => (
                         <div key={field.id} className="flex items-center gap-4">
                           <FormField

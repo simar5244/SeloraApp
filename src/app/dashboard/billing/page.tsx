@@ -877,7 +877,7 @@ export default function BillingPage() {
             </div>
           )}
           
-          <div className="absolute top-0 right-0 flex flex-col space-y-2">
+          <div className="absolute top-0 right-0 flex flex-col space-y-2" data-tour="subscription-buttons">
             <button
               onClick={handleManageSubscription}
               className="px-5 py-2.5 bg-purple-600 text-white font-semibold rounded-lg shadow-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-all duration-150 ease-in-out transform hover:scale-105 active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center text-sm"

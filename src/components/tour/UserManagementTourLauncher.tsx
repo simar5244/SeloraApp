@@ -1,19 +1,104 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { HelpCircle } from 'lucide-react';
+import { HelpCircle, Sparkles, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { Tour } from 'antd';
 import type { TourProps } from 'antd';
-import { areTutorialsEnabled, onTutorialSettingChange } from '@/utils/tutorialSettings';
+import { areTutorialsEnabledSync, onTutorialSettingChange } from '@/utils/tutorialSettings';
+
+const UserManagementWelcomeScreen = ({ open, onStart, onClose, isClosing }: { open: boolean; onStart: () => void; onClose: () => void; isClosing?: boolean }) => {
+  if (!open) return null;
+
+  return (
+    <div
+      className={`usermanagement-welcome-overlay fixed bg-black bg-opacity-50 flex items-center justify-center p-4 transition-opacity duration-500 ${isClosing ? 'opacity-0' : 'opacity-100'}`}
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        width: '100vw',
+        height: '100vh',
+        zIndex: 9999
+      }}
+    >
+      <div className={`bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl border border-purple-100 relative transform transition-all duration-500 ${isClosing ? 'scale-95 opacity-0' : 'scale-100 opacity-100'}`}>
+        {/* Close button */}
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors duration-200"
+        >
+          <X className="h-5 w-5" />
+        </button>
+
+        <div className="text-center">
+          <div className="mx-auto w-16 h-16 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center mb-6">
+            <Sparkles className="h-8 w-8 text-white" />
+          </div>
+          <h3 className="text-2xl font-bold text-gray-900 mb-4">
+            Welcome to User Management
+          </h3>
+          <p className="text-gray-600 mb-8 leading-relaxed">
+            Would you like a quick tour to discover how to manage users, roles, and permissions in your organization?
+          </p>
+          <div className="flex gap-3">
+            <Button
+              onClick={onClose}
+              variant="outline"
+              className="flex-1 py-3 border-gray-300 text-gray-700 hover:bg-gray-50"
+            >
+              Skip Tour
+            </Button>
+            <Button
+              onClick={onStart}
+              className="flex-1 py-3 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white"
+            >
+              <Sparkles className="h-4 w-4 mr-2" />
+              Start Tour
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* Global CSS for welcome screen overlay */}
+      <style jsx global>{`
+        .usermanagement-welcome-overlay {
+          position: fixed !important;
+          top: 0 !important;
+          left: 0 !important;
+          right: 0 !important;
+          bottom: 0 !important;
+          width: 100vw !important;
+          height: 100vh !important;
+          z-index: 9999 !important;
+          background-color: rgba(0, 0, 0, 0.5) !important;
+        }
+      `}</style>
+    </div>
+  );
+};
 
 const UserManagementTour = ({ open, onClose }: { open: boolean; onClose: () => void }) => {
   const [mounted, setMounted] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  useEffect(() => {
+    if (open) {
+      const timer = setTimeout(() => {
+        setIsVisible(true);
+      }, 100);
+      return () => clearTimeout(timer);
+    } else {
+      setIsVisible(false);
+    }
+  }, [open]);
 
   useEffect(() => {
     if (!open) return;
@@ -253,6 +338,7 @@ export function UserManagementTourLauncher() {
   const [isTourOpen, setIsTourOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const [showWelcomePrompt, setShowWelcomePrompt] = useState(false);
+  const [isWelcomeClosing, setIsWelcomeClosing] = useState(false);
   const [tutorialsEnabled, setTutorialsEnabledState] = useState(true);
   const pathname = usePathname();
 
@@ -260,7 +346,7 @@ export function UserManagementTourLauncher() {
     setIsMounted(true);
 
     // Check tutorial settings
-    setTutorialsEnabledState(areTutorialsEnabled());
+    setTutorialsEnabledState(areTutorialsEnabledSync());
 
     // Listen for tutorial setting changes
     const cleanup = onTutorialSettingChange((enabled) => {
@@ -270,30 +356,36 @@ export function UserManagementTourLauncher() {
       }
     });
 
-    const hasTakenTour = localStorage.getItem('hasTakenUserManagementTour');
-
-    if (!hasTakenTour) {
-      const timer = setTimeout(() => {
-        setShowWelcomePrompt(true);
-      }, 1500);
-      return () => {
-        clearTimeout(timer);
-        cleanup();
-      };
-    }
+    // Remove auto-show behavior - only show on button click
 
     return cleanup;
   }, [isTourOpen]);
 
   const startTour = () => {
-    setShowWelcomePrompt(false);
-    setIsTourOpen(true);
-    localStorage.setItem('hasTakenUserManagementTour', 'true');
+    setIsWelcomeClosing(true);
+    setTimeout(() => {
+      setShowWelcomePrompt(false);
+      setIsWelcomeClosing(false);
+      setTimeout(() => {
+        setIsTourOpen(true);
+      }, 100);
+    }, 500);
   };
 
   const dismissWelcome = () => {
-    setShowWelcomePrompt(false);
-    localStorage.setItem('hasTakenUserManagementTour', 'true');
+    setIsWelcomeClosing(true);
+    setTimeout(() => {
+      setShowWelcomePrompt(false);
+      setIsWelcomeClosing(false);
+    }, 500);
+  };
+
+  const manualStartTour = () => {
+    setShowWelcomePrompt(true);
+  };
+
+  const closeTour = () => {
+    setIsTourOpen(false);
   };
 
   if (!isMounted || !pathname?.includes('/dashboard/user-management') || !tutorialsEnabled) return null;
@@ -301,20 +393,34 @@ export function UserManagementTourLauncher() {
   return (
     <>
       {showWelcomePrompt && (
-        <UserManagementTour open={true} onClose={dismissWelcome} />
+        <UserManagementWelcomeScreen
+          open={true}
+          onStart={startTour}
+          onClose={dismissWelcome}
+          isClosing={isWelcomeClosing}
+        />
       )}
 
       <div className="fixed bottom-6 right-6 z-[100]">
         <Button
-          onClick={startTour}
-          className="h-10 w-10 rounded-full bg-purple-600 hover:bg-purple-700 text-white shadow-md hover:shadow-lg transition-all duration-200"
+          onClick={manualStartTour}
+          className="group relative h-12 w-12 rounded-full bg-gradient-to-br from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105"
+          style={{
+            boxShadow: '0 4px 12px rgba(147, 51, 234, 0.3)',
+          }}
         >
-          <HelpCircle className="h-4 w-4" />
+          <HelpCircle className="h-5 w-5 transition-transform duration-200 group-hover:rotate-12" />
+
+          {/* Tooltip */}
+          <div className="absolute bottom-full right-0 mb-3 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">
+            Take Tutorial
+            <div className="absolute top-full right-4 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
+          </div>
         </Button>
       </div>
 
       {isTourOpen && (
-        <UserManagementTour open={true} onClose={() => setIsTourOpen(false)} />
+        <UserManagementTour open={true} onClose={closeTour} />
       )}
     </>
   );

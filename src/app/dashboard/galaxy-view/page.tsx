@@ -20,6 +20,7 @@ import { FaSearch, FaFilter } from 'react-icons/fa';
 import { Suspense } from 'react';
 import dynamic from 'next/dynamic';
 import ErrorBoundary from '@/components/visualization/ErrorBoundary';
+import { GalaxyViewTourLauncher } from '@/components/tour/GalaxyViewTourLauncher';
 
 // Dynamically import the 3D visualization component to prevent SSR issues
 const GalaxyVisualization = dynamic(
@@ -110,15 +111,16 @@ export default function GalaxyPage() {
   }, []);
 
   return (
-    <div 
+    <div
       ref={fullScreenRef}
       className="w-full h-screen relative bg-black overflow-hidden"
+      data-tour="galaxy-container"
     >
-      <div className="absolute top-0 left-0 z-10 p-4 flex flex-col gap-2 w-64 bg-black/50 backdrop-blur-sm rounded-br-lg">
+      <div className="absolute top-0 left-0 z-10 p-4 flex flex-col gap-2 w-64 bg-black/50 backdrop-blur-sm rounded-br-lg" data-tour="galaxy-controls">
         <h1 className="text-white text-xl font-bold"> Galaxy View</h1>
         
         {/* Search */}
-        <form onSubmit={handleSearch} className="flex gap-2">
+        <form onSubmit={handleSearch} className="flex gap-2" data-tour="galaxy-search">
           <Input
             type="text"
             placeholder="Search names, emails, roles..."
@@ -129,7 +131,7 @@ export default function GalaxyPage() {
         </form>
         
         {/* Department filter */}
-        <div className="relative w-full">
+        <div className="relative w-full" data-tour="galaxy-filters">
           <Select.Root value={selectedDepartment || 'all'} onValueChange={handleDepartmentChange}>
             <Select.Trigger className={selectStyles.trigger}>
               <Select.Value placeholder="All Departments" />
@@ -183,14 +185,16 @@ export default function GalaxyPage() {
           </div>
         }>
           <ErrorBoundary>
-            <GalaxyVisualization 
-              graphData={graphData} 
+            <GalaxyVisualization
+              graphData={graphData}
               searchTerm={searchTerm}
               selectedDepartment={selectedDepartment}
             />
           </ErrorBoundary>
         </Suspense>
       )}
+
+      <GalaxyViewTourLauncher />
     </div>
   );
-} 
+}

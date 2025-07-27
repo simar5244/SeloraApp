@@ -882,6 +882,40 @@ export default function SuccessionPlanningPage() {
     }
   };
 
+  // Handle profile approval
+  const handleApproveProfile = async (employeeEmail: string) => {
+    try {
+      const response = await fetch('/api/department-management/users', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: employeeEmail,
+          profileApproved: true,
+        }),
+      });
+
+      if (response.ok) {
+        // Update the selected employee state
+        if (selectedEmployee && selectedEmployee.email === employeeEmail) {
+          setSelectedEmployee({
+            ...selectedEmployee,
+            profileApproved: true,
+          });
+        }
+
+        // Show success message
+        alert('Profile approved successfully!');
+      } else {
+        throw new Error('Failed to approve profile');
+      }
+    } catch (error) {
+      console.error('Error approving profile:', error);
+      alert('Failed to approve profile. Please try again.');
+    }
+  };
+
   // Handle opening successor details modal
   const openSuccessorDetails = (successorOrName: SuccessorCandidate | string, scores?: any, explanation?: string) => {
     if (typeof successorOrName === 'string') {
@@ -1259,17 +1293,7 @@ export default function SuccessionPlanningPage() {
             </p>
           </div>
           
-          <div className="flex items-center gap-3">
-            <Button
-              onClick={refreshAttritionData}
-              disabled={isRefreshing || isAnalysisRunning}
-              className="bg-purple-600 hover:bg-purple-700 flex items-center gap-2"
-              data-tour="refresh-data"
-            >
-              <FaSync className={(isRefreshing || isAnalysisRunning) ? "animate-spin" : ""} />
-              {(isRefreshing || isAnalysisRunning) ? "Refreshing..." : "Refresh"}
-            </Button>
-          </div>
+          
         </div>
 
         {/* Error Alert */}
@@ -1881,7 +1905,7 @@ export default function SuccessionPlanningPage() {
                   <AlertTitle className="text-gray-800">No at-risk employees found</AlertTitle>
                   <AlertDescription className="text-gray-700">
                     There are currently no employees identified as having a high attrition risk.
-                    Click the &quot;Refresh&quot; button above to run a new analysis.
+                    
                   </AlertDescription>
                 </Alert>
               )}
@@ -2255,15 +2279,23 @@ export default function SuccessionPlanningPage() {
         {/* Employee Details Modal */}
         {showEmployeeDetails && selectedEmployee && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-lg shadow-xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
-              <div className="sticky top-0 bg-white z-10 border-b px-4 py-2 flex justify-between items-center">
+            <div className="bg-white rounded-lg shadow-xl w-full max-w-3xl max-h-[85vh] overflow-hidden flex flex-col">
+              <div className="flex-shrink-0 bg-white border-b px-4 py-3 flex justify-between items-center">
                 <h3 className="text-lg font-semibold text-gray-900 flex items-center">
                   <FaUserTie className="text-purple-600 mr-2" />
                   {selectedEmployee.name}
                 </h3>
+                <button
+                  onClick={() => setShowEmployeeDetails(false)}
+                  className="text-gray-400 hover:text-gray-600 p-1 rounded-full hover:bg-gray-100"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
               </div>
-              
-              <div className="p-4">
+
+              <div className="flex-1 overflow-y-auto p-4">
                 {/* Basic Info - Two column layout */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {/* Left Column - Personal Info */}
@@ -2424,10 +2456,31 @@ export default function SuccessionPlanningPage() {
                   </div>
                 </div>
 
-                {/* Close button */}
-                <div className="mt-3 flex justify-end">
-                  <Button 
-                    className="bg-purple-600 hover:bg-purple-700 text-white"
+                {/* Action buttons */}
+                <div className="mt-3 flex justify-between items-center">
+                  <div className="flex items-center space-x-2">
+                    {selectedEmployee.profileApproved ? (
+                      <div className="flex items-center text-green-600">
+                        <svg className="w-5 h-5 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                        </svg>
+                        Profile Approved
+                      </div>
+                    ) : (
+                      <Button
+                        onClick={() => handleApproveProfile(selectedEmployee.email)}
+                        className="bg-green-600 hover:bg-green-700 text-white flex items-center"
+                      >
+                        <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                        Approve Profile
+                      </Button>
+                    )}
+                  </div>
+
+                  <Button
+                    variant="outline"
                     onClick={() => setShowEmployeeDetails(false)}
                   >
                     Close
@@ -2443,22 +2496,25 @@ export default function SuccessionPlanningPage() {
         {/* Successor Explanation Modal */}
         {explanation && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[80vh] overflow-y-auto">
-              <div className="p-6">
-                <div className="flex justify-between items-start mb-4">
+            <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[85vh] overflow-hidden flex flex-col">
+              <div className="flex-shrink-0 p-4 border-b">
+                <div className="flex justify-between items-start">
                   <h3 className="text-xl font-semibold text-gray-900 flex items-center">
                     <FaBrain className="text-purple-600 mr-2" size={18} />
                     AI Succession Analysis
                   </h3>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     onClick={() => setExplanation('')}
                     className="hover:bg-gray-100 rounded-full h-8 w-8 p-0 flex items-center justify-center"
                   >
                     <FaTimes />
                   </Button>
                 </div>
+              </div>
+
+              <div className="flex-1 overflow-y-auto p-6">
                 
                 {isLoading ? (
                   <div className="flex h-64 items-center justify-center">
@@ -2478,8 +2534,20 @@ export default function SuccessionPlanningPage() {
                 )}
                 
                 <div className="mt-6 flex justify-end">
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
+                    onClick={() => setExplanation('')}
+                    className="border-purple-200 text-purple-700 hover:bg-purple-50"
+                  >
+                    Close
+                  </Button>
+                </div>
+              </div>
+
+              <div className="flex-shrink-0 p-4 border-t bg-gray-50">
+                <div className="flex justify-end">
+                  <Button
+                    variant="outline"
                     onClick={() => setExplanation('')}
                     className="border-purple-200 text-purple-700 hover:bg-purple-50"
                   >

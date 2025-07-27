@@ -14,6 +14,7 @@ import { ROUTES } from '@/lib/permissions';
 import DataProcessorInitializer from '@/components/DataProcessorInitializer';
 import RouteGuard from '@/components/RouteGuard';
 import { TourLauncher } from '@/components/tour/TourLauncher';
+import '@/utils/tutorialTestUtils'; // Import test utilities for browser console testing
 
 export default function DashboardLayout({
   children,

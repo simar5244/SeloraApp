@@ -22,6 +22,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { FaSearch, FaPlus, FaFilter, FaExpandAlt, FaUserPlus, FaTrash, FaEdit, FaSyncAlt, FaCamera, FaTimes, FaUndo, FaRobot } from 'react-icons/fa';
 import { useRouter } from 'next/navigation';
 import { toast } from "@/components/ui/use-toast";
+import { OrgChartTourLauncher } from '@/components/tour/OrgChartTourLauncher';
 
 // Import types from ReactFlow
 import type { Node, Edge, ReactFlowInstance } from 'reactflow';
@@ -2400,6 +2401,7 @@ const OrganizationChartPage = () => {
             className="bg-white/10 hover:bg-white/20 text-white border-white/20"
             onClick={fetchAIRecommendations}
             disabled={isLoadingRecommendations}
+            data-tour="ai-recommendations"
           >
             {isLoadingRecommendations ? (
               <>
@@ -2429,12 +2431,13 @@ const OrganizationChartPage = () => {
             size="sm"
             className="bg-white/10 hover:bg-white/20 text-white border-white/20"
             onClick={() => setShowCreateModal(true)}
+            data-tour="add-employee"
           >
             <FaUserPlus className="w-4 h-4 mr-2" />
             Add Employee
           </Button>
           
-          <div className="relative">
+          <div className="relative" data-tour="org-search">
             <Input
               placeholder="Search employees..."
               value={searchQuery}
@@ -2452,7 +2455,7 @@ const OrganizationChartPage = () => {
             </Button>
           </div>
 
-          <Select 
+          <Select
             value={selectedDepartment}
             onValueChange={useCallback((value) => {
               setSelectedDepartment(value);
@@ -2460,7 +2463,7 @@ const OrganizationChartPage = () => {
             }, [])}
             className="w-44"
           >
-            <SelectTrigger className="bg-white/10 text-white border-white/20 w-44">
+            <SelectTrigger className="bg-white/10 text-white border-white/20 w-44" data-tour="department-filter">
               <SelectValue placeholder="All Departments" />
             </SelectTrigger>
             <SelectContent>
@@ -2556,6 +2559,7 @@ const OrganizationChartPage = () => {
                 maxZoom={2}
                 defaultEdgeOptions={defaultEdgeOptionsMemo}
                 className="bg-gray-50 w-full h-full"
+                data-tour="org-chart-container"
                 nodesDraggable={true}
                 elementsSelectable={true}
                 panOnScroll={true}
@@ -2567,7 +2571,7 @@ const OrganizationChartPage = () => {
                 }}
               >
                 {/* Zoom controls */}
-                <div className="absolute right-8 top-1/4 transform -translate-y-1/2 flex flex-col gap-2 z-10">
+                <div className="absolute right-8 top-1/4 transform -translate-y-1/2 flex flex-col gap-2 z-10" data-tour="chart-controls">
                   <Button 
                     variant="default" 
                     size="sm" 
@@ -2656,6 +2660,8 @@ const OrganizationChartPage = () => {
           />
         </div>
       )}
+
+      <OrgChartTourLauncher />
     </div>
   );
 };

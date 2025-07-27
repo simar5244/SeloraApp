@@ -193,6 +193,13 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL('/dashboard', request.url))
     }
 
+    // Check permissions for department management and goals - Management tier access only
+    if ((path.startsWith('/dashboard/department-management') || path.startsWith('/dashboard/goals')) && 
+        !['admin', 'top_management_tier_1', 'top_management_tier_2', 'top_management_tier_3'].includes(decodedToken.role)) {
+      console.log(`Blocked unauthorized access to ${path} by user with role ${decodedToken.role}`)
+      return NextResponse.redirect(new URL('/dashboard', request.url))
+    }
+
     // Check permissions for superadmin routes - STRICT path checking
     if (path.startsWith('/dashboard/superadmin') && decodedToken.role !== 'superadmin') {
       // Re-validate role against the database for superadmin access
