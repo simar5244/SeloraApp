@@ -7,6 +7,7 @@ import AddGoalModal from "../AddGoalModal";
 import { addNewGoal } from "../api";
 import { toast } from "react-hot-toast";
 import { ArrowLeft } from "lucide-react";
+import { GoalsTourLauncher } from "@/components/tour/GoalsTourLauncher";
 
 export default function CreateGoalPage() {
   const router = useRouter();
@@ -42,26 +43,25 @@ export default function CreateGoalPage() {
   };
 
   return (
-    <div className="min-h-screen overflow-auto p-6 bg-gray-50 text-gray-800">
-      <div className="max-w-6xl mx-auto">
-        <div className="mb-6">
-          <Button 
-            variant="ghost" 
-            className="mb-4 flex items-center gap-2 text-purple-600 hover:text-purple-900"
-            onClick={() => router.push("/dashboard/goals")}
-          >
-            <ArrowLeft size={16} />
-            Back to Goals
-          </Button>
-          
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900 mb-2">Create New Goal</h1>
-          <p className="text-gray-500">Fill in the details below to create a new organizational goal.</p>
-        </div>
-        
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <AddGoalModal onAddGoal={handleAddGoal} />
+    <div className="min-h-screen bg-gray-50 text-gray-800">
+      <div className="h-full overflow-auto">
+        <div className="p-6">
+          <div className="max-w-6xl mx-auto">
+            <div className="mb-6">
+              <h1 className="text-3xl font-bold tracking-tight text-gray-900 mb-2">Create New Goal</h1>
+              <p className="text-gray-500">Fill in the details below to create a new organizational goal.</p>
+            </div>
+
+            <div className="bg-white rounded-lg shadow-md p-6">
+              <AddGoalModal
+                onAddGoal={handleAddGoal}
+                onCancel={() => router.push("/dashboard/goals")}
+              />
+            </div>
+          </div>
         </div>
       </div>
+      <GoalsTourLauncher />
     </div>
   );
 }

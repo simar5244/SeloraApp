@@ -43,24 +43,22 @@ export default function CreateProjectPage() {
   };
 
   return (
-    <div className="min-h-screen overflow-auto p-6 bg-gray-50 text-gray-800">
-      <div className="max-w-6xl mx-auto">
-        <div className="mb-6">
-          <Button 
-            variant="ghost" 
-            className="mb-4 flex items-center gap-2 text-purple-600 hover:text-purple-900"
-            onClick={() => router.push("/dashboard/projects")}
-          >
-            <ArrowLeft size={16} />
-            Back to Projects
-          </Button>
-          
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900 mb-2">Create New Project</h1>
-          <p className="text-gray-500">Fill in the details below to create a new project.</p>
-        </div>
-        
-        <div className="bg-white rounded-lg shadow-md p-6" data-tour="create-project-form">
-          <AddProjectModal onAddProject={handleAddProject} />
+    <div className="min-h-screen bg-gray-50 text-gray-800">
+      <div className="h-full overflow-auto">
+        <div className="p-6">
+          <div className="max-w-6xl mx-auto">
+            <div className="mb-6">
+              <h1 className="text-3xl font-bold tracking-tight text-gray-900 mb-2">Create New Project</h1>
+              <p className="text-gray-500">Fill in the details below to create a new project.</p>
+            </div>
+
+            <div className="bg-white rounded-lg shadow-md p-6" data-tour="create-project-form">
+              <AddProjectModal
+                onAddProject={handleAddProject}
+                onCancel={() => router.push("/dashboard/projects")}
+              />
+            </div>
+          </div>
         </div>
       </div>
       <ProjectsTourLauncher />

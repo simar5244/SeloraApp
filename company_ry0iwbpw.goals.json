@@ -1,0 +1,96 @@
+[{
+  "_id": {
+    "$oid": "6886a716fc2ddd9a177ea910"
+  },
+  "goalId": "6886a716fc2ddd9a177ea90f",
+  "title": "asd",
+  "description": "asd",
+  "department": "asd",
+  "startDate": {
+    "$date": "2025-07-09T00:00:00.000Z"
+  },
+  "endDate": {
+    "$date": "2025-07-31T00:00:00.000Z"
+  },
+  "priority": "medium",
+  "status": "planning",
+  "visibleToAll": true,
+  "companyCode": "ry0iwbpw",
+  "createdBy": "",
+  "createdByRole": "admin",
+  "isManagementGoal": false,
+  "assignedEmployees": [],
+  "viewers": [],
+  "kpis": [],
+  "assignedProjects": [],
+  "progress": 0,
+  "createdAt": {
+    "$date": "2025-07-27T22:24:22.986Z"
+  },
+  "updatedAt": {
+    "$date": "2025-07-27T22:24:22.986Z"
+  },
+  "updated_at": {
+    "$date": "2025-07-28T00:02:31.514Z"
+  },
+  "updates": [
+    {
+      "_id": {
+        "$oid": "6886be17fc2ddd9a177ea95f"
+      },
+      "message": "hi",
+      "author_id": "686440e49f50e0b6e5da0732",
+      "author_name": "Anthony Kasey",
+      "created_at": {
+        "$date": "2025-07-28T00:02:31.514Z"
+      },
+      "updated_at": {
+        "$date": "2025-07-28T00:02:31.514Z"
+      }
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "6886d265fc2ddd9a177eaa56"
+  },
+  "goalId": "6886d265fc2ddd9a177eaa55",
+  "title": "Marketing",
+  "description": " manage marketing of company",
+  "department": "marketing",
+  "startDate": {
+    "$date": "2025-07-01T00:00:00.000Z"
+  },
+  "endDate": {
+    "$date": "2025-07-31T00:00:00.000Z"
+  },
+  "priority": "medium",
+  "status": "active",
+  "visibleToAll": true,
+  "companyCode": "ry0iwbpw",
+  "createdBy": "",
+  "createdByRole": "admin",
+  "isManagementGoal": false,
+  "assignedEmployees": [],
+  "viewers": [],
+  "kpis": [
+    {
+      "name": "more susbcriptions",
+      "description": "reach 50000 subscriptions",
+      "target": 50000,
+      "unit": "people",
+      "dueDate": {
+        "$date": "2025-07-31T00:00:00.000Z"
+      },
+      "current": 0
+    }
+  ],
+  "assignedProjects": [],
+  "progress": 0,
+  "createdAt": {
+    "$date": "2025-07-28T01:29:09.224Z"
+  },
+  "updatedAt": {
+    "$date": "2025-07-28T01:29:09.224Z"
+  }
+}]

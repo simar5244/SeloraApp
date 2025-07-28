@@ -34,34 +34,68 @@ const ProfileWelcomeScreen = ({ open, onStart, onClose, isClosing }: { open: boo
           <X className="h-5 w-5" />
         </button>
 
-        <div className="text-center">
-          <div className="mx-auto w-16 h-16 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center mb-6">
+        {/* Header */}
+        <div className="text-center mb-6">
+          <div className="w-16 h-16 bg-gradient-to-br from-purple-600 to-purple-700 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
             <Sparkles className="h-8 w-8 text-white" />
           </div>
-          <h3 className="text-2xl font-bold text-gray-900 mb-4">
-            Welcome to Your Profile
-          </h3>
-          <p className="text-gray-600 mb-8 leading-relaxed">
-            Let's take a quick tour of your profile page to help you get familiar with managing your personal information, job details, and account settings.
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Welcome to Your Profile!</h2>
+          <p className="text-gray-600 text-sm leading-relaxed">
+            Let's take a quick tour to help you manage your personal information and account settings
           </p>
-          <div className="flex gap-3">
-            <Button
-              onClick={onClose}
-              variant="outline"
-              className="flex-1 py-3 border-gray-300 text-gray-700 hover:bg-gray-50"
-            >
-              Skip Tour
-            </Button>
-            <Button
-              onClick={onStart}
-              className="flex-1 py-3 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white"
-            >
-              <Sparkles className="h-4 w-4 mr-2" />
-              Start Tour
-            </Button>
+        </div>
+
+        {/* Features */}
+        <div className="space-y-4 mb-8">
+          <div className="flex items-start space-x-3">
+            <div className="w-2 h-2 bg-purple-600 rounded-full mt-2 flex-shrink-0"></div>
+            <div>
+              <h3 className="font-semibold text-gray-900 text-sm">Personal Information</h3>
+              <p className="text-gray-600 text-xs">Update your contact details and personal data</p>
+            </div>
+          </div>
+          <div className="flex items-start space-x-3">
+            <div className="w-2 h-2 bg-purple-600 rounded-full mt-2 flex-shrink-0"></div>
+            <div>
+              <h3 className="font-semibold text-gray-900 text-sm">Job Information</h3>
+              <p className="text-gray-600 text-xs">Manage your role, department, and work details</p>
+            </div>
+          </div>
+          <div className="flex items-start space-x-3">
+            <div className="w-2 h-2 bg-purple-600 rounded-full mt-2 flex-shrink-0"></div>
+            <div>
+              <h3 className="font-semibold text-gray-900 text-sm">Account Settings</h3>
+              <p className="text-gray-600 text-xs">Configure preferences and security settings</p>
+            </div>
           </div>
         </div>
+
+        {/* Buttons */}
+        <div className="flex space-x-3">
+          <Button
+            onClick={onStart}
+            className="flex-1 py-3 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white"
+          >
+            <Sparkles className="h-4 w-4 mr-2" />
+            Start Tour
+          </Button>
+        </div>
       </div>
+
+      {/* Global CSS for welcome screen overlay */}
+      <style jsx global>{`
+        .profile-welcome-overlay {
+          position: fixed !important;
+          top: 0 !important;
+          left: 0 !important;
+          right: 0 !important;
+          bottom: 0 !important;
+          width: 100vw !important;
+          height: 100vh !important;
+          z-index: 9999 !important;
+          background-color: rgba(0, 0, 0, 0.5) !important;
+        }
+      `}</style>
     </div>
   );
 };

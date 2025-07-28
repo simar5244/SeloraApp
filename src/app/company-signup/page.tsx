@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
-import { FaEye, FaEyeSlash, FaCheck, FaArrowRight, FaArrowLeft, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import { FaEye, FaEyeSlash, FaCheck, FaArrowRight, FaArrowLeft, FaChevronLeft, FaChevronRight, FaSpinner } from 'react-icons/fa';
 // Removed unused loadStripe import
 import { toast } from 'react-hot-toast';
 
@@ -781,8 +781,8 @@ export default function CompanySignupPage() {
                 <div className="space-y-4">
                   {pricesLoading && prices.length === 0 ? (
                     <div className="text-center py-8">
-                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto"></div>
-                      <p className="text-gray-500 mt-2">Loading plans...</p>
+                      <FaSpinner className="animate-spin h-8 w-8 text-purple-600 mx-auto mb-2" />
+                      <p className="text-gray-500">Loading plans...</p>
                     </div>
                   ) : (
                     prices.map((price) => (

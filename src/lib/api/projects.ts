@@ -93,7 +93,7 @@ export async function addNewProject(data: any) {
 export async function searchUsers(term: string) {
   const res = await fetch(`/api/users/search?term=${encodeURIComponent(term)}`);
   if (!res.ok) throw new Error('User search failed');
-  return (await res.json()).users || [];
+  return await res.json(); // API returns users directly, not wrapped in 'users' property
 }
 
 export async function addUserToProject(projectId: string, userId: string) {

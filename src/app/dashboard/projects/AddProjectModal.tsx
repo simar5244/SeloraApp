@@ -9,14 +9,17 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'react-hot-toast';
 import { fetchProjects } from "./api";
 import ProjectAIRecommendations from '@/components/ProjectAIRecommendations';
+import { ArrowLeft } from 'lucide-react';
+import { FaSearch, FaSpinner } from 'react-icons/fa';
 
 interface AddProjectModalProps {
   onAddProject: (project: any) => Promise<{ success: boolean; error?: string; projectId?: string }>;
+  onCancel?: () => void;
 }
 
 type EmployeeEditor = { name: string; email: string; department: string; role: string; tasks: string; hours: string; toolsUsed: string; isLead?: boolean };
 
-const AddProjectModal = ({ onAddProject }: AddProjectModalProps) => {
+const AddProjectModal = ({ onAddProject, onCancel }: AddProjectModalProps) => {
   const router = useRouter();
   const [projectData, setProjectData] = useState({
     linkedProjects: [] as { projectId: string; name: string }[], // store multiple linked projects
@@ -36,11 +39,52 @@ const AddProjectModal = ({ onAddProject }: AddProjectModalProps) => {
   const [localCompanyCode, setLocalCompanyCode] = useState<string | null>(null);
   const [isPrivilegedUser, setIsPrivilegedUser] = useState(false);
   const [showRecommendations, setShowRecommendations] = useState(false);
+  const [projectSearchTerm, setProjectSearchTerm] = useState('');
+  const [projectSearchResults, setProjectSearchResults] = useState<any[]>([]);
+  const [isSearchingProjects, setIsSearchingProjects] = useState(false);
+  const [showEmployeeSearch, setShowEmployeeSearch] = useState(false);
+  const [showViewerSearch, setShowViewerSearch] = useState(false);
+
+  // User search states - using user-management pattern
+  const [allUsers, setAllUsers] = useState<any[]>([]);
+  const [employeeSearchTerm, setEmployeeSearchTerm] = useState('');
+  const [employeeSearchResults, setEmployeeSearchResults] = useState<any[]>([]);
+  const [isLoadingUsers, setIsLoadingUsers] = useState(false);
+
+  // Load all users once for fast client-side search (user-management pattern)
+  const loadAllUsers = async () => {
+    try {
+      setIsLoadingUsers(true);
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/admin/users?limit=0', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to fetch users');
+      }
+
+      setAllUsers(data.users || []);
+    } catch (error) {
+      console.error('Error loading users:', error);
+      // Fallback to empty array if loading fails
+      setAllUsers([]);
+    } finally {
+      setIsLoadingUsers(false);
+    }
+  };
 
   useEffect(() => {
     async function loadProjectsList() {
       setLoading(true);
       try {
+        // Load all users for search
+        await loadAllUsers();
         // Determine current user from localStorage or API
         const storedUser = localStorage.getItem('user');
         let user: any = storedUser ? JSON.parse(storedUser) : {};
@@ -112,9 +156,111 @@ const AddProjectModal = ({ onAddProject }: AddProjectModalProps) => {
   const addEmployee = () => setProjectData(prev => ({ ...prev, employees: [...prev.employees, { name:'',email:'',department:'',role:'',tasks:'',hours:'',toolsUsed:'' }] }));
   const removeEmployee = (i: number) => setProjectData(prev => { const emps=[...prev.employees]; emps.splice(i,1); return { ...prev, employees: emps }; });
 
+  // Employee search function - using client-side filtering (user-management pattern)
+  const searchEmployees = (term: string) => {
+    if (!term.trim()) {
+      setEmployeeSearchResults([]);
+      return;
+    }
+
+    // Filter users client-side for instant results
+    const filteredUsers = allUsers.filter(user => {
+      const matchesSearch =
+        user.username?.toLowerCase().includes(term.toLowerCase()) ||
+        user.email?.toLowerCase().includes(term.toLowerCase()) ||
+        (user.firstName && user.firstName.toLowerCase().includes(term.toLowerCase())) ||
+        (user.lastName && user.lastName.toLowerCase().includes(term.toLowerCase())) ||
+        (user.name && user.name.toLowerCase().includes(term.toLowerCase()));
+
+      return matchesSearch;
+    });
+
+    // Format results to match expected structure
+    const formattedResults = filteredUsers.map(user => ({
+      _id: user._id,
+      id: user._id,
+      email: user.email,
+      name: user.name || `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email.split('@')[0],
+      firstName: user.firstName || '',
+      lastName: user.lastName || '',
+      role: user.role || '',
+      department: user.department || '',
+      jobTitle: user.jobTitle || ''
+    }));
+
+    // Check if the term looks like an email for manual entry
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (emailRegex.test(term) && !formattedResults.some(user => user.email === term)) {
+      // Add manual email entry option
+      formattedResults.unshift({
+        _id: term,
+        id: term,
+        email: term,
+        name: term.split('@')[0],
+        firstName: term.split('@')[0],
+        lastName: '',
+        role: '',
+        department: '',
+        jobTitle: '',
+        isManualEntry: true
+      } as any);
+    }
+
+    setEmployeeSearchResults(formattedResults);
+  };
+
+  const addEmployeeFromSearch = (employee: any) => {
+    // Check if already added
+    if (projectData.employees.some(emp => emp.email === employee.email)) {
+      toast.error('User already added as team member');
+      return;
+    }
+
+    setProjectData(prev => ({
+      ...prev,
+      employees: [...prev.employees, {
+        name: employee.name || `${employee.firstName} ${employee.lastName}`.trim(),
+        email: employee.email,
+        department: employee.department || '',
+        role: employee.role || 'Team Member',
+        tasks: '',
+        hours: '',
+        toolsUsed: '',
+        addedBy: currentUser?.name || currentUser?.email || 'Current User'
+      }]
+    }));
+
+    toast.success(`${employee.name || employee.email} added as team member`);
+  };
+
   const addMember = () => setProjectData(prev => ({ ...prev, viewers: [...prev.viewers, { name: '', email: '' }] }));
   const removeMember = (i: number) => setProjectData(prev => { const m = [...prev.viewers]; m.splice(i,1); return { ...prev, viewers: m }; });
   const handleMemberChange = (i: number, field: 'name' | 'email', value: string) => setProjectData(prev => { const m = [...prev.viewers]; m[i] = { ...m[i], [field]: value }; return { ...prev, viewers: m }; });
+
+  const addViewerFromSearch = (viewer: any) => {
+    // Check if already added
+    if (projectData.viewers.some(v => v.email === viewer.email)) {
+      toast.error('User already added as viewer');
+      return;
+    }
+
+    // Check if already assigned as employee
+    if (projectData.employees.some(emp => emp.email === viewer.email)) {
+      toast.error('User is already assigned as team member');
+      return;
+    }
+
+    setProjectData(prev => ({
+      ...prev,
+      viewers: [...prev.viewers, {
+        name: viewer.name || `${viewer.firstName} ${viewer.lastName}`.trim(),
+        email: viewer.email,
+        addedBy: currentUser?.name || currentUser?.email || 'Current User'
+      }]
+    }));
+
+    toast.success(`${viewer.name || viewer.email} added as viewer`);
+  };
 
   const handleCheckboxChange = (field: string, value: boolean) => {
     setProjectData({
@@ -218,6 +364,27 @@ const AddProjectModal = ({ onAddProject }: AddProjectModalProps) => {
       toast.error('Failed to create project');
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  // Project search function
+  const searchProjects = async (term: string) => {
+    if (!term.trim()) {
+      setProjectSearchResults([]);
+      return;
+    }
+
+    setIsSearchingProjects(true);
+    try {
+      const response = await fetch(`/api/projects/search?q=${encodeURIComponent(term)}`);
+      if (response.ok) {
+        const data = await response.json();
+        setProjectSearchResults(data.projects || []);
+      }
+    } catch (error) {
+      console.error('Error searching projects:', error);
+    } finally {
+      setIsSearchingProjects(false);
     }
   };
 
@@ -368,31 +535,85 @@ const AddProjectModal = ({ onAddProject }: AddProjectModalProps) => {
                   <SelectValue placeholder="Select a project to link" className="text-black" />
                 </SelectTrigger>
                 <SelectContent className="bg-white text-black">
-                  {projectsList
-                    .filter(p => {
-                      // Skip if no ID or title
-                      if (!p.id || !(p.project_title || p.name)) return false;
-                      
-                      // Only show if not already linked
-                      return !projectData.linkedProjects.some(lp => lp.projectId === p.id);
-                    })
-                    .map(p => (
-                      <SelectItem 
-                        key={p.id} 
-                        value={p.id} 
-                        className="text-black hover:bg-gray-100"
-                      >
-                        {p.project_title || p.name || 'Unnamed Project'}
-                      </SelectItem>
-                  ))}
-                  {projectsList.filter(p => 
-                    p.id && 
-                    (p.project_title || p.name) && 
+                  {/* Search Input in Dropdown */}
+                  <div className="p-2 border-b">
+                    <Input
+                      placeholder="Search projects..."
+                      value={projectSearchTerm}
+                      onChange={(e) => {
+                        setProjectSearchTerm(e.target.value);
+                        searchProjects(e.target.value);
+                      }}
+                      className="text-black"
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                  </div>
+
+                  {/* Recent Projects (when no search) */}
+                  {!projectSearchTerm && (
+                    <>
+                      <div className="px-2 py-1 text-xs text-gray-500 font-medium">Recent Projects</div>
+                      {projectsList
+                        .filter(p => {
+                          // Skip if no ID or title
+                          if (!p.id || !(p.project_title || p.name)) return false;
+
+                          // Only show if not already linked
+                          return !projectData.linkedProjects.some(lp => lp.projectId === p.id);
+                        })
+                        .map(p => (
+                          <SelectItem
+                            key={p.id}
+                            value={p.id}
+                            className="text-black hover:bg-gray-100"
+                          >
+                            {p.project_title || p.name || 'Unnamed Project'}
+                          </SelectItem>
+                      ))}
+                    </>
+                  )}
+
+                  {/* Search Results */}
+                  {projectSearchTerm && projectSearchResults.length > 0 && (
+                    <>
+                      <div className="px-2 py-1 text-xs text-gray-500 font-medium">Search Results</div>
+                      {projectSearchResults
+                        .filter(p => !projectData.linkedProjects.some(lp => lp.projectId === p.id))
+                        .map(p => (
+                          <SelectItem
+                            key={p.id}
+                            value={p.id}
+                            className="text-black hover:bg-gray-100"
+                          >
+                            {p.project_title || p.title || 'Unnamed Project'}
+                          </SelectItem>
+                        ))}
+                    </>
+                  )}
+
+                  {/* No results */}
+                  {projectSearchTerm && projectSearchResults.length === 0 && !isSearchingProjects && (
+                    <div className="px-2 py-2 text-sm text-gray-500 text-center">
+                      No projects found
+                    </div>
+                  )}
+
+                  {/* Loading */}
+                  {isSearchingProjects && (
+                    <div className="px-2 py-2 text-sm text-gray-500 text-center">
+                      Searching...
+                    </div>
+                  )}
+
+                  {/* No projects available when not searching */}
+                  {!projectSearchTerm && projectsList.filter(p =>
+                    p.id &&
+                    (p.project_title || p.name) &&
                     !projectData.linkedProjects.some(lp => lp.projectId === p.id)
                   ).length === 0 && (
-                    <p className="text-sm text-gray-700 text-center py-2 px-4 my-2 mx-2">
+                    <div className="px-2 py-2 text-sm text-gray-500 text-center">
                       No projects available to link
-                    </p>
+                    </div>
                   )}
                 </SelectContent>
               </Select>
@@ -430,38 +651,97 @@ const AddProjectModal = ({ onAddProject }: AddProjectModalProps) => {
           </div>
         )}
       </div>
-      {/* Project Visibility */}
-      <div className="pt-4 border-t" data-tour="permission-controls">
-        <div className="flex items-center space-x-2">
-          <Checkbox
-            id="visibleToAll"
-            name="visibleToAll"
-            checked={projectData.visibleToAll}
-            onCheckedChange={(checked) => handleCheckboxChange('visibleToAll', !!checked)}
-          />
-          <Label htmlFor="visibleToAll" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-            Make Visible to All Employees (Recommended)
-          </Label>
-        </div>
-        <p className="text-xs text-gray-500 pl-6 mt-1">
-          When enabled, all employees will have view access to this project.
-          Top management will still have edit access regardless of this setting.
-        </p>
-      </div>
+
       {/* Employees Section */}
       <div className="space-y-4 border-t pt-4" data-tour="members-section">
         <div className="flex justify-between items-center">
           <Label className="text-sm font-medium">Team Members</Label>
-          <Button 
-            variant="default" 
-            size="sm" 
-            type="button" 
-            onClick={addEmployee} 
-            className="bg-purple-100 hover:bg-purple-200 text-black text-sm"
-          >
-            Add Employee
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              type="button"
+              onClick={() => setShowEmployeeSearch(!showEmployeeSearch)}
+              className="text-black text-sm"
+            >
+              Search & Add
+            </Button>
+            <Button
+              variant="default"
+              size="sm"
+              type="button"
+              onClick={addEmployee}
+              className="bg-purple-100 hover:bg-purple-200 text-black text-sm"
+            >
+              Add Manually
+            </Button>
+          </div>
         </div>
+
+        {showEmployeeSearch && (
+          <div className="border rounded-lg p-4 bg-blue-50">
+            <div className="space-y-3">
+              <div className="relative">
+                <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                <Input
+                  type="text"
+                  placeholder="Search team members by name or email..."
+                  className="pl-10 pr-4 py-2 w-full"
+                  value={employeeSearchTerm}
+                  onChange={(e) => {
+                    setEmployeeSearchTerm(e.target.value);
+                    searchEmployees(e.target.value);
+                  }}
+                />
+              </div>
+
+              {isLoadingUsers && (
+                <div className="flex items-center justify-center py-4">
+                  <FaSpinner className="animate-spin h-5 w-5 text-purple-600 mr-2" />
+                  <span className="text-sm text-gray-600">Loading users...</span>
+                </div>
+              )}
+
+              {employeeSearchTerm && employeeSearchResults.length > 0 && (
+                <div className="max-h-48 overflow-y-auto border rounded-md bg-white">
+                  {employeeSearchResults.map((employee, index) => (
+                    <div
+                      key={employee.id || index}
+                      className="p-3 hover:bg-gray-50 cursor-pointer border-b last:border-b-0"
+                      onClick={() => {
+                        addEmployeeFromSearch(employee);
+                        setShowEmployeeSearch(false);
+                        setEmployeeSearchTerm('');
+                        setEmployeeSearchResults([]);
+                      }}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="font-medium text-gray-900">
+                            {employee.name || employee.email}
+                            {employee.isManualEntry && (
+                              <span className="ml-2 text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">Manual Entry</span>
+                            )}
+                          </div>
+                          <div className="text-sm text-gray-600">{employee.email}</div>
+                          {employee.department && (
+                            <div className="text-xs text-gray-500">{employee.department} • {employee.role}</div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {employeeSearchTerm && employeeSearchResults.length === 0 && !isLoadingUsers && (
+                <div className="text-center py-4 text-gray-500">
+                  No users found for "{employeeSearchTerm}"
+                </div>
+              )}
+            </div>
+          </div>
+        )}
         {projectData.employees.map((emp, idx) => (
           <div key={idx} className="border p-4 rounded-md space-y-3 bg-gray-50">
             <div className="flex justify-between items-center">
@@ -473,6 +753,12 @@ const AddProjectModal = ({ onAddProject }: AddProjectModalProps) => {
               <Input placeholder="Email" value={emp.email} onChange={(e) => handleEmployeeChange(idx,'email',e.target.value)} />
               <Input placeholder="Department" value={emp.department} onChange={(e) => handleEmployeeChange(idx,'department',e.target.value)} />
               <Input placeholder="Role" value={emp.role} onChange={(e) => handleEmployeeChange(idx,'role',e.target.value)} />
+              <Input
+                placeholder="Added by"
+                value={emp.addedBy || currentUser?.name || currentUser?.email || 'Current User'}
+                disabled
+                className="bg-gray-100 text-gray-600"
+              />
               <div className="md:col-span-2">
                 <Textarea placeholder="Specific Tasks (comma separated)" value={emp.tasks} onChange={(e) => handleEmployeeChange(idx,'tasks',e.target.value)} rows={2} />
               </div>
@@ -497,23 +783,125 @@ const AddProjectModal = ({ onAddProject }: AddProjectModalProps) => {
       <div className="space-y-2 border-t pt-4" data-tour="viewers-section">
         <div className="flex justify-between items-center">
           <Label className="text-sm font-medium">Viewers</Label>
-          <Button 
-            variant="default" 
-            size="sm" 
-            type="button" 
-            onClick={addMember}
-            className="bg-purple-100 hover:bg-purple-200 text-black text-sm"
-          >
-            Add Viewer
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              type="button"
+              onClick={() => setShowViewerSearch(!showViewerSearch)}
+              className="text-black text-sm"
+            >
+              Search & Add
+            </Button>
+            <Button
+              variant="default"
+              size="sm"
+              type="button"
+              onClick={addMember}
+              className="bg-purple-100 hover:bg-purple-200 text-black text-sm"
+            >
+              Add Manually
+            </Button>
+          </div>
         </div>
+
+        {showViewerSearch && (
+          <div className="border rounded-lg p-4 bg-yellow-50">
+            <div className="space-y-3">
+              <div className="relative">
+                <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                <Input
+                  type="text"
+                  placeholder="Search viewers by name or email..."
+                  className="pl-10 pr-4 py-2 w-full"
+                  value={employeeSearchTerm}
+                  onChange={(e) => {
+                    setEmployeeSearchTerm(e.target.value);
+                    searchEmployees(e.target.value);
+                  }}
+                />
+              </div>
+
+              {isLoadingUsers && (
+                <div className="flex items-center justify-center py-4">
+                  <FaSpinner className="animate-spin h-5 w-5 text-purple-600 mr-2" />
+                  <span className="text-sm text-gray-600">Loading users...</span>
+                </div>
+              )}
+
+              {employeeSearchTerm && employeeSearchResults.length > 0 && (
+                <div className="max-h-48 overflow-y-auto border rounded-md bg-white">
+                  {employeeSearchResults.map((viewer, index) => (
+                    <div
+                      key={viewer.id || index}
+                      className="p-3 hover:bg-gray-50 cursor-pointer border-b last:border-b-0"
+                      onClick={() => {
+                        addViewerFromSearch(viewer);
+                        setShowViewerSearch(false);
+                        setEmployeeSearchTerm('');
+                        setEmployeeSearchResults([]);
+                      }}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="font-medium text-gray-900">
+                            {viewer.name || viewer.email}
+                            {viewer.isManualEntry && (
+                              <span className="ml-2 text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">Manual Entry</span>
+                            )}
+                          </div>
+                          <div className="text-sm text-gray-600">{viewer.email}</div>
+                          {viewer.department && (
+                            <div className="text-xs text-gray-500">{viewer.department} • {viewer.role}</div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {employeeSearchTerm && employeeSearchResults.length === 0 && !isLoadingUsers && (
+                <div className="text-center py-4 text-gray-500">
+                  No users found for "{employeeSearchTerm}"
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         {projectData.viewers.map((viewer, idx) => (
           <div key={idx} className="flex gap-2 mb-2">
             <Input placeholder="Name" value={viewer.name} onChange={e => handleMemberChange(idx, 'name', e.target.value)} />
             <Input placeholder="Email" value={viewer.email} onChange={e => handleMemberChange(idx, 'email', e.target.value)} />
+            <Input
+              placeholder="Added by"
+              value={viewer.addedBy || currentUser?.name || currentUser?.email || 'Current User'}
+              disabled
+              className="bg-gray-100 text-gray-600"
+            />
             <Button variant="destructive" size="sm" type="button" onClick={() => removeMember(idx)}>Remove</Button>
           </div>
         ))}
+      </div>
+
+      {/* Project Visibility */}
+      <div className="pt-4 border-t" data-tour="permission-controls">
+        <div className="flex items-center space-x-2">
+          <Checkbox
+            id="visibleToAll"
+            name="visibleToAll"
+            checked={projectData.visibleToAll}
+            onCheckedChange={(checked) => handleCheckboxChange('visibleToAll', !!checked)}
+          />
+          <Label htmlFor="visibleToAll" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+            Make Visible to All Employees (Recommended)
+          </Label>
+        </div>
+        <p className="text-xs text-gray-500 pl-6 mt-1">
+          When enabled, all employees will have view access to this project.
+          Top management will still have edit access regardless of this setting.
+        </p>
       </div>
       
       {/* Team Members Section */}
@@ -557,7 +945,18 @@ const AddProjectModal = ({ onAddProject }: AddProjectModalProps) => {
         )}
       </div>
       
-      <div className="flex justify-end pt-4 border-t">
+      <div className="flex justify-between pt-4 border-t">
+        {onCancel && (
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={onCancel}
+            className="flex items-center gap-2 text-purple-600 hover:text-purple-900"
+          >
+            <ArrowLeft size={16} />
+            Back to Projects
+          </Button>
+        )}
         <Button
           type="submit"
           size="default"

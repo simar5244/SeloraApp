@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter, useParams } from 'next/navigation';
-import { FaArrowLeft, FaEdit, FaTrash, FaUser, FaClock, FaCalendar, FaExclamationCircle, FaSpinner } from 'react-icons/fa';
+import { FaArrowLeft, FaEdit, FaTrash, FaUser, FaClock, FaCalendar, FaExclamationCircle, FaSpinner, FaCommentDots, FaSearch, FaPlus } from 'react-icons/fa';
 import { Project } from '@/types/project';
 import { Label } from '@/components/ui/label';
 import ProjectForm from '@/components/ProjectForm';
@@ -173,7 +173,21 @@ export default function ProjectDetailPage({ params }: ProjectDetailProps) {
   const [showLinkSection, setShowLinkSection] = useState(false);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
 
-  // Load current user once
+  // Update modal states
+  const [showUpdateModal, setShowUpdateModal] = useState(false);
+  const [updateText, setUpdateText] = useState('');
+  const [isSubmittingUpdate, setIsSubmittingUpdate] = useState(false);
+  const [projectUpdates, setProjectUpdates] = useState<any[]>([]);
+
+  // User search states for edit mode - using user-management pattern
+  const [allUsers, setAllUsers] = useState<any[]>([]);
+  const [employeeSearchTerm, setEmployeeSearchTerm] = useState('');
+  const [employeeSearchResults, setEmployeeSearchResults] = useState<any[]>([]);
+  const [isLoadingUsers, setIsLoadingUsers] = useState(false);
+  const [showEmployeeSearch, setShowEmployeeSearch] = useState(false);
+  const [showViewerSearch, setShowViewerSearch] = useState(false);
+
+  // Load current user once and load all users for search
   useEffect(() => {
     try {
       const userJson = localStorage.getItem('user');
@@ -181,6 +195,9 @@ export default function ProjectDetailPage({ params }: ProjectDetailProps) {
     } catch (error) {
       console.error('Error loading current user:', error);
     }
+
+    // Load all users for search functionality
+    loadAllUsers();
   }, []);
 
   const fetchProject = async () => {
@@ -335,6 +352,31 @@ export default function ProjectDetailPage({ params }: ProjectDetailProps) {
     fetchAvailableProjects();
   }, []);
 
+  // Load project updates
+  useEffect(() => {
+    const loadProjectUpdates = async () => {
+      if (!id) return;
+
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`/api/projects/${id}/updates`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setProjectUpdates(data.updates || []);
+        }
+      } catch (error) {
+        console.error('Error loading project updates:', error);
+      }
+    };
+
+    loadProjectUpdates();
+  }, [id]);
+
   // Handle project update
   const handleUpdateProject = async (updatedData: any) => {
     try {
@@ -467,12 +509,186 @@ export default function ProjectDetailPage({ params }: ProjectDetailProps) {
     });
   };
 
+  // Handle project update submission
+  const handleSubmitUpdate = async () => {
+    if (!updateText.trim()) return;
+
+    setIsSubmittingUpdate(true);
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/projects/${id}/updates`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          message: updateText.trim(),
+          author_id: currentUser?._id || currentUser?.id,
+          author_name: currentUser?.name || `${currentUser?.firstName || ''} ${currentUser?.lastName || ''}`.trim() || currentUser?.email
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to post update');
+      }
+
+      const result = await response.json();
+
+      // Add the new update to the local state
+      setProjectUpdates(prev => [result.update, ...prev]);
+
+      // Clear the form and close modal
+      setUpdateText('');
+      setShowUpdateModal(false);
+
+      toast.success('Update posted successfully!');
+    } catch (error) {
+      console.error('Error posting update:', error);
+      toast.error('Failed to post update. Please try again.');
+    } finally {
+      setIsSubmittingUpdate(false);
+    }
+  };
+
   const handleViewerChange = (index: number, field: 'name' | 'email', value: string) => {
     setEditData(prev => {
       const newViewers = [...prev.viewers];
       newViewers[index] = { ...newViewers[index], [field]: value };
       return { ...prev, viewers: newViewers };
     });
+  };
+
+  // Load all users once for fast client-side search (user-management pattern)
+  const loadAllUsers = async () => {
+    try {
+      setIsLoadingUsers(true);
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/admin/users?limit=0', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to fetch users');
+      }
+
+      setAllUsers(data.users || []);
+    } catch (error) {
+      console.error('Error loading users:', error);
+      // Fallback to empty array if loading fails
+      setAllUsers([]);
+    } finally {
+      setIsLoadingUsers(false);
+    }
+  };
+
+  // Employee search function - using client-side filtering (user-management pattern)
+  const searchEmployees = (term: string) => {
+    if (!term.trim()) {
+      setEmployeeSearchResults([]);
+      return;
+    }
+
+    // Filter users client-side for instant results
+    const filteredUsers = allUsers.filter(user => {
+      const matchesSearch =
+        user.username?.toLowerCase().includes(term.toLowerCase()) ||
+        user.email?.toLowerCase().includes(term.toLowerCase()) ||
+        (user.firstName && user.firstName.toLowerCase().includes(term.toLowerCase())) ||
+        (user.lastName && user.lastName.toLowerCase().includes(term.toLowerCase())) ||
+        (user.name && user.name.toLowerCase().includes(term.toLowerCase()));
+
+      return matchesSearch;
+    });
+
+    // Format results to match expected structure
+    const formattedResults = filteredUsers.map(user => ({
+      _id: user._id,
+      id: user._id,
+      email: user.email,
+      name: user.name || `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email.split('@')[0],
+      firstName: user.firstName || '',
+      lastName: user.lastName || '',
+      role: user.role || '',
+      department: user.department || '',
+      jobTitle: user.jobTitle || ''
+    }));
+
+    // Check if the term looks like an email for manual entry
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (emailRegex.test(term) && !formattedResults.some(user => user.email === term)) {
+      // Add manual email entry option
+      formattedResults.unshift({
+        _id: term,
+        id: term,
+        email: term,
+        name: term.split('@')[0],
+        firstName: term.split('@')[0],
+        lastName: '',
+        role: '',
+        department: '',
+        jobTitle: '',
+        isManualEntry: true
+      } as any);
+    }
+
+    setEmployeeSearchResults(formattedResults);
+  };
+
+  const addEmployeeFromSearch = (employee: any) => {
+    // Check if already added
+    if (editData.employees.some(emp => emp.email === employee.email)) {
+      toast.error('User already added as team member');
+      return;
+    }
+
+    const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+    setEditData(prev => ({
+      ...prev,
+      employees: [...prev.employees, {
+        name: employee.name || `${employee.firstName} ${employee.lastName}`.trim(),
+        email: employee.email,
+        department: employee.department || '',
+        role: employee.role || 'Team Member',
+        tasks: '',
+        hours: '',
+        tools_used: '',
+        addedBy: currentUser?.name || currentUser?.email || 'Current User'
+      }]
+    }));
+
+    toast.success(`${employee.name || employee.email} added as team member`);
+  };
+
+  const addViewerFromSearch = (viewer: any) => {
+    // Check if already added
+    if (editData.viewers.some(v => v.email === viewer.email)) {
+      toast.error('User already added as viewer');
+      return;
+    }
+
+    // Check if already assigned as employee
+    if (editData.employees.some(emp => emp.email === viewer.email)) {
+      toast.error('User is already assigned as team member');
+      return;
+    }
+
+    const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+    setEditData(prev => ({
+      ...prev,
+      viewers: [...prev.viewers, {
+        name: viewer.name || `${viewer.firstName} ${viewer.lastName}`.trim(),
+        email: viewer.email,
+        addedBy: currentUser?.name || currentUser?.email || 'Current User'
+      }]
+    }));
+
+    toast.success(`${viewer.name || viewer.email} added as viewer`);
   };
 
   // Normalize status and priority values
@@ -848,15 +1064,92 @@ export default function ProjectDetailPage({ params }: ProjectDetailProps) {
               <div className="space-y-4 border-t pt-6">
                 <div className="flex justify-between items-center">
                   <Label className="text-sm font-medium">Team Members</Label>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={() => setShowEmployeeForm(true)}
-                    className="bg-purple-100 hover:bg-purple-200 text-black text-sm"
-                  >
-                    Add Employee
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowEmployeeSearch(!showEmployeeSearch)}
+                      className="bg-purple-100 hover:bg-purple-200 text-black text-sm"
+                    >
+                      <FaSearch className="mr-1 h-3 w-3" />
+                      Search & Add
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setEditData(prev => ({...prev, employees: [...prev.employees, { name: '', email: '', department: '', role: '', hours: '', tasks: '', tools_used: '' }]}))}
+                      className="bg-gray-100 hover:bg-gray-200 text-black text-sm"
+                    >
+                      <FaPlus className="mr-1 h-3 w-3" />
+                      Add Manually
+                    </Button>
+                  </div>
                 </div>
+
+                {showEmployeeSearch && (
+                  <div className="border rounded-lg p-4 bg-blue-50">
+                    <div className="space-y-3">
+                      <div className="relative">
+                        <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                        <Input
+                          type="text"
+                          placeholder="Search team members by name or email..."
+                          className="pl-10 pr-4 py-2 w-full"
+                          value={employeeSearchTerm}
+                          onChange={(e) => {
+                            setEmployeeSearchTerm(e.target.value);
+                            searchEmployees(e.target.value);
+                          }}
+                        />
+                      </div>
+
+                      {isLoadingUsers && (
+                        <div className="flex items-center justify-center py-4">
+                          <FaSpinner className="animate-spin h-5 w-5 text-purple-600 mr-2" />
+                          <span className="text-sm text-gray-600">Loading users...</span>
+                        </div>
+                      )}
+
+                      {employeeSearchTerm && employeeSearchResults.length > 0 && (
+                        <div className="max-h-48 overflow-y-auto border rounded-md bg-white">
+                          {employeeSearchResults.map((employee, index) => (
+                            <div
+                              key={employee.id || index}
+                              className="p-3 hover:bg-gray-50 cursor-pointer border-b last:border-b-0"
+                              onClick={() => {
+                                addEmployeeFromSearch(employee);
+                                setShowEmployeeSearch(false);
+                                setEmployeeSearchTerm('');
+                                setEmployeeSearchResults([]);
+                              }}
+                            >
+                              <div className="flex items-center justify-between">
+                                <div>
+                                  <div className="font-medium text-gray-900">
+                                    {employee.name || employee.email}
+                                    {employee.isManualEntry && (
+                                      <span className="ml-2 text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">Manual Entry</span>
+                                    )}
+                                  </div>
+                                  <div className="text-sm text-gray-600">{employee.email}</div>
+                                  {employee.department && (
+                                    <div className="text-xs text-gray-500">{employee.department} • {employee.role}</div>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {employeeSearchTerm && employeeSearchResults.length === 0 && !isLoadingUsers && (
+                        <div className="text-center py-4 text-gray-500">
+                          No users found for "{employeeSearchTerm}"
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
                 
                 {editData.employees.map((emp, idx) => (
                   <div key={idx} className="border p-4 rounded-md space-y-3 bg-gray-50">
@@ -892,6 +1185,12 @@ export default function ProjectDetailPage({ params }: ProjectDetailProps) {
                         arr[idx].role=e.target.value;
                         setEditData({...editData,employees:arr});
                       }} />
+                      <Input
+                        placeholder="Added by"
+                        value={emp.addedBy || currentUser?.name || currentUser?.email || 'Current User'}
+                        disabled
+                        className="bg-gray-100 text-gray-600"
+                      />
                       <div className="md:col-span-2">
                         <Textarea placeholder="Specific Tasks (comma separated)" value={emp.tasks} onChange={(e) => {
                           const arr=[...editData.employees];
@@ -928,24 +1227,108 @@ export default function ProjectDetailPage({ params }: ProjectDetailProps) {
                 ))}
               </div>
               
-              {/* Members (association only) */}
+              {/* Viewers Section */}
               <div className="space-y-4 border-t pt-6">
                 <div className="flex justify-between items-center">
                   <Label className="text-sm font-medium">Viewers</Label>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    type="button"
-                    onClick={addViewer}
-                    className="bg-purple-100 hover:bg-purple-200 text-black text-sm"
-                  >
-                    Add Viewer
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowViewerSearch(!showViewerSearch)}
+                      className="bg-yellow-100 hover:bg-yellow-200 text-black text-sm"
+                    >
+                      <FaSearch className="mr-1 h-3 w-3" />
+                      Search & Add
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      type="button"
+                      onClick={addViewer}
+                      className="bg-gray-100 hover:bg-gray-200 text-black text-sm"
+                    >
+                      <FaPlus className="mr-1 h-3 w-3" />
+                      Add Manually
+                    </Button>
+                  </div>
                 </div>
+
+                {showViewerSearch && (
+                  <div className="border rounded-lg p-4 bg-yellow-50">
+                    <div className="space-y-3">
+                      <div className="relative">
+                        <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                        <Input
+                          type="text"
+                          placeholder="Search viewers by name or email..."
+                          className="pl-10 pr-4 py-2 w-full"
+                          value={employeeSearchTerm}
+                          onChange={(e) => {
+                            setEmployeeSearchTerm(e.target.value);
+                            searchEmployees(e.target.value);
+                          }}
+                        />
+                      </div>
+
+                      {isLoadingUsers && (
+                        <div className="flex items-center justify-center py-4">
+                          <FaSpinner className="animate-spin h-5 w-5 text-purple-600 mr-2" />
+                          <span className="text-sm text-gray-600">Loading users...</span>
+                        </div>
+                      )}
+
+                      {employeeSearchTerm && employeeSearchResults.length > 0 && (
+                        <div className="max-h-48 overflow-y-auto border rounded-md bg-white">
+                          {employeeSearchResults.map((viewer, index) => (
+                            <div
+                              key={viewer.id || index}
+                              className="p-3 hover:bg-gray-50 cursor-pointer border-b last:border-b-0"
+                              onClick={() => {
+                                addViewerFromSearch(viewer);
+                                setShowViewerSearch(false);
+                                setEmployeeSearchTerm('');
+                                setEmployeeSearchResults([]);
+                              }}
+                            >
+                              <div className="flex items-center justify-between">
+                                <div>
+                                  <div className="font-medium text-gray-900">
+                                    {viewer.name || viewer.email}
+                                    {viewer.isManualEntry && (
+                                      <span className="ml-2 text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">Manual Entry</span>
+                                    )}
+                                  </div>
+                                  <div className="text-sm text-gray-600">{viewer.email}</div>
+                                  {viewer.department && (
+                                    <div className="text-xs text-gray-500">{viewer.department} • {viewer.role}</div>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {employeeSearchTerm && employeeSearchResults.length === 0 && !isLoadingUsers && (
+                        <div className="text-center py-4 text-gray-500">
+                          No users found for "{employeeSearchTerm}"
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
                 {editData.viewers.map((viewer, idx) => (
                   <div key={idx} className="flex gap-2 mb-2">
                     <Input placeholder="Name" value={viewer.name} onChange={e => handleViewerChange(idx, 'name', e.target.value)} />
                     <Input placeholder="Email" value={viewer.email} onChange={e => handleViewerChange(idx, 'email', e.target.value)} />
+                    <Input
+                      placeholder="Added by"
+                      value={viewer.addedBy || currentUser?.name || currentUser?.email || 'Current User'}
+                      disabled
+                      className="bg-gray-100 text-gray-600"
+                    />
                     <Button variant="destructive" size="sm" type="button" onClick={() => removeViewer(idx)}>Remove</Button>
                   </div>
                 ))}
@@ -1023,9 +1406,6 @@ export default function ProjectDetailPage({ params }: ProjectDetailProps) {
                         
                         // Dismiss the loading toast
                         toast.dismiss();
-                        
-                        // Force a router refresh to ensure we have the latest data
-                        router.refresh();
                       } catch (error) {
                         // Dismiss the loading toast
                         toast.dismiss();
@@ -1068,7 +1448,16 @@ export default function ProjectDetailPage({ params }: ProjectDetailProps) {
               <FaEdit className="w-4 h-4 mr-2" />
               Edit Project
             </Button>
-            
+
+            <Button
+              variant="outline"
+              onClick={() => setShowUpdateModal(true)}
+              className="text-purple-600 border-purple-600 hover:bg-purple-50"
+            >
+              <FaCommentDots className="w-4 h-4 mr-2" />
+              Update
+            </Button>
+
             {canEdit && (
               <Dialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
                 <DialogTrigger asChild>
@@ -1228,8 +1617,56 @@ export default function ProjectDetailPage({ params }: ProjectDetailProps) {
                 )}
               </div>
             </div>
+
+            {/* Project Updates Timeline */}
+            <div className="mt-6">
+              <h2 className="text-lg font-medium text-gray-800 mb-4">
+                Project Updates Timeline
+              </h2>
+              <div className="space-y-4">
+                {projectUpdates && projectUpdates.length > 0 ? (
+                  projectUpdates.map((update: any, index: number) => (
+                    <div key={update._id || index} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                      <div className="flex items-start space-x-3">
+                        
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center space-x-2">
+                              <span className="font-medium text-gray-900">
+                                {update.author_name || 'Unknown User'}
+                              </span>
+                              <span className="text-sm text-gray-500">posted an update</span>
+                            </div>
+                            <span className="text-sm text-gray-500">
+                              {new Date(update.created_at).toLocaleDateString('en-US', {
+                                year: 'numeric',
+                                month: 'short',
+                                day: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              })}
+                            </span>
+                          </div>
+                          <div className="text-gray-700 whitespace-pre-wrap break-words">
+                            {update.message}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    <FaCommentDots className="mx-auto h-12 w-12 text-gray-300 mb-4" />
+                    <p className="text-lg font-medium text-gray-900 mb-2">No updates yet</p>
+                    <p className="text-gray-500">
+                      Project updates will appear here when team members post progress reports.
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
-          
+
           <div className="space-y-6">
             <div className="bg-white rounded-lg p-4 border border-gray-200 shadow-sm">
               <h2 className="text-lg font-medium text-gray-900 mb-3">Project Details</h2>
@@ -1311,6 +1748,90 @@ export default function ProjectDetailPage({ params }: ProjectDetailProps) {
           </div>
         </div>
       </div>
+
+      {/* Update Modal */}
+      <Dialog open={showUpdateModal} onOpenChange={setShowUpdateModal}>
+        <DialogContent className="bg-white max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold text-gray-900">Post Project Update</DialogTitle>
+            <DialogDescription className="text-gray-600 text-base">
+              Write a comprehensive update about this project in one detailed paragraph.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-6">
+            <div>
+              <Label htmlFor="update-text" className="text-base font-semibold text-gray-800 mb-3 block">
+                Project Update
+              </Label>
+              <div className="text-sm text-gray-600 mb-3">
+                <p>Write a comprehensive update covering progress, challenges, achievements, next steps, and any important information the team should know.</p>
+              </div>
+              <Textarea
+                id="update-text"
+                placeholder="Write a comprehensive project update in one detailed paragraph. Include progress made, current status, any challenges and how they're being addressed, team highlights, upcoming priorities, and any other important information the team should know..."
+                value={updateText}
+                onChange={(e) => setUpdateText(e.target.value)}
+                className="mt-2 min-h-[200px] text-base"
+                disabled={isSubmittingUpdate}
+              />
+              <div className="mt-2 text-sm text-gray-500">
+                {updateText.length}/2000 characters
+              </div>
+            </div>
+
+            {/* Recent Updates */}
+            {projectUpdates.length > 0 && (
+              <div className="border-t pt-4">
+                <h4 className="text-sm font-medium text-gray-700 mb-3">Recent Updates</h4>
+                <div className="space-y-3 max-h-48 overflow-y-auto">
+                  {projectUpdates.slice(0, 3).map((update, index) => (
+                    <div key={index} className="bg-gray-50 p-3 rounded-lg">
+                      <div className="flex justify-between items-start mb-2">
+                        <span className="text-sm font-medium text-gray-900">
+                          {update.author_name || 'Unknown User'}
+                        </span>
+                        <span className="text-xs text-gray-500">
+                          {new Date(update.created_at).toLocaleDateString()}
+                        </span>
+                      </div>
+                      <p className="text-sm text-gray-700">{update.message}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowUpdateModal(false);
+                setUpdateText('');
+              }}
+              disabled={isSubmittingUpdate}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSubmitUpdate}
+              disabled={!updateText.trim() || isSubmittingUpdate || updateText.length > 2000}
+              className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2"
+            >
+              {isSubmittingUpdate ? (
+                <>
+                  <FaSpinner className="animate-spin mr-2 h-4 w-4 text-purple-600" />
+                  Posting Update...
+                </>
+              ) : (
+                'Post Project Update'
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* Add space between project details box and footer */}
       <div className="mb-96"></div>
     </div>

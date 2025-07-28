@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { FiUser, FiEdit, FiSearch, FiCheck, FiX, FiInfo, FiUsers, FiEye, FiCheckCircle, FiXCircle, FiStar } from 'react-icons/fi';
 import { FaSpinner } from 'react-icons/fa';
 import { toast } from 'react-hot-toast';
@@ -29,6 +29,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useFieldArray } from 'react-hook-form';
+import { DepartmentManagementTourLauncher } from '@/components/tour/DepartmentManagementTourLauncher';
 import { 
   Form, 
   FormControl, 
@@ -221,11 +222,7 @@ export default function DepartmentManagementPage() {
     name: 'jobResponsibilities' 
   });
 
-  // Fetch users when component mounts, search changes, or department changes
-  useEffect(() => {
-    fetchUsers();
-    setCurrentPage(1);
-  }, [searchTerm, currentUserDepartment]);
+
 
   // Filter users based on search term and filters
   const filteredUsers = users.filter(user => {
@@ -349,7 +346,7 @@ export default function DepartmentManagementPage() {
     }
   };
 
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     try {
       console.log('Starting to fetch users...');
       setIsLoading(true);
@@ -469,7 +466,13 @@ export default function DepartmentManagementPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [searchTerm]);
+
+  // Fetch users when component mounts, search changes, or department changes
+  useEffect(() => {
+    fetchUsers();
+    setCurrentPage(1);
+  }, [searchTerm, currentUserDepartment, fetchUsers]);
 
   const handleApproveProfile = async (user: User, approve: boolean) => {
     const token = localStorage.getItem('token');
@@ -805,25 +808,22 @@ export default function DepartmentManagementPage() {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="container mx-auto px-4 py-6 sm:py-8">
-        <div className="mb-8">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Department Management</h1>
-              <p className="text-gray-600 text-sm sm:text-base leading-relaxed">
-                Manage employees in your department, edit their job profiles, and approve their information.
-              </p>
-            </div>
-            {currentUserDepartment && (
-              <div className="flex-shrink-0">
-                <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200 text-sm px-3 py-1">
-                  Your Department: {currentUserDepartment}
-                </Badge>
-              </div>
-            )}
+    <div className="container mx-auto py-8 px-4 bg-gray-50 min-h-screen">
+      <div className="text-center mb-10 md:mb-12">
+        <h1 className="text-4xl md:text-5xl font-bold text-gray-800 mt-4">
+          <span className="text-purple-700">Department</span> Management
+        </h1>
+        <p className="mt-3 text-lg text-gray-600 max-w-xl mx-auto">
+          Manage employees in your department, edit their job profiles, and approve their information.
+        </p>
+        {currentUserDepartment && (
+          <div className="mt-4">
+            <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200 text-sm px-3 py-1">
+              Your Department: {currentUserDepartment}
+            </Badge>
           </div>
-        </div>
+        )}
+      </div>
 
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
           <div className="flex flex-col lg:flex-row gap-4 lg:items-end">
@@ -838,18 +838,19 @@ export default function DepartmentManagementPage() {
                 className="pl-9 pr-4 py-2.5 w-full text-sm rounded-md border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-white text-gray-900"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
+                data-tour="search-employees"
               />
             </div>
 
             {/* Filters */}
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-wrap gap-3" data-tour="filter-controls">
               {/* Status Filter */}
               <div className="flex flex-col">
 
                 <select
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
-                  className="pl-3 pr-10 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-white min-w-[140px]"
+                  className="pl-3 pr-10 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-white min-w-[140px] appearance-none"
                   style={{
                     backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`,
                     backgroundPosition: 'right 0.5rem center',
@@ -868,7 +869,7 @@ export default function DepartmentManagementPage() {
                 <select
                   value={feedbackFilter}
                   onChange={(e) => setFeedbackFilter(e.target.value)}
-                  className="pl-3 pr-10 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-white min-w-[140px]"
+                  className="pl-3 pr-10 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-white min-w-[140px] appearance-none"
                   style={{
                     backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`,
                     backgroundPosition: 'right 0.5rem center',
@@ -888,7 +889,7 @@ export default function DepartmentManagementPage() {
                 <select
                   value={roleFilter}
                   onChange={(e) => setRoleFilter(e.target.value)}
-                  className="pl-3 pr-10 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-white min-w-[140px]"
+                  className="pl-3 pr-10 py-2.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-white min-w-[140px] appearance-none"
                   style={{
                     backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`,
                     backgroundPosition: 'right 0.5rem center',
@@ -908,14 +909,14 @@ export default function DepartmentManagementPage() {
 
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-sm min-w-[900px]">
+            <table className="w-full text-sm min-w-[900px]" data-tour="employee-table">
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Employee</th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Role Type</th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Feedback</th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Status</th>
-                  <th className="px-6 py-4 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">Actions</th>
+                  <th className="w-[35%] px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Employee</th>
+                  <th className="w-[18%] px-8 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Role Type</th>
+                  <th className="w-[20%] px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Feedback</th>
+                  <th className="w-[15%] px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Status</th>
+                  <th className="w-[12%] px-4 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-100">
@@ -923,7 +924,7 @@ export default function DepartmentManagementPage() {
                   <tr>
                     <td colSpan={6} className="px-6 py-12 text-center">
                       <div className="flex flex-col items-center justify-center space-y-3">
-                        <FaSpinner className="h-8 w-8 text-blue-600 animate-spin" />
+                        <FaSpinner className="h-8 w-8 text-purple-600 animate-spin" />
                         <p className="text-sm text-gray-600 font-medium">Loading employees...</p>
                       </div>
                     </td>
@@ -951,7 +952,7 @@ export default function DepartmentManagementPage() {
                 ) : (
                   currentUsers.map((user) => (
                     <tr key={user._id} className="hover:bg-gray-50 transition-colors duration-200">
-                      <td className="px-6 py-4">
+                      <td className="w-[35%] px-6 py-4">
                         <div className="flex items-center">
                           <div className="flex-shrink-0 h-10 w-10 rounded-full bg-purple-50 flex items-center justify-center border border-purple-100">
                             <FiUser className="h-5 w-5 text-purple-600" />
@@ -964,12 +965,12 @@ export default function DepartmentManagementPage() {
                           </div>
                         </div>
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="w-[18%] px-8 py-4">
                         <span className={`px-3 py-1.5 inline-flex text-xs leading-4 font-semibold rounded-full ${getRoleBadgeClass(user.role)}`}>
                           {formatRoleType(user.role)}
                         </span>
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="w-[20%] px-6 py-4">
                         <div className="flex items-center">
                           {user.feedbackRating ? (
                             <div className="flex flex-col">
@@ -988,7 +989,7 @@ export default function DepartmentManagementPage() {
                           )}
                         </div>
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="w-[15%] px-6 py-4">
                         <span className={`px-3 py-1.5 inline-flex text-xs leading-4 font-semibold rounded-full ${
                           user.profileApproved
                             ? 'bg-green-50 text-green-700 border border-green-200'
@@ -997,8 +998,8 @@ export default function DepartmentManagementPage() {
                           {user.profileApproved ? 'Approved' : 'Pending'}
                         </span>
                       </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center justify-end space-x-2">
+                      <td className="w-[12%] px-4 py-4">
+                        <div className="flex items-center justify-center space-x-2" data-tour="employee-actions">
                           {/* View Button - Always shown */}
                           <Button
                             variant="ghost"
@@ -1227,7 +1228,7 @@ export default function DepartmentManagementPage() {
                       <h3 className="text-lg font-semibold text-gray-900 mb-3">Job Information</h3>
                       <div className="space-y-2 text-sm">
                         <p className="text-gray-700"><span className="font-medium text-gray-900">Job Title:</span> {selectedUser.jobTitle || 'N/A'}</p>
-                        <p className="text-gray-700"><span className="font-medium text-gray-900">Department:</span> {selectedUser.department || 'N/A'}</p>
+                        <p className="text-gray-700"><span className="font-medium text-purple-900">Department:</span> {selectedUser.department || 'N/A'}</p>
                         <p className="text-gray-700"><span className="font-medium text-gray-900">Reports To:</span> {selectedUser.reportsTo || 'N/A'}</p>
                         <p className="text-gray-700"><span className="font-medium text-gray-900">Work Mode:</span> {selectedUser.workMode || 'N/A'}</p>
                         <p className="text-gray-700"><span className="font-medium text-gray-900">Office Location:</span> {selectedUser.officeLocation || 'N/A'}</p>
@@ -1567,7 +1568,7 @@ export default function DepartmentManagementPage() {
                     name="department"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Department *</FormLabel>
+                        <FormLabel className="text-purple-900">Department *</FormLabel>
                         <FormControl>
                           <Input placeholder="Enter department" {...field} />
                         </FormControl>
@@ -1835,7 +1836,7 @@ export default function DepartmentManagementPage() {
           
           {isLoadingDetails ? (
             <div className="flex flex-col items-center justify-center py-16 space-y-4 bg-white">
-              <FaSpinner className="h-10 w-10 text-blue-600 animate-spin" />
+              <FaSpinner className="h-10 w-10 text-purple-600 animate-spin" />
               <p className="text-gray-700 font-medium">Loading employee details...</p>
             </div>
           ) : userDetails ? (
@@ -2026,7 +2027,8 @@ export default function DepartmentManagementPage() {
           )}
         </DialogContent>
       </Dialog>
-      </div>
+
+      <DepartmentManagementTourLauncher />
     </div>
   );
 }

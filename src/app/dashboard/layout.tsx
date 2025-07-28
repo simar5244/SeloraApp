@@ -285,6 +285,18 @@ export default function DashboardLayout({
       </div>
     );
   }
+
+  // Fullscreen Objective Visualization override
+  if (pathname === '/dashboard/objective-visualization') {
+    return (
+      <div className="h-screen w-full">
+        <DataProcessorInitializer />
+        <RouteGuard>
+          {children}
+        </RouteGuard>
+      </div>
+    );
+  }
   
   // Galaxy View fullscreen override
   if (pathname === '/dashboard/galaxy-view') {

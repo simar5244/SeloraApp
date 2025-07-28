@@ -1,0 +1,942 @@
+[{
+  "_id": {
+    "$oid": "68644412f33da3e4f53ffa8c"
+  },
+  "project_title": "Manage reporting",
+  "project_description": "Manage legal operations and reporting on databases",
+  "department": "",
+  "start_date": "2025-06-11",
+  "end_date": "2025-07-25",
+  "status": "ongoing",
+  "priority": "high",
+  "total_budget": 500000,
+  "tools_and_resources": [
+    "GitHub"
+  ],
+  "visible_to_all": true,
+  "linked_projects": [],
+  "employee_contributions": [
+    {
+      "name": "user2",
+      "email": "user2@testingdemo.com",
+      "department": "law",
+      "role": "lawyer",
+      "is_lead": true,
+      "tasks": [
+        "manage court proceedings"
+      ],
+      "hours": 10,
+      "tools_used": []
+    }
+  ],
+  "viewers": [
+    {
+      "name": "Anthony",
+      "email": "user1@testingdemo.com"
+    }
+  ],
+  "creatorRole": "employee_tier_3",
+  "creatorEmail": "user2@testingdemo.com",
+  "companyCode": "ry0iwbpw",
+  "isManagementProject": false,
+  "visibleToAll": true,
+  "createdByRole": "employee_tier_3",
+  "created_at": {
+    "$date": "2025-07-01T20:24:50.786Z"
+  },
+  "updated_at": {
+    "$date": "2025-07-01T20:24:50.786Z"
+  },
+  "employees": [
+    {
+      "name": "user2@testingdemo.com",
+      "email": "user2@testingdemo.com",
+      "role": "Creator",
+      "department": "Unknown"
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "68678fffc353d9bab1357842"
+  },
+  "project_title": "marketing umbrella project",
+  "project_description": "design campaigns",
+  "department": "marketign",
+  "start_date": "2025-07-01",
+  "end_date": "2025-07-30",
+  "status": "ongoing",
+  "priority": "medium",
+  "total_budget": 500000,
+  "tools_and_resources": [],
+  "visible_to_all": true,
+  "linked_projects": [],
+  "employee_contributions": [
+    {
+      "name": "Cathy McBrdige",
+      "email": "user3@testingdemo.com",
+      "department": "marketign",
+      "role": "Project Lead",
+      "is_lead": true,
+      "tasks": [
+        "Oversee campaign design",
+        "coordinate team efforts",
+        "manage project timeline",
+        "present campaign performance reports"
+      ],
+      "hours": 15,
+      "tools_used": [
+        "Adobe",
+        "SQL"
+      ]
+    }
+  ],
+  "viewers": [],
+  "creatorRole": "employee_tier_3",
+  "creatorEmail": "user3@testingdemo.com",
+  "companyCode": "ry0iwbpw",
+  "isManagementProject": false,
+  "visibleToAll": true,
+  "createdByRole": "employee_tier_3",
+  "created_at": {
+    "$date": "2025-07-04T08:25:35.973Z"
+  },
+  "updated_at": {
+    "$date": "2025-07-04T08:25:35.973Z"
+  },
+  "employees": [
+    {
+      "name": "user3@testingdemo.com",
+      "email": "user3@testingdemo.com",
+      "role": "Creator",
+      "department": "marketign"
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "686a120feb7f664ec49c59e5"
+  },
+  "project_title": "Marketing campaign",
+  "project_description": "make an advertisement ",
+  "department": "marketing",
+  "start_date": "2025-07-03",
+  "end_date": "2025-07-22",
+  "status": "ongoing",
+  "priority": "medium",
+  "total_budget": 40000,
+  "tools_and_resources": [],
+  "visible_to_all": false,
+  "linked_projects": [],
+  "employee_contributions": [
+    {
+      "employee_id": "user3@testingdemo.com",
+      "name": "Cathy McBrdige",
+      "email": "user3@testingdemo.com",
+      "department": "Marketing",
+      "role": "Project Lead",
+      "hours_per_week": 4,
+      "start_date": "2025-07-07T02:51:55.349Z",
+      "active": true,
+      "tasks": [
+        "Develop the overall marketing strategy",
+        "oversee the creation of ad content",
+        "analyze campaign performance",
+        "manage budget allocation",
+        "present findings to stakeholders"
+      ],
+      "tools_used": [
+        "Adobe",
+        "SQL",
+        "MongoDB"
+      ],
+      "project_title": "Marketing campaign"
+    },
+    {
+      "employee_id": "user2@testingdemo.com",
+      "name": "Ted Mosby",
+      "email": "user2@testingdemo.com",
+      "department": "It",
+      "role": "Data Analyst",
+      "hours_per_week": 3,
+      "start_date": "2025-07-07T02:51:55.349Z",
+      "active": true,
+      "tasks": [
+        "Provide data analysis for marketing campaign",
+        "measure key performance indicators",
+        "identify trends",
+        "perform A/B testing",
+        "create reports"
+      ],
+      "tools_used": [
+        "SQL",
+        "MongoDB"
+      ],
+      "project_title": "Marketing campaign"
+    },
+    {
+      "employee_id": "user4@testingdemo.com",
+      "name": "Barney Stinson",
+      "email": "user4@testingdemo.com",
+      "department": "Law",
+      "role": "Legal Review",
+      "hours_per_week": 4,
+      "start_date": "2025-07-07T02:51:55.349Z",
+      "active": true,
+      "tasks": [
+        "Review advertising copy for legal compliance",
+        "ensure the campaign follows industry regulations",
+        "handle any legal issues that arise"
+      ],
+      "tools_used": [
+        "law"
+      ],
+      "project_title": "Marketing campaign"
+    },
+    {
+      "employee_id": "user1@testingdemo.com",
+      "name": "user1@testingdemo.com",
+      "email": "user1@testingdemo.com",
+      "department": "marketing",
+      "role": "Creator",
+      "hours_per_week": 0,
+      "start_date": "2025-07-07T02:51:55.349Z",
+      "active": true,
+      "tasks": [],
+      "tools_used": [],
+      "project_title": "Marketing campaign"
+    }
+  ],
+  "viewers": [],
+  "creatorRole": "admin",
+  "creatorEmail": "user1@testingdemo.com",
+  "companyCode": "Ry0iwBpw",
+  "isManagementProject": false,
+  "visibleToAll": false,
+  "createdByRole": "admin",
+  "created_at": {
+    "$date": "2025-07-06T06:05:03.416Z"
+  },
+  "updated_at": {
+    "$date": "2025-07-07T02:51:56.225Z"
+  },
+  "employees": [
+    {
+      "name": "Cathy McBrdige",
+      "email": "user3@testingdemo.com",
+      "department": "Marketing",
+      "role": "Project Lead",
+      "hours": "4",
+      "tasks": "Develop the overall marketing strategy,oversee the creation of ad content,analyze campaign performance,manage budget allocation,present findings to stakeholders",
+      "tools_used": "Adobe,SQL,MongoDB"
+    },
+    {
+      "name": "Ted Mosby",
+      "email": "user2@testingdemo.com",
+      "department": "It",
+      "role": "Data Analyst",
+      "hours": "3",
+      "tasks": "Provide data analysis for marketing campaign,measure key performance indicators,identify trends,perform A/B testing,create reports",
+      "tools_used": "SQL,MongoDB"
+    },
+    {
+      "name": "Barney Stinson",
+      "email": "user4@testingdemo.com",
+      "department": "Law",
+      "role": "Legal Review",
+      "hours": "4",
+      "tasks": "Review advertising copy for legal compliance,ensure the campaign follows industry regulations,handle any legal issues that arise",
+      "tools_used": "law"
+    },
+    {
+      "name": "user1@testingdemo.com",
+      "email": "user1@testingdemo.com",
+      "department": "marketing",
+      "role": "Creator",
+      "hours": "",
+      "tasks": "",
+      "tools_used": ""
+    }
+  ],
+  "linkedProjects": [],
+  "tech_stack": [],
+  "total_hours": 0
+},
+{
+  "_id": {
+    "$oid": "686c07b4bfda57370829a2c4"
+  },
+  "project_title": "database management",
+  "project_description": "manage all databases",
+  "department": "IT",
+  "start_date": "2025-07-01",
+  "end_date": "2025-07-28",
+  "status": "ongoing",
+  "priority": "critical",
+  "total_budget": 50000,
+  "tools_and_resources": [],
+  "visible_to_all": false,
+  "linked_projects": [],
+  "employee_contributions": [
+    {
+      "employee_id": "user2@testingdemo.com",
+      "name": "Ted Mosby",
+      "email": "user2@testingdemo.com",
+      "department": "It",
+      "role": "Project Lead",
+      "hours_per_week": 7,
+      "start_date": "2025-07-07T17:45:55.823Z",
+      "active": true,
+      "tasks": [
+        "Database design",
+        "database architecture",
+        "data migration",
+        "performance tuning",
+        "security implementation"
+      ],
+      "tools_used": [
+        "SQL",
+        "NoSQL"
+      ],
+      "project_title": "database management"
+    },
+    {
+      "employee_id": "user10@testingdemo.com",
+      "name": "Kurt Reade",
+      "email": "user10@testingdemo.com",
+      "department": "It",
+      "role": "Database Engineer",
+      "hours_per_week": 18,
+      "start_date": "2025-07-07T17:45:55.823Z",
+      "active": true,
+      "tasks": [
+        "Database implementation",
+        "cloud integration",
+        "data backup and recovery",
+        "automation"
+      ],
+      "tools_used": [
+        "AWS",
+        "Python",
+        "SQL",
+        "NoSQL"
+      ],
+      "project_title": "database management"
+    },
+    {
+      "employee_id": "user3@testingdemo.com",
+      "name": "Cathy McBrdige",
+      "email": "user3@testingdemo.com",
+      "department": "Marketing",
+      "role": "Database Analyst",
+      "hours_per_week": 5,
+      "start_date": "2025-07-07T17:45:55.823Z",
+      "active": true,
+      "tasks": [
+        "Data analysis",
+        "reporting",
+        "data quality monitoring",
+        "data governance"
+      ],
+      "tools_used": [
+        "SQL",
+        "MongoDB"
+      ],
+      "project_title": "database management"
+    },
+    {
+      "employee_id": "user1@testingdemo.com",
+      "name": "user1@testingdemo.com",
+      "email": "user1@testingdemo.com",
+      "department": "IT",
+      "role": "Creator",
+      "hours_per_week": 5,
+      "start_date": "2025-07-07T17:45:55.823Z",
+      "active": true,
+      "tasks": [],
+      "tools_used": [],
+      "project_title": "database management"
+    }
+  ],
+  "viewers": [
+    {
+      "name": "user4",
+      "email": "user4@testingdemo.com"
+    }
+  ],
+  "creatorRole": "admin",
+  "creatorEmail": "user1@testingdemo.com",
+  "companyCode": "Ry0iwBpw",
+  "isManagementProject": false,
+  "visibleToAll": false,
+  "createdByRole": "admin",
+  "created_at": {
+    "$date": "2025-07-07T17:45:24.126Z"
+  },
+  "updated_at": {
+    "$date": "2025-07-07T17:45:56.225Z"
+  },
+  "employees": [
+    {
+      "name": "Ted Mosby",
+      "email": "user2@testingdemo.com",
+      "department": "It",
+      "role": "Project Lead",
+      "hours": "7",
+      "tasks": "Database design,database architecture,data migration,performance tuning,security implementation",
+      "tools_used": "SQL,NoSQL"
+    },
+    {
+      "name": "Kurt Reade",
+      "email": "user10@testingdemo.com",
+      "department": "It",
+      "role": "Database Engineer",
+      "hours": "18",
+      "tasks": "Database implementation,cloud integration,data backup and recovery,automation",
+      "tools_used": "AWS,Python,SQL,NoSQL"
+    },
+    {
+      "name": "Cathy McBrdige",
+      "email": "user3@testingdemo.com",
+      "department": "Marketing",
+      "role": "Database Analyst",
+      "hours": "5",
+      "tasks": "Data analysis,reporting,data quality monitoring,data governance",
+      "tools_used": "SQL,MongoDB"
+    },
+    {
+      "name": "user1@testingdemo.com",
+      "email": "user1@testingdemo.com",
+      "department": "IT",
+      "role": "Creator",
+      "hours": "5",
+      "tasks": "",
+      "tools_used": "",
+      "isLead": true
+    }
+  ],
+  "linkedProjects": [],
+  "tech_stack": [],
+  "total_hours": 0
+},
+{
+  "_id": {
+    "$oid": "686c31adbfda57370829a48b"
+  },
+  "project_title": "Manage legal paperwork",
+  "project_description": ".",
+  "department": "",
+  "start_date": "2025-07-16",
+  "status": "ongoing",
+  "priority": "low",
+  "tools_and_resources": [],
+  "visible_to_all": false,
+  "linked_projects": [],
+  "employee_contributions": [
+    {
+      "employee_id": "user4@testingdemo.com",
+      "name": "Barney Stinson",
+      "email": "user4@testingdemo.com",
+      "department": "Law",
+      "role": "Project Lead",
+      "hours_per_week": null,
+      "start_date": "2025-07-27T22:01:53.355Z",
+      "active": true,
+      "tasks": [
+        "Document review",
+        "legal research",
+        "ensure compliance with regulations and much more"
+      ],
+      "tools_used": [
+        "law"
+      ],
+      "project_title": "Manage legal paperwork"
+    },
+    {
+      "employee_id": "user11@testingdemo.com",
+      "name": "Michelle Obama",
+      "email": "user11@testingdemo.com",
+      "department": "Law",
+      "role": "Paralegal",
+      "hours_per_week": null,
+      "start_date": "2025-07-27T22:01:53.355Z",
+      "active": true,
+      "tasks": [
+        "Assist with document preparation",
+        "organize legal documents",
+        "file paperwork"
+      ],
+      "tools_used": [
+        "JD law"
+      ],
+      "project_title": "Manage legal paperwork"
+    },
+    {
+      "employee_id": "user3@testingdemo.com",
+      "name": "Cathy McBrdige",
+      "email": "user3@testingdemo.com",
+      "department": "Marketing",
+      "role": "Documentation Specialist",
+      "hours_per_week": null,
+      "start_date": "2025-07-27T22:01:53.355Z",
+      "active": true,
+      "tasks": [
+        "Assist with document preparation",
+        "organize legal documents",
+        "file paperwork"
+      ],
+      "tools_used": [
+        "Adobe",
+        "SQL",
+        "MongoDB"
+      ],
+      "project_title": "Manage legal paperwork"
+    },
+    {
+      "employee_id": "user1@testingdemo.com",
+      "name": "user1@testingdemo.com",
+      "email": "user1@testingdemo.com",
+      "department": "Unknown",
+      "role": "Creator",
+      "hours_per_week": 0,
+      "start_date": "2025-07-27T22:01:53.355Z",
+      "active": true,
+      "tasks": [],
+      "tools_used": [],
+      "project_title": "Manage legal paperwork"
+    }
+  ],
+  "viewers": [],
+  "creatorRole": "admin",
+  "creatorEmail": "user1@testingdemo.com",
+  "companyCode": "Ry0iwBpw",
+  "isManagementProject": false,
+  "visibleToAll": false,
+  "createdByRole": "admin",
+  "created_at": {
+    "$date": "2025-07-07T20:44:29.668Z"
+  },
+  "updated_at": {
+    "$date": "2025-07-27T22:24:04.194Z"
+  },
+  "employees": [
+    {
+      "name": "Barney Stinson",
+      "email": "user4@testingdemo.com",
+      "department": "Law",
+      "role": "Project Lead",
+      "hours": "undefined",
+      "tasks": "Document review,legal research,ensure compliance with regulations and much more",
+      "tools_used": "law"
+    },
+    {
+      "name": "Michelle Obama",
+      "email": "user11@testingdemo.com",
+      "department": "Law",
+      "role": "Paralegal",
+      "hours": "undefined",
+      "tasks": "Assist with document preparation,organize legal documents,file paperwork",
+      "tools_used": "JD law"
+    },
+    {
+      "name": "Cathy McBrdige",
+      "email": "user3@testingdemo.com",
+      "department": "Marketing",
+      "role": "Documentation Specialist",
+      "hours": "undefined",
+      "tasks": "Assist with document preparation,organize legal documents,file paperwork",
+      "tools_used": "Adobe,SQL,MongoDB"
+    },
+    {
+      "name": "user1@testingdemo.com",
+      "email": "user1@testingdemo.com",
+      "department": "Unknown",
+      "role": "Creator",
+      "hours": "",
+      "tasks": "",
+      "tools_used": ""
+    }
+  ],
+  "end_date": "",
+  "linkedProjects": [],
+  "tech_stack": [],
+  "total_budget": 0,
+  "total_hours": 0,
+  "updates": [
+    {
+      "_id": {
+        "$oid": "6886a704fc2ddd9a177ea90e"
+      },
+      "message": "asd",
+      "author_id": "686440e49f50e0b6e5da0732",
+      "author_name": "Anthony Kasey",
+      "created_at": {
+        "$date": "2025-07-27T22:24:04.194Z"
+      },
+      "updated_at": {
+        "$date": "2025-07-27T22:24:04.194Z"
+      }
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "687201eb21b801a5ab161194"
+  },
+  "project_title": "manage operations",
+  "project_description": "1) manage databases\n2) run marketing campaigns",
+  "department": "",
+  "start_date": "",
+  "status": "ongoing",
+  "priority": "low",
+  "total_budget": 50000,
+  "tools_and_resources": [],
+  "visible_to_all": true,
+  "linked_projects": [
+    {
+      "projectId": "68678fffc353d9bab1357842",
+      "name": "marketing umbrella project"
+    },
+    {
+      "projectId": "686c07b4bfda57370829a2c4",
+      "name": "database management"
+    }
+  ],
+  "employee_contributions": [
+    {
+      "name": "Anthony Kasey",
+      "email": "user1@testingdemo.com",
+      "department": "Operations",
+      "role": "Project Lead",
+      "is_lead": true,
+      "tasks": [
+        "Oversee project execution",
+        "manage team coordination",
+        "ensure project aligns with strategic goals",
+        "manage project budget",
+        "report on project status"
+      ],
+      "hours": 15,
+      "hours_per_week": 15,
+      "tools_used": [
+        "Management",
+        "AI",
+        "Automation"
+      ]
+    },
+    {
+      "name": "Ted Mosby",
+      "email": "user2@testingdemo.com",
+      "department": "It",
+      "role": "Database Manager",
+      "is_lead": false,
+      "tasks": [
+        "Manage database infrastructure",
+        "ensure data integrity",
+        "optimize database performance",
+        "troubleshoot database issues"
+      ],
+      "hours": 10,
+      "hours_per_week": 10,
+      "tools_used": [
+        "SQL",
+        "NoSQL"
+      ]
+    },
+    {
+      "name": "Cathy McBrdige",
+      "email": "user3@testingdemo.com",
+      "department": "Marketing",
+      "role": "Marketing Specialist",
+      "is_lead": false,
+      "tasks": [
+        "Plan and execute marketing campaigns",
+        "analyze campaign performance",
+        "manage marketing budget",
+        "conduct market research"
+      ],
+      "hours": 5,
+      "hours_per_week": 5,
+      "tools_used": [
+        "Adobe",
+        "SQL",
+        "MongoDB"
+      ]
+    }
+  ],
+  "viewers": [],
+  "creatorRole": "admin",
+  "creatorEmail": "user1@testingdemo.com",
+  "companyCode": "Ry0iwBpw",
+  "isManagementProject": false,
+  "visibleToAll": true,
+  "createdByRole": "admin",
+  "created_at": {
+    "$date": "2025-07-12T06:34:19.492Z"
+  },
+  "updated_at": {
+    "$date": "2025-07-12T06:34:19.492Z"
+  },
+  "employees": [
+    {
+      "name": "user1@testingdemo.com",
+      "email": "user1@testingdemo.com",
+      "role": "Creator",
+      "department": "Unknown"
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "68853e8f26ee151be87e05df"
+  },
+  "project_title": "operations",
+  "project_description": "manage operations",
+  "department": "",
+  "start_date": "",
+  "status": "planning",
+  "priority": "low",
+  "tools_and_resources": [],
+  "visible_to_all": true,
+  "linked_projects": [],
+  "employee_contributions": [
+    {
+      "name": "User6",
+      "email": "user6@testingdemo.com",
+      "department": "n/a",
+      "role": "Project Lead",
+      "is_lead": true,
+      "tasks": [
+        "Project planning",
+        "task delegation",
+        "progress tracking",
+        "risk assessment",
+        "communication with stakeholders"
+      ],
+      "hours": 10,
+      "hours_per_week": 10,
+      "tools_used": [
+        "Project management software",
+        "communication tools"
+      ]
+    },
+    {
+      "name": "User7",
+      "email": "user7@testingdemo.com",
+      "department": "N/A",
+      "role": "Operations Analyst",
+      "is_lead": false,
+      "tasks": [
+        "Data analysis",
+        "process improvement",
+        "performance monitoring",
+        "reporting"
+      ],
+      "hours": 12,
+      "hours_per_week": 12,
+      "tools_used": [
+        "Data analysis software",
+        "spreadsheet software"
+      ]
+    },
+    {
+      "name": "User9",
+      "email": "user9@testingdemo.com",
+      "department": "N/A",
+      "role": "Operations Coordinator",
+      "is_lead": false,
+      "tasks": [
+        "Task coordination",
+        "documentation",
+        "scheduling",
+        "communication support"
+      ],
+      "hours": 8,
+      "hours_per_week": 8,
+      "tools_used": [
+        "Scheduling software",
+        "documentation tools",
+        "communication tools"
+      ]
+    }
+  ],
+  "viewers": [],
+  "creatorRole": "admin",
+  "creatorEmail": "user1@testingdemo.com",
+  "companyCode": "Ry0iwBpw",
+  "isManagementProject": false,
+  "visibleToAll": true,
+  "createdByRole": "admin",
+  "created_at": {
+    "$date": "2025-07-26T20:46:07.622Z"
+  },
+  "updated_at": {
+    "$date": "2025-07-26T20:46:07.622Z"
+  },
+  "employees": [
+    {
+      "name": "user1@testingdemo.com",
+      "email": "user1@testingdemo.com",
+      "role": "Creator",
+      "department": "Unknown"
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "6885d8857794bd97ebf2504e"
+  },
+  "project_title": "opsgoal",
+  "title": "opsgoal",
+  "project_description": "",
+  "description": "",
+  "start_date": "2025-07-27",
+  "startDate": "2025-07-27",
+  "end_date": "",
+  "endDate": "",
+  "total_budget": 20000,
+  "budget": 20000,
+  "assignedEmployees": [
+    {
+      "employeeId": "user1@testingdemo.com",
+      "name": "user1",
+      "email": "user1@testingdemo.com"
+    }
+  ],
+  "assigned_employees": [
+    {
+      "employeeId": "user1@testingdemo.com",
+      "name": "user1",
+      "email": "user1@testingdemo.com"
+    }
+  ],
+  "team_members": [
+    {
+      "user_id": "user1@testingdemo.com",
+      "name": "user1",
+      "email": "user1@testingdemo.com",
+      "role": "member",
+      "permissions": [
+        "view",
+        "edit",
+        "comment"
+      ],
+      "joinedAt": "2025-07-27T07:43:00.214Z"
+    }
+  ],
+  "project_permissions": {
+    "user1@testingdemo.com": {
+      "role": "member",
+      "permissions": [
+        "view",
+        "edit",
+        "comment",
+        "manage_tasks"
+      ],
+      "canEdit": true,
+      "canDelete": true,
+      "assignedAt": "2025-07-27T07:43:00.214Z"
+    }
+  },
+  "visibleToAll": false,
+  "status": "planning",
+  "priority": "medium",
+  "department": "",
+  "createdBy": "user1@testingdemo.com",
+  "createdByRole": "admin",
+  "companyCode": "ry0iwbpw",
+  "createdFromGoal": true,
+  "linkedToGoal": true,
+  "goalContext": {
+    "goalId": "pending",
+    "goalTitle": "New Goal"
+  },
+  "isManagementProject": false,
+  "created_at": {
+    "$date": "2025-07-27T07:43:01.446Z"
+  },
+  "updated_at": {
+    "$date": "2025-07-27T07:43:01.446Z"
+  },
+  "employees": [],
+  "viewers": []
+},
+{
+  "_id": {
+    "$oid": "6886a21c181eb5f729ca1fb7"
+  },
+  "project_title": "Subscribers",
+  "title": "Subscribers",
+  "project_description": "hit 500k subs",
+  "description": "hit 500k subs",
+  "start_date": "2025-07-27",
+  "startDate": "2025-07-27",
+  "end_date": "",
+  "endDate": "",
+  "total_budget": 0,
+  "budget": 0,
+  "assignedEmployees": [
+    {
+      "employeeId": "686440e49f50e0b6e5da0732",
+      "name": "Anthony Kasey",
+      "email": "user1@testingdemo.com"
+    }
+  ],
+  "assigned_employees": [
+    {
+      "employeeId": "686440e49f50e0b6e5da0732",
+      "name": "Anthony Kasey",
+      "email": "user1@testingdemo.com"
+    }
+  ],
+  "team_members": [
+    {
+      "user_id": "686440e49f50e0b6e5da0732",
+      "name": "Anthony Kasey",
+      "email": "user1@testingdemo.com",
+      "role": "member",
+      "permissions": [
+        "view",
+        "edit",
+        "comment"
+      ],
+      "joinedAt": "2025-07-27T22:03:06.171Z"
+    }
+  ],
+  "project_permissions": {
+    "user1@testingdemo.com": {
+      "role": "member",
+      "permissions": [
+        "view",
+        "edit",
+        "comment",
+        "manage_tasks"
+      ],
+      "canEdit": true,
+      "canDelete": true,
+      "assignedAt": "2025-07-27T22:03:06.171Z"
+    }
+  },
+  "visibleToAll": false,
+  "status": "planning",
+  "priority": "medium",
+  "department": "",
+  "createdBy": "user1@testingdemo.com",
+  "createdByRole": "admin",
+  "companyCode": "ry0iwbpw",
+  "createdFromGoal": true,
+  "linkedToGoal": true,
+  "goalContext": {
+    "goalId": "pending",
+    "goalTitle": "marketing"
+  },
+  "isManagementProject": false,
+  "created_at": {
+    "$date": "2025-07-27T22:03:08.611Z"
+  },
+  "updated_at": {
+    "$date": "2025-07-27T22:03:08.611Z"
+  },
+  "employees": [],
+  "viewers": []
+}]

@@ -267,13 +267,29 @@ export async function POST(request: Request) {
             companyCode = authUser.companyCode || companyCode;
             dbUserRole = authUser.role || dbUserRole;
             console.log(`Loaded fresh role/company from auth_db: ${dbUserRole}/${companyCode}`);
+          } else {
+            dbUserRole = payload.role || '';
+            companyCode = payload.companyCode || companyCode;
           }
         } catch (err) {
           console.error('Error loading user from auth_db:', err);
+          dbUserRole = payload.role || '';
+          companyCode = payload.companyCode || companyCode;
         }
       }
     }
-    
+
+    // If no company code yet, try to get from user record
+    if (!companyCode && userEmail) {
+      const defaultDb = client.db(defaultDbName);
+      const usersCol = defaultDb.collection('users');
+      const userDoc = await usersCol.findOne({ email: userEmail });
+      if (userDoc) {
+        companyCode = (userDoc as any).companyCode || '';
+        dbUserRole = (userDoc as any).role || '';
+      }
+    }
+
     if (!companyCode) {
       console.error('Company code missing for goal creation');
       return NextResponse.json({ error: 'Company code required for goal creation' }, { status: 400 });

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { FiPlusCircle, FiBarChart2, FiUsers, FiRefreshCw, FiDollarSign, FiClock, FiEdit, FiCopy, FiTrash2, FiFilter } from 'react-icons/fi';
+import { FaSpinner } from 'react-icons/fa';
 import { motion } from 'framer-motion';
 import clsx from 'clsx';
 
@@ -301,7 +302,10 @@ const SimulationsPage = () => {
 
       {loading ? (
         <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+          <div className="text-center">
+            <FaSpinner className="animate-spin h-8 w-8 text-purple-600 mx-auto mb-4" />
+            <p className="text-gray-600">Loading simulations...</p>
+          </div>
         </div>
       ) : (
         <>

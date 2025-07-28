@@ -33,14 +33,42 @@ export interface IGoal extends Document {
     name: string;
     role: string;
     assignedAt: Date;
+    addedBy?: {
+      userId: string;
+      userName: string;
+      addedAt: Date;
+    };
+    removedBy?: {
+      userId: string;
+      userName: string;
+      removedAt: Date;
+    };
   }[];
   viewers: {
     employeeId: string;
     email: string;
     name: string;
+    addedBy?: {
+      userId: string;
+      userName: string;
+      addedAt: Date;
+    };
+    removedBy?: {
+      userId: string;
+      userName: string;
+      removedAt: Date;
+    };
   }[];
   progress: number; // 0-100
   isManagementGoal: boolean;
+  updates?: {
+    _id: mongoose.Types.ObjectId;
+    message: string;
+    author_id: string;
+    author_name: string;
+    created_at: Date;
+    updated_at: Date;
+  }[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -172,6 +200,34 @@ const GoalSchema: Schema = new Schema({
     assignedAt: {
       type: Date,
       default: Date.now
+    },
+    addedBy: {
+      userId: {
+        type: String,
+        required: false
+      },
+      userName: {
+        type: String,
+        required: false
+      },
+      addedAt: {
+        type: Date,
+        default: Date.now
+      }
+    },
+    removedBy: {
+      userId: {
+        type: String,
+        required: false
+      },
+      userName: {
+        type: String,
+        required: false
+      },
+      removedAt: {
+        type: Date,
+        required: false
+      }
     }
   }],
   viewers: [{
@@ -186,6 +242,34 @@ const GoalSchema: Schema = new Schema({
     name: {
       type: String,
       required: true
+    },
+    addedBy: {
+      userId: {
+        type: String,
+        required: false
+      },
+      userName: {
+        type: String,
+        required: false
+      },
+      addedAt: {
+        type: Date,
+        default: Date.now
+      }
+    },
+    removedBy: {
+      userId: {
+        type: String,
+        required: false
+      },
+      userName: {
+        type: String,
+        required: false
+      },
+      removedAt: {
+        type: Date,
+        required: false
+      }
     }
   }],
   progress: {
@@ -198,7 +282,34 @@ const GoalSchema: Schema = new Schema({
     type: Boolean,
     default: false,
     index: true
-  }
+  },
+  updates: [{
+    _id: {
+      type: Schema.Types.ObjectId,
+      default: () => new mongoose.Types.ObjectId()
+    },
+    message: {
+      type: String,
+      required: true,
+      trim: true
+    },
+    author_id: {
+      type: String,
+      required: true
+    },
+    author_name: {
+      type: String,
+      required: true
+    },
+    created_at: {
+      type: Date,
+      default: Date.now
+    },
+    updated_at: {
+      type: Date,
+      default: Date.now
+    }
+  }]
 }, {
   timestamps: true
 });

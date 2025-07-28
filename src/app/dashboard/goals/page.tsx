@@ -11,15 +11,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import GoalDisplayCard from "./GoalDisplayCard";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
 import { fetchGoals } from "./api";
 import { toast } from "react-hot-toast";
-import { FaBullseye, FaPlus } from "react-icons/fa";
+import { FaSpinner } from "react-icons/fa";
+import { GoalsTourLauncher } from "@/components/tour/GoalsTourLauncher";
 
 
 import { useRouter } from "next/navigation";
@@ -208,8 +203,8 @@ export default function GoalsPage() {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="flex flex-col justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
-          <p className="mt-4 text-gray-600">Loading goals...</p>
+          <FaSpinner className="animate-spin h-8 w-8 text-purple-600 mb-4" />
+          <p className="text-gray-600">Loading goals...</p>
         </div>
       </div>
     );
@@ -237,11 +232,12 @@ export default function GoalsPage() {
               value={searchTerm}
               onChange={handleSearch}
               className="pl-10 border-gray-300 focus:border-purple-500 focus:ring-purple-500"
+              data-tour="search-input"
             />
           </div>
 
           <Select value={departmentFilter} onValueChange={handleDepartmentFilterChange}>
-            <SelectTrigger className="border-gray-300 focus:border-purple-500 focus:ring-purple-500">
+            <SelectTrigger className="border-gray-300 focus:border-purple-500 focus:ring-purple-500" data-tour="department-filter">
               <SelectValue placeholder="Department" />
             </SelectTrigger>
             <SelectContent>
@@ -253,7 +249,7 @@ export default function GoalsPage() {
           </Select>
 
           <Select value={statusFilter} onValueChange={handleStatusFilterChange}>
-            <SelectTrigger className="border-gray-300 focus:border-purple-500 focus:ring-purple-500">
+            <SelectTrigger className="border-gray-300 focus:border-purple-500 focus:ring-purple-500" data-tour="status-filter">
               <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent>
@@ -270,6 +266,7 @@ export default function GoalsPage() {
         <Button
           onClick={() => router.push('/dashboard/goals/create')}
           className="bg-purple-600 hover:bg-purple-700 text-white"
+          data-tour="create-goal-button"
         >
           Add Goal
         </Button>
@@ -280,8 +277,8 @@ export default function GoalsPage() {
       {/* Goals Grid - Matching Projects Page */}
       {loadingGoals ? (
         <div className="flex flex-col justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
-          <p className="mt-4 text-gray-600">Loading goals...</p>
+          <FaSpinner className="animate-spin h-8 w-8 text-purple-600 mb-4" />
+          <p className="text-gray-600">Loading goals...</p>
         </div>
       ) : errorMessage ? (
         <div className="text-center py-8">
@@ -291,7 +288,7 @@ export default function GoalsPage() {
           </Button>
         </div>
       ) : filteredGoals.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" data-tour="goals-grid">
           {filteredGoals.map((goal) => (
             <GoalDisplayCard key={goal.id} goal={goal} />
           ))}
@@ -313,44 +310,7 @@ export default function GoalsPage() {
       )}
 
 
-
-
-
-      {/* Error Message */}
-      {errorMessage && (
-        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-          <p className="text-red-700">{errorMessage}</p>
-        </div>
-      )}
-
-      {/* Goals Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredGoals.length === 0 ? (
-          <div className="col-span-full">
-            <div className="text-center py-12">
-              <FaBullseye className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No goals found</h3>
-              <p className="text-gray-500 mb-4">
-                {searchTerm || departmentFilter !== 'all' || statusFilter !== 'all'
-                  ? 'No goals match your current filters.'
-                  : 'Get started by creating your first goal.'
-                }
-              </p>
-              <Button
-                onClick={() => router.push('/dashboard/goals/create')}
-                className="bg-purple-600 hover:bg-purple-700"
-              >
-                <FaPlus className="h-4 w-4 mr-2" />
-                Create Goal
-              </Button>
-            </div>
-          </div>
-        ) : (
-          filteredGoals.map((goal) => (
-            <GoalDisplayCard key={goal.id} goal={goal} />
-          ))
-        )}
-      </div>
+      <GoalsTourLauncher />
     </div>
   );
 }

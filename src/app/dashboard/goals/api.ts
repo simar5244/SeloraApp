@@ -176,9 +176,15 @@ export async function addNewGoal(data: any) {
     
     const queryString = params.toString() ? `?${params.toString()}` : '';
     
+    // Get the token for Authorization header
+    const storedToken = localStorage.getItem('token');
+
     const res = await fetch(`/api/goals${queryString}`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        ...(storedToken ? { 'Authorization': `Bearer ${storedToken}` } : {})
+      },
       body: JSON.stringify({
         ...data,
         // Include user info directly in the body as well
@@ -494,6 +500,7 @@ export async function assignProjectToGoal(goalId: string, projectId: string) {
         currentUser = JSON.parse(storedUser);
         userInfo = {
           userEmail: currentUser.email,
+          userRole: currentUser.role,
           companyCode: currentUser.companyCode || currentUser.company_code
         };
       } catch (e) {
@@ -504,6 +511,7 @@ export async function assignProjectToGoal(goalId: string, projectId: string) {
     // Build query parameters
     const params = new URLSearchParams();
     if ((userInfo as any).userEmail) params.append('userEmail', (userInfo as any).userEmail);
+    if ((userInfo as any).userRole) params.append('userRole', (userInfo as any).userRole);
     if ((userInfo as any).companyCode) params.append('companyCode', (userInfo as any).companyCode);
     
     const queryString = params.toString() ? `?${params.toString()}` : '';
@@ -555,6 +563,7 @@ export async function removeProjectFromGoal(goalId: string, projectId: string) {
         currentUser = JSON.parse(storedUser);
         userInfo = {
           userEmail: currentUser.email,
+          userRole: currentUser.role,
           companyCode: currentUser.companyCode || currentUser.company_code
         };
       } catch (e) {
@@ -566,6 +575,7 @@ export async function removeProjectFromGoal(goalId: string, projectId: string) {
     const params = new URLSearchParams();
     params.append('projectId', projectId);
     if ((userInfo as any).userEmail) params.append('userEmail', (userInfo as any).userEmail);
+    if ((userInfo as any).userRole) params.append('userRole', (userInfo as any).userRole);
     if ((userInfo as any).companyCode) params.append('companyCode', (userInfo as any).companyCode);
     
     const queryString = params.toString() ? `?${params.toString()}` : '';
@@ -595,7 +605,18 @@ export async function removeProjectFromGoal(goalId: string, projectId: string) {
 
 // Search users for assignment
 export async function searchUsers(term: string) {
-  const res = await fetch(`/api/users/search?term=${encodeURIComponent(term)}`);
-  if (!res.ok) throw new Error('User search failed');
-  return (await res.json()).users || [];
+  console.log('Searching users with term:', term);
+  const token = localStorage.getItem('token');
+  const res = await fetch(`/api/users/search?term=${encodeURIComponent(term)}`, {
+    headers: {
+      'Authorization': `Bearer ${token}`
+    }
+  });
+  if (!res.ok) {
+    console.error('User search failed:', res.status, res.statusText);
+    throw new Error('User search failed');
+  }
+  const result = await res.json();
+  console.log('Search users result:', result);
+  return result; // API returns users directly, not wrapped in 'users' property
 }

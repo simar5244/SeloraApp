@@ -15,6 +15,7 @@ import {
   SelectValue 
 } from "@/components/ui/select";
 import { Loader2 } from "lucide-react";
+import { FaSpinner } from 'react-icons/fa';
 import { toast } from "sonner";
 import OrganizationalGalaxy from '@/components/visualization/OrganizationalGalaxy';
 import NetworkChart from '@/components/visualization/NetworkChart';
@@ -125,8 +126,8 @@ const VisualizeERPPageContent = () => {
     return (
       <div className="container py-10 flex items-center justify-center min-h-[calc(100vh-200px)]">
         <div className="text-center">
-          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
-          <p className="text-xl">Loading organization data...</p>
+          <FaSpinner className="animate-spin h-8 w-8 text-purple-600 mx-auto mb-4" />
+          <p className="text-xl text-gray-600">Loading organization data...</p>
         </div>
       </div>
     );

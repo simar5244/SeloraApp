@@ -827,3 +827,558 @@
 [2025-07-27T07:14:20.265Z] [DEBUG] [2025-07-27T07:14:20.265Z] Daemon is running...
 [2025-07-27T07:14:20.268Z] [INFO] [RESOURCE] Memory: 3.99MB used, 5.06MB total, 31.14MB RSS | Load: 1.31, 1.78, 1.86
 [2025-07-27T07:14:20.269Z] [WARN] [WARNING] High memory usage: 78.9% of heap used
+[2025-07-27T17:44:33.399Z] [INFO] 🚀 Starting data update daemon... {
+  "nodeVersion": "v20.19.3",
+  "platform": "darwin",
+  "arch": "arm64",
+  "pid": 85958,
+  "cwd": "/Users/sim/selora-clean",
+  "system": {
+    "cpus": 8,
+    "memory": {
+      "total": "16.00 GB",
+      "free": "0.96 GB",
+      "usage": "94.03%"
+    },
+    "load": [
+      1.521484375,
+      1.34375,
+      1.287109375
+    ]
+  },
+  "env": "production"
+}
+[2025-07-27T17:44:33.400Z] [INFO] [RESOURCE] Memory: 4.25MB used, 4.56MB total, 37.70MB RSS | Load: 1.52, 1.34, 1.29
+[2025-07-27T17:44:33.400Z] [WARN] [WARNING] High memory usage: 93.3% of heap used
+[2025-07-27T17:44:33.400Z] [WARN] [WARNING] Critical memory usage - consider increasing Node.js memory limit
+[2025-07-27T17:44:33.400Z] [INFO] Performing initial data update...
+[2025-07-27T17:44:33.401Z] [INFO] 🚀 Starting scheduled data updates... {
+  "system": {
+    "platform": "darwin",
+    "arch": "arm64",
+    "node": "v20.19.3",
+    "pid": 85958,
+    "cpus": 8,
+    "memory": {
+      "total": "16.00 GB",
+      "free": "0.94 GB",
+      "usage": "94.12%"
+    }
+  },
+  "totalScripts": 3,
+  "logLevel": "INFO"
+}
+[2025-07-27T17:44:33.401Z] [INFO] 
+📋 [1/3] Starting script: Employee Utilization Analysis {
+  "script": "employee_utilization_analyzer.py",
+  "args": "",
+  "timeout": "1800s",
+  "maxRetries": 2,
+  "retryDelay": "10000ms"
+}
+[2025-07-27T17:44:33.402Z] [DEBUG] Executing script: employee_utilization_analyzer.py {
+  "args": [],
+  "pid": 85958,
+  "cwd": "/Users/sim/selora-clean",
+  "pythonPath": "python3",
+  "timeout": 1800000,
+  "maxRetries": 2
+}
+[2025-07-27T17:44:33.456Z] [WARN] Script attempt 1 failed, will retry: employee_utilization_analyzer.py {
+  "script": "employee_utilization_analyzer.py",
+  "duration": "54ms",
+  "exitCode": 1,
+  "signal": null,
+  "attempt": 1,
+  "maxAttempts": 3,
+  "error": "Command failed: \"python3\" \"/Users/sim/selora-clean/employee_utilization_analyzer.py\"\nTraceback (most recent call last):\n  File \u001b[35m\"/Users/sim/selora-clean/employee_utilization_analyzer.py\"\u001b[0m, line \u001b[35m5\u001b[0m, in \u001b[35m<module>\u001b[0m\n    from pymongo import MongoClient, UpdateOne\n\u001b[1;35mModuleNotFoundError\u001b[0m: \u001b[35mNo module named 'pymongo'\u001b[0m\n"
+}
+[2025-07-27T17:44:33.456Z] [WARN] Retry attempt 2 of 2 after 10000ms... {
+  "script": "employee_utilization_analyzer.py",
+  "previousError": "Command failed: \"python3\" \"/Users/sim/selora-clean/employee_utilization_analyzer.py\"\nTraceback (most recent call last):\n  File \u001b[35m\"/Users/sim/selora-clean/employee_utilization_analyzer.py\"\u001b[0m, line \u001b[35m5\u001b[0m, in \u001b[35m<module>\u001b[0m\n    from pymongo import MongoClient, UpdateOne\n\u001b[1;35mModuleNotFoundError\u001b[0m: \u001b[35mNo module named 'pymongo'\u001b[0m\n"
+}
+[2025-07-27T17:44:43.528Z] [WARN] Script attempt 2 failed, will retry: employee_utilization_analyzer.py {
+  "script": "employee_utilization_analyzer.py",
+  "duration": "10126ms",
+  "exitCode": 1,
+  "signal": null,
+  "attempt": 2,
+  "maxAttempts": 3,
+  "error": "Command failed: \"python3\" \"/Users/sim/selora-clean/employee_utilization_analyzer.py\"\nTraceback (most recent call last):\n  File \u001b[35m\"/Users/sim/selora-clean/employee_utilization_analyzer.py\"\u001b[0m, line \u001b[35m5\u001b[0m, in \u001b[35m<module>\u001b[0m\n    from pymongo import MongoClient, UpdateOne\n\u001b[1;35mModuleNotFoundError\u001b[0m: \u001b[35mNo module named 'pymongo'\u001b[0m\n"
+}
+[2025-07-27T17:44:43.528Z] [WARN] Retry attempt 3 of 2 after 10000ms... {
+  "script": "employee_utilization_analyzer.py",
+  "previousError": "Command failed: \"python3\" \"/Users/sim/selora-clean/employee_utilization_analyzer.py\"\nTraceback (most recent call last):\n  File \u001b[35m\"/Users/sim/selora-clean/employee_utilization_analyzer.py\"\u001b[0m, line \u001b[35m5\u001b[0m, in \u001b[35m<module>\u001b[0m\n    from pymongo import MongoClient, UpdateOne\n\u001b[1;35mModuleNotFoundError\u001b[0m: \u001b[35mNo module named 'pymongo'\u001b[0m\n"
+}
+[2025-07-27T17:44:53.604Z] [ERROR] Script failed after 3 attempts: employee_utilization_analyzer.py {
+  "script": "employee_utilization_analyzer.py",
+  "duration": "20202ms",
+  "exitCode": 1,
+  "signal": null,
+  "attempt": 3,
+  "maxAttempts": 3,
+  "error": "Command failed: \"python3\" \"/Users/sim/selora-clean/employee_utilization_analyzer.py\"\nTraceback (most recent call last):\n  File \u001b[35m\"/Users/sim/selora-clean/employee_utilization_analyzer.py\"\u001b[0m, line \u001b[35m5\u001b[0m, in \u001b[35m<module>\u001b[0m\n    from pymongo import MongoClient, UpdateOne\n\u001b[1;35mModuleNotFoundError\u001b[0m: \u001b[35mNo module named 'pymongo'\u001b[0m\n"
+}
+[2025-07-27T17:44:53.605Z] [ERROR] [employee_utilization_analyzer.py STDERR] Traceback (most recent call last):
+  File [35m"/Users/sim/selora-clean/employee_utilization_analyzer.py"[0m, line [35m5[0m, in [35m<module>[0m
+    from pymongo import MongoClient, UpdateOne
+[1;35mModuleNotFoundError[0m: [35mNo module named 'pymongo'[0m
+
+[2025-07-27T17:44:53.605Z] [ERROR] ❌ [1/3] Employee Utilization Analysis failed after 20.2s (attempt 1) {
+  "script": "employee_utilization_analyzer.py",
+  "duration": "20204ms",
+  "attempts": 1,
+  "startTime": "2025-07-27T17:44:33.401Z",
+  "endTime": "2025-07-27T17:44:53.605Z"
+}
+[2025-07-27T17:44:53.605Z] [ERROR] 💥 Script failed: employee_utilization_analyzer.py (attempt 1/3) {
+  "duration": "20204ms",
+  "error": "Script failed after 3 attempts: Command failed: \"python3\" \"/Users/sim/selora-clean/employee_utilization_analyzer.py\"\nTraceback (most recent call last):\n  File \u001b[35m\"/Users/sim/selora-clean/employee_utilization_analyzer.py\"\u001b[0m, line \u001b[35m5\u001b[0m, in \u001b[35m<module>\u001b[0m\n    from pymongo import MongoClient, UpdateOne\n\u001b[1;35mModuleNotFoundError\u001b[0m: \u001b[35mNo module named 'pymongo'\u001b[0m\n",
+  "code": "N/A",
+  "signal": "N/A"
+}
+[2025-07-27T17:44:53.605Z] [INFO] ⏳ Waiting 5s before next script...
+[2025-07-27T17:44:58.607Z] [INFO] [RESOURCE] Memory: 3.86MB used, 4.81MB total, 39.16MB RSS | Load: 2.19, 1.52, 1.35
+[2025-07-27T17:44:58.608Z] [WARN] [WARNING] High memory usage: 80.2% of heap used
+[2025-07-27T17:44:58.609Z] [INFO] 
+📋 [2/3] Starting script: Attrition Score Calculation {
+  "script": "attrition_score.py",
+  "args": "",
+  "timeout": "3600s",
+  "maxRetries": 2,
+  "retryDelay": "15000ms"
+}
+[2025-07-27T17:44:58.610Z] [DEBUG] Executing script: attrition_score.py {
+  "args": [],
+  "pid": 85958,
+  "cwd": "/Users/sim/selora-clean",
+  "pythonPath": "python3",
+  "timeout": 3600000,
+  "maxRetries": 2
+}
+[2025-07-27T17:44:58.678Z] [WARN] Script attempt 1 failed, will retry: attrition_score.py {
+  "script": "attrition_score.py",
+  "duration": "68ms",
+  "exitCode": 1,
+  "signal": null,
+  "attempt": 1,
+  "maxAttempts": 3,
+  "error": "Command failed: \"python3\" \"/Users/sim/selora-clean/attrition_score.py\"\nTraceback (most recent call last):\n  File \u001b[35m\"/Users/sim/selora-clean/attrition_score.py\"\u001b[0m, line \u001b[35m6\u001b[0m, in \u001b[35m<module>\u001b[0m\n    import numpy as np\n\u001b[1;35mModuleNotFoundError\u001b[0m: \u001b[35mNo module named 'numpy'\u001b[0m\n"
+}
+[2025-07-27T17:44:58.678Z] [WARN] Retry attempt 2 of 2 after 15000ms... {
+  "script": "attrition_score.py",
+  "previousError": "Command failed: \"python3\" \"/Users/sim/selora-clean/attrition_score.py\"\nTraceback (most recent call last):\n  File \u001b[35m\"/Users/sim/selora-clean/attrition_score.py\"\u001b[0m, line \u001b[35m6\u001b[0m, in \u001b[35m<module>\u001b[0m\n    import numpy as np\n\u001b[1;35mModuleNotFoundError\u001b[0m: \u001b[35mNo module named 'numpy'\u001b[0m\n"
+}
+[2025-07-27T17:45:13.753Z] [WARN] Script attempt 2 failed, will retry: attrition_score.py {
+  "script": "attrition_score.py",
+  "duration": "15143ms",
+  "exitCode": 1,
+  "signal": null,
+  "attempt": 2,
+  "maxAttempts": 3,
+  "error": "Command failed: \"python3\" \"/Users/sim/selora-clean/attrition_score.py\"\nTraceback (most recent call last):\n  File \u001b[35m\"/Users/sim/selora-clean/attrition_score.py\"\u001b[0m, line \u001b[35m6\u001b[0m, in \u001b[35m<module>\u001b[0m\n    import numpy as np\n\u001b[1;35mModuleNotFoundError\u001b[0m: \u001b[35mNo module named 'numpy'\u001b[0m\n"
+}
+[2025-07-27T17:45:13.754Z] [WARN] Retry attempt 3 of 2 after 15000ms... {
+  "script": "attrition_score.py",
+  "previousError": "Command failed: \"python3\" \"/Users/sim/selora-clean/attrition_score.py\"\nTraceback (most recent call last):\n  File \u001b[35m\"/Users/sim/selora-clean/attrition_score.py\"\u001b[0m, line \u001b[35m6\u001b[0m, in \u001b[35m<module>\u001b[0m\n    import numpy as np\n\u001b[1;35mModuleNotFoundError\u001b[0m: \u001b[35mNo module named 'numpy'\u001b[0m\n"
+}
+[2025-07-27T17:45:28.829Z] [ERROR] Script failed after 3 attempts: attrition_score.py {
+  "script": "attrition_score.py",
+  "duration": "30219ms",
+  "exitCode": 1,
+  "signal": null,
+  "attempt": 3,
+  "maxAttempts": 3,
+  "error": "Command failed: \"python3\" \"/Users/sim/selora-clean/attrition_score.py\"\nTraceback (most recent call last):\n  File \u001b[35m\"/Users/sim/selora-clean/attrition_score.py\"\u001b[0m, line \u001b[35m6\u001b[0m, in \u001b[35m<module>\u001b[0m\n    import numpy as np\n\u001b[1;35mModuleNotFoundError\u001b[0m: \u001b[35mNo module named 'numpy'\u001b[0m\n"
+}
+[2025-07-27T17:45:28.829Z] [INFO] [RESOURCE] Memory: 4.34MB used, 5.06MB total, 35.55MB RSS | Load: 2.95, 1.75, 1.44
+[2025-07-27T17:45:28.829Z] [WARN] [WARNING] High memory usage: 85.7% of heap used
+[2025-07-27T17:45:28.829Z] [ERROR] [attrition_score.py STDERR] Traceback (most recent call last):
+  File [35m"/Users/sim/selora-clean/attrition_score.py"[0m, line [35m6[0m, in [35m<module>[0m
+    import numpy as np
+[1;35mModuleNotFoundError[0m: [35mNo module named 'numpy'[0m
+
+[2025-07-27T17:45:28.829Z] [ERROR] ❌ [2/3] Attrition Score Calculation failed after 30.2s (attempt 1) {
+  "script": "attrition_score.py",
+  "duration": "30220ms",
+  "attempts": 1,
+  "startTime": "2025-07-27T17:44:58.610Z",
+  "endTime": "2025-07-27T17:45:28.829Z"
+}
+[2025-07-27T17:45:28.830Z] [ERROR] 💥 Script failed: attrition_score.py (attempt 1/3) {
+  "duration": "30220ms",
+  "error": "Script failed after 3 attempts: Command failed: \"python3\" \"/Users/sim/selora-clean/attrition_score.py\"\nTraceback (most recent call last):\n  File \u001b[35m\"/Users/sim/selora-clean/attrition_score.py\"\u001b[0m, line \u001b[35m6\u001b[0m, in \u001b[35m<module>\u001b[0m\n    import numpy as np\n\u001b[1;35mModuleNotFoundError\u001b[0m: \u001b[35mNo module named 'numpy'\u001b[0m\n",
+  "code": "N/A",
+  "signal": "N/A"
+}
+[2025-07-27T17:45:28.830Z] [INFO] ⏳ Waiting 5s before next script...
+[2025-07-27T17:45:33.831Z] [INFO] [RESOURCE] Memory: 4.38MB used, 5.06MB total, 35.70MB RSS | Load: 2.72, 1.72, 1.43
+[2025-07-27T17:45:33.832Z] [WARN] [WARNING] High memory usage: 86.4% of heap used
+[2025-07-27T17:45:33.833Z] [INFO] 
+📋 [3/3] Starting script: Successor Identification {
+  "script": "successor_identification.py",
+  "args": "--refresh --batch-size=10",
+  "timeout": "2700s",
+  "maxRetries": 1,
+  "retryDelay": "20000ms"
+}
+[2025-07-27T17:45:33.834Z] [DEBUG] Executing script: successor_identification.py {
+  "args": [
+    "--refresh",
+    "--batch-size=10"
+  ],
+  "pid": 85958,
+  "cwd": "/Users/sim/selora-clean",
+  "pythonPath": "python3",
+  "timeout": 2700000,
+  "maxRetries": 1
+}
+[2025-07-27T17:45:33.898Z] [WARN] Script attempt 1 failed, will retry: successor_identification.py {
+  "script": "successor_identification.py",
+  "duration": "64ms",
+  "exitCode": 1,
+  "signal": null,
+  "attempt": 1,
+  "maxAttempts": 2,
+  "error": "Command failed: \"python3\" \"/Users/sim/selora-clean/successor_identification.py\" \"--refresh\" \"--batch-size=10\"\nTraceback (most recent call last):\n  File \u001b[35m\"/Users/sim/selora-clean/successor_identification.py\"\u001b[0m, line \u001b[35m6\u001b[0m, in \u001b[35m<module>\u001b[0m\n    import numpy as np\n\u001b[1;35mModuleNotFoundError\u001b[0m: \u001b[35mNo module named 'numpy'\u001b[0m\n"
+}
+[2025-07-27T17:45:33.898Z] [WARN] Retry attempt 2 of 1 after 20000ms... {
+  "script": "successor_identification.py",
+  "previousError": "Command failed: \"python3\" \"/Users/sim/selora-clean/successor_identification.py\" \"--refresh\" \"--batch-size=10\"\nTraceback (most recent call last):\n  File \u001b[35m\"/Users/sim/selora-clean/successor_identification.py\"\u001b[0m, line \u001b[35m6\u001b[0m, in \u001b[35m<module>\u001b[0m\n    import numpy as np\n\u001b[1;35mModuleNotFoundError\u001b[0m: \u001b[35mNo module named 'numpy'\u001b[0m\n"
+}
+[2025-07-27T17:45:53.968Z] [ERROR] Script failed after 2 attempts: successor_identification.py {
+  "script": "successor_identification.py",
+  "duration": "20134ms",
+  "exitCode": 1,
+  "signal": null,
+  "attempt": 2,
+  "maxAttempts": 2,
+  "error": "Command failed: \"python3\" \"/Users/sim/selora-clean/successor_identification.py\" \"--refresh\" \"--batch-size=10\"\nTraceback (most recent call last):\n  File \u001b[35m\"/Users/sim/selora-clean/successor_identification.py\"\u001b[0m, line \u001b[35m6\u001b[0m, in \u001b[35m<module>\u001b[0m\n    import numpy as np\n\u001b[1;35mModuleNotFoundError\u001b[0m: \u001b[35mNo module named 'numpy'\u001b[0m\n"
+}
+[2025-07-27T17:45:53.969Z] [ERROR] [successor_identification.py STDERR] Traceback (most recent call last):
+  File [35m"/Users/sim/selora-clean/successor_identification.py"[0m, line [35m6[0m, in [35m<module>[0m
+    import numpy as np
+[1;35mModuleNotFoundError[0m: [35mNo module named 'numpy'[0m
+
+[2025-07-27T17:45:53.969Z] [ERROR] ❌ [3/3] Successor Identification failed after 20.1s (attempt 1) {
+  "script": "successor_identification.py",
+  "duration": "20136ms",
+  "attempts": 1,
+  "startTime": "2025-07-27T17:45:33.834Z",
+  "endTime": "2025-07-27T17:45:53.969Z"
+}
+[2025-07-27T17:45:53.969Z] [ERROR] 💥 Script failed: successor_identification.py (attempt 1/2) {
+  "duration": "20136ms",
+  "error": "Script failed after 2 attempts: Command failed: \"python3\" \"/Users/sim/selora-clean/successor_identification.py\" \"--refresh\" \"--batch-size=10\"\nTraceback (most recent call last):\n  File \u001b[35m\"/Users/sim/selora-clean/successor_identification.py\"\u001b[0m, line \u001b[35m6\u001b[0m, in \u001b[35m<module>\u001b[0m\n    import numpy as np\n\u001b[1;35mModuleNotFoundError\u001b[0m: \u001b[35mNo module named 'numpy'\u001b[0m\n",
+  "code": "N/A",
+  "signal": "N/A"
+}
+[2025-07-27T17:45:53.969Z] [INFO] ⏳ Waiting 5s before next script...
+[2025-07-27T17:45:58.970Z] [INFO] [RESOURCE] Memory: 4.60MB used, 5.06MB total, 36.38MB RSS | Load: 2.37, 1.71, 1.43
+[2025-07-27T17:45:58.971Z] [WARN] [WARNING] High memory usage: 90.8% of heap used
+[2025-07-27T17:45:58.971Z] [WARN] [WARNING] Critical memory usage - consider increasing Node.js memory limit
+[2025-07-27T17:45:58.972Z] [INFO] 
+📊 ====== DATA UPDATE SUMMARY ======
+[2025-07-27T17:45:58.972Z] [INFO] 📅 Started: 2025-07-27T17:44:33.401Z
+[2025-07-27T17:45:58.973Z] [INFO] 🏁 Finished: 2025-07-27T17:45:58.972Z
+[2025-07-27T17:45:58.973Z] [INFO] ⏱️  Total Duration: 1.4 minutes
+[2025-07-27T17:45:58.973Z] [INFO] 📋 Scripts: 3 total, 0 successful, 3 failed
+[2025-07-27T17:45:58.974Z] [INFO] 📈 Success Rate: 0.0%
+[2025-07-27T17:45:58.974Z] [INFO] 
+📋 SCRIPT EXECUTION STATUS:
+[2025-07-27T17:45:58.979Z] [INFO] 
+💾 SYSTEM RESOURCE USAGE:
+[2025-07-27T17:45:58.980Z] [INFO] Memory: 4.70MB used / 5.06MB total
+[2025-07-27T17:45:58.981Z] [INFO] RSS: 37.11MB
+[2025-07-27T17:45:58.981Z] [INFO] Load: 2.37, 1.71, 1.43
+[2025-07-27T17:45:58.982Z] [WARN] 
+⚠️  COMPLETED WITH 3 OF 3 SCRIPTS FAILING
+[2025-07-27T17:45:58.982Z] [INFO] [RESOURCE] Memory: 4.72MB used, 5.06MB total, 37.13MB RSS | Load: 2.37, 1.71, 1.43
+[2025-07-27T17:45:58.982Z] [WARN] [WARNING] High memory usage: 93.3% of heap used
+[2025-07-27T17:45:58.983Z] [WARN] [WARNING] Critical memory usage - consider increasing Node.js memory limit
+[2025-07-27T17:45:58.983Z] [WARN] Initial update completed with 3 failures
+[2025-07-27T17:45:58.983Z] [INFO] Initial update completed. Next update in 1440 minutes.
+[2025-07-27T18:45:58.973Z] [DEBUG] [2025-07-27T18:45:58.973Z] Daemon is running...
+[2025-07-27T18:45:58.975Z] [INFO] [RESOURCE] Memory: 3.99MB used, 5.06MB total, 31.11MB RSS | Load: 1.79, 1.72, 1.69
+[2025-07-27T18:45:58.977Z] [WARN] [WARNING] High memory usage: 78.8% of heap used
+[2025-07-27T19:45:58.992Z] [DEBUG] [2025-07-27T19:45:58.992Z] Daemon is running...
+[2025-07-27T19:45:58.995Z] [INFO] [RESOURCE] Memory: 4.00MB used, 5.06MB total, 30.48MB RSS | Load: 1.26, 1.59, 1.72
+[2025-07-27T19:45:58.996Z] [WARN] [WARNING] High memory usage: 79.1% of heap used
+[2025-07-27T20:45:58.967Z] [DEBUG] [2025-07-27T20:45:58.967Z] Daemon is running...
+[2025-07-27T20:45:58.970Z] [INFO] [RESOURCE] Memory: 4.02MB used, 5.06MB total, 30.20MB RSS | Load: 4.04, 3.15, 2.60
+[2025-07-27T20:45:58.971Z] [WARN] [WARNING] High memory usage: 79.4% of heap used
+[2025-07-27T21:45:59.044Z] [DEBUG] [2025-07-27T21:45:59.043Z] Daemon is running...
+[2025-07-27T21:45:59.046Z] [INFO] [RESOURCE] Memory: 4.03MB used, 5.06MB total, 29.98MB RSS | Load: 3.65, 3.36, 2.82
+[2025-07-27T21:45:59.047Z] [WARN] [WARNING] High memory usage: 79.6% of heap used
+[2025-07-27T22:09:33.511Z] [INFO] 🚀 Starting data update daemon... {
+  "nodeVersion": "v20.19.3",
+  "platform": "darwin",
+  "arch": "arm64",
+  "pid": 40833,
+  "cwd": "/Users/sim/selora-clean",
+  "system": {
+    "cpus": 8,
+    "memory": {
+      "total": "16.00 GB",
+      "free": "4.08 GB",
+      "usage": "74.49%"
+    },
+    "load": [
+      4.44873046875,
+      3.81396484375,
+      3.3828125
+    ]
+  },
+  "env": "production"
+}
+[2025-07-27T22:09:33.515Z] [INFO] [RESOURCE] Memory: 4.25MB used, 4.56MB total, 38.70MB RSS | Load: 4.45, 3.81, 3.38
+[2025-07-27T22:09:33.515Z] [WARN] [WARNING] High memory usage: 93.3% of heap used
+[2025-07-27T22:09:33.515Z] [WARN] [WARNING] Critical memory usage - consider increasing Node.js memory limit
+[2025-07-27T22:09:33.515Z] [INFO] Performing initial data update...
+[2025-07-27T22:09:33.516Z] [INFO] 🚀 Starting scheduled data updates... {
+  "system": {
+    "platform": "darwin",
+    "arch": "arm64",
+    "node": "v20.19.3",
+    "pid": 40833,
+    "cpus": 8,
+    "memory": {
+      "total": "16.00 GB",
+      "free": "4.08 GB",
+      "usage": "74.49%"
+    }
+  },
+  "totalScripts": 3,
+  "logLevel": "INFO"
+}
+[2025-07-27T22:09:33.516Z] [INFO] 
+📋 [1/3] Starting script: Employee Utilization Analysis {
+  "script": "employee_utilization_analyzer.py",
+  "args": "",
+  "timeout": "1800s",
+  "maxRetries": 2,
+  "retryDelay": "10000ms"
+}
+[2025-07-27T22:09:33.516Z] [DEBUG] Executing script: employee_utilization_analyzer.py {
+  "args": [],
+  "pid": 40833,
+  "cwd": "/Users/sim/selora-clean",
+  "pythonPath": "python3",
+  "timeout": 1800000,
+  "maxRetries": 2
+}
+[2025-07-27T22:09:33.560Z] [WARN] Script attempt 1 failed, will retry: employee_utilization_analyzer.py {
+  "script": "employee_utilization_analyzer.py",
+  "duration": "44ms",
+  "exitCode": 1,
+  "signal": null,
+  "attempt": 1,
+  "maxAttempts": 3,
+  "error": "Command failed: \"python3\" \"/Users/sim/selora-clean/employee_utilization_analyzer.py\"\nTraceback (most recent call last):\n  File \u001b[35m\"/Users/sim/selora-clean/employee_utilization_analyzer.py\"\u001b[0m, line \u001b[35m5\u001b[0m, in \u001b[35m<module>\u001b[0m\n    from pymongo import MongoClient, UpdateOne\n\u001b[1;35mModuleNotFoundError\u001b[0m: \u001b[35mNo module named 'pymongo'\u001b[0m\n"
+}
+[2025-07-27T22:09:33.560Z] [WARN] Retry attempt 2 of 2 after 10000ms... {
+  "script": "employee_utilization_analyzer.py",
+  "previousError": "Command failed: \"python3\" \"/Users/sim/selora-clean/employee_utilization_analyzer.py\"\nTraceback (most recent call last):\n  File \u001b[35m\"/Users/sim/selora-clean/employee_utilization_analyzer.py\"\u001b[0m, line \u001b[35m5\u001b[0m, in \u001b[35m<module>\u001b[0m\n    from pymongo import MongoClient, UpdateOne\n\u001b[1;35mModuleNotFoundError\u001b[0m: \u001b[35mNo module named 'pymongo'\u001b[0m\n"
+}
+[2025-07-27T22:09:43.632Z] [WARN] Script attempt 2 failed, will retry: employee_utilization_analyzer.py {
+  "script": "employee_utilization_analyzer.py",
+  "duration": "10116ms",
+  "exitCode": 1,
+  "signal": null,
+  "attempt": 2,
+  "maxAttempts": 3,
+  "error": "Command failed: \"python3\" \"/Users/sim/selora-clean/employee_utilization_analyzer.py\"\nTraceback (most recent call last):\n  File \u001b[35m\"/Users/sim/selora-clean/employee_utilization_analyzer.py\"\u001b[0m, line \u001b[35m5\u001b[0m, in \u001b[35m<module>\u001b[0m\n    from pymongo import MongoClient, UpdateOne\n\u001b[1;35mModuleNotFoundError\u001b[0m: \u001b[35mNo module named 'pymongo'\u001b[0m\n"
+}
+[2025-07-27T22:09:43.632Z] [WARN] Retry attempt 3 of 2 after 10000ms... {
+  "script": "employee_utilization_analyzer.py",
+  "previousError": "Command failed: \"python3\" \"/Users/sim/selora-clean/employee_utilization_analyzer.py\"\nTraceback (most recent call last):\n  File \u001b[35m\"/Users/sim/selora-clean/employee_utilization_analyzer.py\"\u001b[0m, line \u001b[35m5\u001b[0m, in \u001b[35m<module>\u001b[0m\n    from pymongo import MongoClient, UpdateOne\n\u001b[1;35mModuleNotFoundError\u001b[0m: \u001b[35mNo module named 'pymongo'\u001b[0m\n"
+}
+[2025-07-27T22:09:53.704Z] [ERROR] Script failed after 3 attempts: employee_utilization_analyzer.py {
+  "script": "employee_utilization_analyzer.py",
+  "duration": "20188ms",
+  "exitCode": 1,
+  "signal": null,
+  "attempt": 3,
+  "maxAttempts": 3,
+  "error": "Command failed: \"python3\" \"/Users/sim/selora-clean/employee_utilization_analyzer.py\"\nTraceback (most recent call last):\n  File \u001b[35m\"/Users/sim/selora-clean/employee_utilization_analyzer.py\"\u001b[0m, line \u001b[35m5\u001b[0m, in \u001b[35m<module>\u001b[0m\n    from pymongo import MongoClient, UpdateOne\n\u001b[1;35mModuleNotFoundError\u001b[0m: \u001b[35mNo module named 'pymongo'\u001b[0m\n"
+}
+[2025-07-27T22:09:53.705Z] [ERROR] [employee_utilization_analyzer.py STDERR] Traceback (most recent call last):
+  File [35m"/Users/sim/selora-clean/employee_utilization_analyzer.py"[0m, line [35m5[0m, in [35m<module>[0m
+    from pymongo import MongoClient, UpdateOne
+[1;35mModuleNotFoundError[0m: [35mNo module named 'pymongo'[0m
+
+[2025-07-27T22:09:53.705Z] [ERROR] ❌ [1/3] Employee Utilization Analysis failed after 20.2s (attempt 1) {
+  "script": "employee_utilization_analyzer.py",
+  "duration": "20189ms",
+  "attempts": 1,
+  "startTime": "2025-07-27T22:09:33.516Z",
+  "endTime": "2025-07-27T22:09:53.705Z"
+}
+[2025-07-27T22:09:53.705Z] [ERROR] 💥 Script failed: employee_utilization_analyzer.py (attempt 1/3) {
+  "duration": "20189ms",
+  "error": "Script failed after 3 attempts: Command failed: \"python3\" \"/Users/sim/selora-clean/employee_utilization_analyzer.py\"\nTraceback (most recent call last):\n  File \u001b[35m\"/Users/sim/selora-clean/employee_utilization_analyzer.py\"\u001b[0m, line \u001b[35m5\u001b[0m, in \u001b[35m<module>\u001b[0m\n    from pymongo import MongoClient, UpdateOne\n\u001b[1;35mModuleNotFoundError\u001b[0m: \u001b[35mNo module named 'pymongo'\u001b[0m\n",
+  "code": "N/A",
+  "signal": "N/A"
+}
+[2025-07-27T22:09:53.705Z] [INFO] ⏳ Waiting 5s before next script...
+[2025-07-27T22:09:58.707Z] [INFO] [RESOURCE] Memory: 3.92MB used, 5.06MB total, 39.56MB RSS | Load: 3.40, 3.62, 3.32
+[2025-07-27T22:09:58.708Z] [WARN] [WARNING] High memory usage: 77.5% of heap used
+[2025-07-27T22:09:58.709Z] [INFO] 
+📋 [2/3] Starting script: Attrition Score Calculation {
+  "script": "attrition_score.py",
+  "args": "",
+  "timeout": "3600s",
+  "maxRetries": 2,
+  "retryDelay": "15000ms"
+}
+[2025-07-27T22:09:58.710Z] [DEBUG] Executing script: attrition_score.py {
+  "args": [],
+  "pid": 40833,
+  "cwd": "/Users/sim/selora-clean",
+  "pythonPath": "python3",
+  "timeout": 3600000,
+  "maxRetries": 2
+}
+[2025-07-27T22:09:58.778Z] [WARN] Script attempt 1 failed, will retry: attrition_score.py {
+  "script": "attrition_score.py",
+  "duration": "68ms",
+  "exitCode": 1,
+  "signal": null,
+  "attempt": 1,
+  "maxAttempts": 3,
+  "error": "Command failed: \"python3\" \"/Users/sim/selora-clean/attrition_score.py\"\nTraceback (most recent call last):\n  File \u001b[35m\"/Users/sim/selora-clean/attrition_score.py\"\u001b[0m, line \u001b[35m6\u001b[0m, in \u001b[35m<module>\u001b[0m\n    import numpy as np\n\u001b[1;35mModuleNotFoundError\u001b[0m: \u001b[35mNo module named 'numpy'\u001b[0m\n"
+}
+[2025-07-27T22:09:58.778Z] [WARN] Retry attempt 2 of 2 after 15000ms... {
+  "script": "attrition_score.py",
+  "previousError": "Command failed: \"python3\" \"/Users/sim/selora-clean/attrition_score.py\"\nTraceback (most recent call last):\n  File \u001b[35m\"/Users/sim/selora-clean/attrition_score.py\"\u001b[0m, line \u001b[35m6\u001b[0m, in \u001b[35m<module>\u001b[0m\n    import numpy as np\n\u001b[1;35mModuleNotFoundError\u001b[0m: \u001b[35mNo module named 'numpy'\u001b[0m\n"
+}
+[2025-07-27T22:10:13.853Z] [WARN] Script attempt 2 failed, will retry: attrition_score.py {
+  "script": "attrition_score.py",
+  "duration": "15143ms",
+  "exitCode": 1,
+  "signal": null,
+  "attempt": 2,
+  "maxAttempts": 3,
+  "error": "Command failed: \"python3\" \"/Users/sim/selora-clean/attrition_score.py\"\nTraceback (most recent call last):\n  File \u001b[35m\"/Users/sim/selora-clean/attrition_score.py\"\u001b[0m, line \u001b[35m6\u001b[0m, in \u001b[35m<module>\u001b[0m\n    import numpy as np\n\u001b[1;35mModuleNotFoundError\u001b[0m: \u001b[35mNo module named 'numpy'\u001b[0m\n"
+}
+[2025-07-27T22:10:13.853Z] [WARN] Retry attempt 3 of 2 after 15000ms... {
+  "script": "attrition_score.py",
+  "previousError": "Command failed: \"python3\" \"/Users/sim/selora-clean/attrition_score.py\"\nTraceback (most recent call last):\n  File \u001b[35m\"/Users/sim/selora-clean/attrition_score.py\"\u001b[0m, line \u001b[35m6\u001b[0m, in \u001b[35m<module>\u001b[0m\n    import numpy as np\n\u001b[1;35mModuleNotFoundError\u001b[0m: \u001b[35mNo module named 'numpy'\u001b[0m\n"
+}
+[2025-07-27T22:10:28.925Z] [ERROR] Script failed after 3 attempts: attrition_score.py {
+  "script": "attrition_score.py",
+  "duration": "30215ms",
+  "exitCode": 1,
+  "signal": null,
+  "attempt": 3,
+  "maxAttempts": 3,
+  "error": "Command failed: \"python3\" \"/Users/sim/selora-clean/attrition_score.py\"\nTraceback (most recent call last):\n  File \u001b[35m\"/Users/sim/selora-clean/attrition_score.py\"\u001b[0m, line \u001b[35m6\u001b[0m, in \u001b[35m<module>\u001b[0m\n    import numpy as np\n\u001b[1;35mModuleNotFoundError\u001b[0m: \u001b[35mNo module named 'numpy'\u001b[0m\n"
+}
+[2025-07-27T22:10:28.925Z] [INFO] [RESOURCE] Memory: 4.40MB used, 5.31MB total, 39.98MB RSS | Load: 2.67, 3.43, 3.27
+[2025-07-27T22:10:28.925Z] [WARN] [WARNING] High memory usage: 82.8% of heap used
+[2025-07-27T22:10:28.925Z] [ERROR] [attrition_score.py STDERR] Traceback (most recent call last):
+  File [35m"/Users/sim/selora-clean/attrition_score.py"[0m, line [35m6[0m, in [35m<module>[0m
+    import numpy as np
+[1;35mModuleNotFoundError[0m: [35mNo module named 'numpy'[0m
+
+[2025-07-27T22:10:28.926Z] [ERROR] ❌ [2/3] Attrition Score Calculation failed after 30.2s (attempt 1) {
+  "script": "attrition_score.py",
+  "duration": "30216ms",
+  "attempts": 1,
+  "startTime": "2025-07-27T22:09:58.710Z",
+  "endTime": "2025-07-27T22:10:28.925Z"
+}
+[2025-07-27T22:10:28.926Z] [ERROR] 💥 Script failed: attrition_score.py (attempt 1/3) {
+  "duration": "30216ms",
+  "error": "Script failed after 3 attempts: Command failed: \"python3\" \"/Users/sim/selora-clean/attrition_score.py\"\nTraceback (most recent call last):\n  File \u001b[35m\"/Users/sim/selora-clean/attrition_score.py\"\u001b[0m, line \u001b[35m6\u001b[0m, in \u001b[35m<module>\u001b[0m\n    import numpy as np\n\u001b[1;35mModuleNotFoundError\u001b[0m: \u001b[35mNo module named 'numpy'\u001b[0m\n",
+  "code": "N/A",
+  "signal": "N/A"
+}
+[2025-07-27T22:10:28.926Z] [INFO] ⏳ Waiting 5s before next script...
+[2025-07-27T22:10:33.927Z] [INFO] [RESOURCE] Memory: 4.44MB used, 5.31MB total, 40.02MB RSS | Load: 2.54, 3.39, 3.25
+[2025-07-27T22:10:33.928Z] [WARN] [WARNING] High memory usage: 83.5% of heap used
+[2025-07-27T22:10:33.929Z] [INFO] 
+📋 [3/3] Starting script: Successor Identification {
+  "script": "successor_identification.py",
+  "args": "--refresh --batch-size=10",
+  "timeout": "2700s",
+  "maxRetries": 1,
+  "retryDelay": "20000ms"
+}
+[2025-07-27T22:10:33.930Z] [DEBUG] Executing script: successor_identification.py {
+  "args": [
+    "--refresh",
+    "--batch-size=10"
+  ],
+  "pid": 40833,
+  "cwd": "/Users/sim/selora-clean",
+  "pythonPath": "python3",
+  "timeout": 2700000,
+  "maxRetries": 1
+}
+[2025-07-27T22:10:33.998Z] [WARN] Script attempt 1 failed, will retry: successor_identification.py {
+  "script": "successor_identification.py",
+  "duration": "68ms",
+  "exitCode": 1,
+  "signal": null,
+  "attempt": 1,
+  "maxAttempts": 2,
+  "error": "Command failed: \"python3\" \"/Users/sim/selora-clean/successor_identification.py\" \"--refresh\" \"--batch-size=10\"\nTraceback (most recent call last):\n  File \u001b[35m\"/Users/sim/selora-clean/successor_identification.py\"\u001b[0m, line \u001b[35m6\u001b[0m, in \u001b[35m<module>\u001b[0m\n    import numpy as np\n\u001b[1;35mModuleNotFoundError\u001b[0m: \u001b[35mNo module named 'numpy'\u001b[0m\n"
+}
+[2025-07-27T22:10:33.998Z] [WARN] Retry attempt 2 of 1 after 20000ms... {
+  "script": "successor_identification.py",
+  "previousError": "Command failed: \"python3\" \"/Users/sim/selora-clean/successor_identification.py\" \"--refresh\" \"--batch-size=10\"\nTraceback (most recent call last):\n  File \u001b[35m\"/Users/sim/selora-clean/successor_identification.py\"\u001b[0m, line \u001b[35m6\u001b[0m, in \u001b[35m<module>\u001b[0m\n    import numpy as np\n\u001b[1;35mModuleNotFoundError\u001b[0m: \u001b[35mNo module named 'numpy'\u001b[0m\n"
+}
+[2025-07-27T22:10:54.068Z] [ERROR] Script failed after 2 attempts: successor_identification.py {
+  "script": "successor_identification.py",
+  "duration": "20138ms",
+  "exitCode": 1,
+  "signal": null,
+  "attempt": 2,
+  "maxAttempts": 2,
+  "error": "Command failed: \"python3\" \"/Users/sim/selora-clean/successor_identification.py\" \"--refresh\" \"--batch-size=10\"\nTraceback (most recent call last):\n  File \u001b[35m\"/Users/sim/selora-clean/successor_identification.py\"\u001b[0m, line \u001b[35m6\u001b[0m, in \u001b[35m<module>\u001b[0m\n    import numpy as np\n\u001b[1;35mModuleNotFoundError\u001b[0m: \u001b[35mNo module named 'numpy'\u001b[0m\n"
+}
+[2025-07-27T22:10:54.069Z] [ERROR] [successor_identification.py STDERR] Traceback (most recent call last):
+  File [35m"/Users/sim/selora-clean/successor_identification.py"[0m, line [35m6[0m, in [35m<module>[0m
+    import numpy as np
+[1;35mModuleNotFoundError[0m: [35mNo module named 'numpy'[0m
+
+[2025-07-27T22:10:54.069Z] [ERROR] ❌ [3/3] Successor Identification failed after 20.1s (attempt 1) {
+  "script": "successor_identification.py",
+  "duration": "20140ms",
+  "attempts": 1,
+  "startTime": "2025-07-27T22:10:33.930Z",
+  "endTime": "2025-07-27T22:10:54.069Z"
+}
+[2025-07-27T22:10:54.069Z] [ERROR] 💥 Script failed: successor_identification.py (attempt 1/2) {
+  "duration": "20140ms",
+  "error": "Script failed after 2 attempts: Command failed: \"python3\" \"/Users/sim/selora-clean/successor_identification.py\" \"--refresh\" \"--batch-size=10\"\nTraceback (most recent call last):\n  File \u001b[35m\"/Users/sim/selora-clean/successor_identification.py\"\u001b[0m, line \u001b[35m6\u001b[0m, in \u001b[35m<module>\u001b[0m\n    import numpy as np\n\u001b[1;35mModuleNotFoundError\u001b[0m: \u001b[35mNo module named 'numpy'\u001b[0m\n",
+  "code": "N/A",
+  "signal": "N/A"
+}
+[2025-07-27T22:10:54.069Z] [INFO] ⏳ Waiting 5s before next script...
+[2025-07-27T22:10:59.071Z] [INFO] [RESOURCE] Memory: 4.66MB used, 5.31MB total, 40.30MB RSS | Load: 2.43, 3.28, 3.21
+[2025-07-27T22:10:59.071Z] [WARN] [WARNING] High memory usage: 87.6% of heap used
+[2025-07-27T22:10:59.072Z] [INFO] 
+📊 ====== DATA UPDATE SUMMARY ======
+[2025-07-27T22:10:59.073Z] [INFO] 📅 Started: 2025-07-27T22:09:33.516Z
+[2025-07-27T22:10:59.073Z] [INFO] 🏁 Finished: 2025-07-27T22:10:59.072Z
+[2025-07-27T22:10:59.074Z] [INFO] ⏱️  Total Duration: 1.4 minutes
+[2025-07-27T22:10:59.074Z] [INFO] 📋 Scripts: 3 total, 0 successful, 3 failed
+[2025-07-27T22:10:59.074Z] [INFO] 📈 Success Rate: 0.0%
+[2025-07-27T22:10:59.075Z] [INFO] 
+📋 SCRIPT EXECUTION STATUS:
+[2025-07-27T22:10:59.081Z] [INFO] 
+💾 SYSTEM RESOURCE USAGE:
+[2025-07-27T22:10:59.081Z] [INFO] Memory: 4.76MB used / 5.31MB total
+[2025-07-27T22:10:59.081Z] [INFO] RSS: 40.70MB
+[2025-07-27T22:10:59.082Z] [INFO] Load: 2.43, 3.28, 3.21
+[2025-07-27T22:10:59.082Z] [WARN] 
+⚠️  COMPLETED WITH 3 OF 3 SCRIPTS FAILING
+[2025-07-27T22:10:59.082Z] [INFO] [RESOURCE] Memory: 4.78MB used, 5.31MB total, 40.73MB RSS | Load: 2.43, 3.28, 3.21
+[2025-07-27T22:10:59.083Z] [WARN] [WARNING] High memory usage: 90.0% of heap used
+[2025-07-27T22:10:59.083Z] [WARN] Initial update completed with 3 failures
+[2025-07-27T22:10:59.084Z] [INFO] Initial update completed. Next update in 1440 minutes.
+[2025-07-27T23:10:59.135Z] [DEBUG] [2025-07-27T23:10:59.135Z] Daemon is running...
+[2025-07-27T23:10:59.137Z] [INFO] [RESOURCE] Memory: 4.05MB used, 5.31MB total, 31.31MB RSS | Load: 1.16, 1.71, 2.10
+[2025-07-27T23:10:59.138Z] [WARN] [WARNING] High memory usage: 76.3% of heap used

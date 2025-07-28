@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { FiBan, FiLogOut, FiArrowLeft, FiMail } from 'react-icons/fi';
 import { Button } from '@/components/ui/button';
-import { Spinner } from '@/components/ui/spinner';
+import { FaSpinner } from 'react-icons/fa';
 
 export default function InactiveAccountPage() {
   const router = useRouter();
@@ -98,7 +98,10 @@ export default function InactiveAccountPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-r from-red-50 to-orange-50 flex items-center justify-center p-4">
-        <Spinner size="lg" />
+        <div className="text-center">
+          <FaSpinner className="animate-spin h-8 w-8 text-purple-600 mx-auto mb-4" />
+          <p className="text-gray-600">Loading...</p>
+        </div>
       </div>
     );
   }

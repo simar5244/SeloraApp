@@ -32,32 +32,51 @@ const DashboardWelcomeScreen = ({ open, onStart, onClose, isClosing }: { open: b
           <X className="h-5 w-5" />
         </button>
 
-        <div className="text-center">
-          <div className="mx-auto w-16 h-16 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center mb-6">
+        {/* Header */}
+        <div className="text-center mb-6">
+          <div className="w-16 h-16 bg-gradient-to-br from-purple-600 to-purple-700 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
             <Sparkles className="h-8 w-8 text-white" />
           </div>
-          <h3 className="text-2xl font-bold text-gray-900 mb-4">
-            Welcome to Your Dashboard
-          </h3>
-          <p className="text-gray-600 mb-8 leading-relaxed">
-            Would you like a quick tour to discover all the powerful features available to help you manage your organization?
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Welcome to Your Dashboard!</h2>
+          <p className="text-gray-600 text-sm leading-relaxed">
+            Let's take a quick tour to discover all the powerful features available to help you manage your organization
           </p>
-          <div className="flex gap-3">
-            <Button
-              onClick={onClose}
-              variant="outline"
-              className="flex-1 py-3 border-gray-300 text-gray-700 hover:bg-gray-50"
-            >
-              Skip Tour
-            </Button>
-            <Button
-              onClick={onStart}
-              className="flex-1 py-3 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white"
-            >
-              <Sparkles className="h-4 w-4 mr-2" />
-              Start Tour
-            </Button>
+        </div>
+
+        {/* Features */}
+        <div className="space-y-4 mb-8">
+          <div className="flex items-start space-x-3">
+            <div className="w-2 h-2 bg-purple-600 rounded-full mt-2 flex-shrink-0"></div>
+            <div>
+              <h3 className="font-semibold text-gray-900 text-sm">Performance Metrics</h3>
+              <p className="text-gray-600 text-xs">Monitor key organizational statistics and insights</p>
+            </div>
           </div>
+          <div className="flex items-start space-x-3">
+            <div className="w-2 h-2 bg-purple-600 rounded-full mt-2 flex-shrink-0"></div>
+            <div>
+              <h3 className="font-semibold text-gray-900 text-sm">Quick Actions</h3>
+              <p className="text-gray-600 text-xs">Access frequently used tools and shortcuts</p>
+            </div>
+          </div>
+          <div className="flex items-start space-x-3">
+            <div className="w-2 h-2 bg-purple-600 rounded-full mt-2 flex-shrink-0"></div>
+            <div>
+              <h3 className="font-semibold text-gray-900 text-sm">AI-Enhanced Tools</h3>
+              <p className="text-gray-600 text-xs">Leverage intelligent features for better decision making</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Buttons */}
+        <div className="flex space-x-3">
+          <Button
+            onClick={onStart}
+            className="flex-1 py-3 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white"
+          >
+            <Sparkles className="h-4 w-4 mr-2" />
+            Start Tour
+          </Button>
         </div>
       </div>
 

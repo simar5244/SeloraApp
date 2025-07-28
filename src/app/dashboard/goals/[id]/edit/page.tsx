@@ -11,7 +11,8 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'react-hot-toast';
 import { searchUsers, fetchGoals, updateGoal } from '../../api';
-import { FaArrowLeft, FaSave, FaSpinner, FaPlus, FaMinus, FaSearch, FaTimes, FaTarget } from 'react-icons/fa';
+import { FaArrowLeft, FaSave, FaSpinner, FaPlus, FaMinus, FaSearch, FaTimes, FaBullseye } from 'react-icons/fa';
+import EmployeeSearchInput from '@/components/EmployeeSearchInput';
 
 interface Goal {
   id: string;
@@ -412,7 +413,7 @@ export default function EditGoalPage() {
             </Button>
             <div>
               <h1 className="text-3xl font-bold text-gray-900 flex items-center">
-                <FaTarget className="mr-3 text-purple-600" />
+                <FaBullseye className="mr-3 text-purple-600" />
                 Edit Goal
               </h1>
               <p className="text-gray-600">Update goal information, KPIs, and assignments</p>
@@ -528,7 +529,7 @@ export default function EditGoalPage() {
         <div className="space-y-4 border-t pt-4">
           <div className="flex items-center justify-between">
             <Label className="text-lg font-semibold flex items-center">
-              <FaTarget className="mr-2" />
+              <FaBullseye className="mr-2" />
               Key Performance Indicators (KPIs)
             </Label>
             <Button type="button" onClick={addKpi} size="sm" variant="outline">
@@ -611,10 +612,10 @@ export default function EditGoalPage() {
         <div className="space-y-4 border-t pt-4">
           <div className="flex items-center justify-between">
             <Label className="text-lg font-semibold">Assigned Employees</Label>
-            <Button 
-              type="button" 
-              onClick={() => setShowEmployeeSearch(!showEmployeeSearch)} 
-              size="sm" 
+            <Button
+              type="button"
+              onClick={() => setShowEmployeeSearch(!showEmployeeSearch)}
+              size="sm"
               variant="outline"
             >
               <FaPlus className="mr-2" />
@@ -624,42 +625,17 @@ export default function EditGoalPage() {
 
           {showEmployeeSearch && (
             <div className="border rounded-lg p-4 bg-blue-50">
-              <div className="flex items-center space-x-2">
-                <FaSearch className="text-gray-500" />
-                <Input
-                  placeholder="Search employees by name or email..."
-                  value={employeeSearchTerm}
-                  onChange={(e) => {
-                    setEmployeeSearchTerm(e.target.value);
-                    searchEmployees(e.target.value);
-                  }}
-                  className="flex-1"
-                />
-              </div>
-              
-              {isSearchingEmployees && (
-                <div className="text-center py-2">
-                  <FaSpinner className="animate-spin h-6 w-6 text-purple-600 mx-auto" />
-                </div>
-              )}
-              
-              {employeeSearchResults.length > 0 && (
-                <div className="mt-3 max-h-40 overflow-y-auto">
-                  {employeeSearchResults.map((employee) => (
-                    <div 
-                      key={employee.id}
-                      className="flex items-center justify-between p-2 hover:bg-white rounded cursor-pointer"
-                      onClick={() => addEmployee(employee)}
-                    >
-                      <div>
-                        <div className="font-medium">{employee.name || `${employee.firstName} ${employee.lastName}`}</div>
-                        <div className="text-sm text-gray-600">{employee.email}</div>
-                      </div>
-                      <Badge variant="outline">{employee.role || 'Employee'}</Badge>
-                    </div>
-                  ))}
-                </div>
-              )}
+              <EmployeeSearchInput
+                onEmployeeSelect={(employee) => {
+                  addEmployee(employee);
+                  setShowEmployeeSearch(false);
+                }}
+                searchFunction={searchUsers}
+                placeholder="Search employees by name or email..."
+                label=""
+                allowManualEmail={true}
+                className="mb-0"
+              />
             </div>
           )}
 
@@ -689,7 +665,7 @@ export default function EditGoalPage() {
         {/* Viewers Section */}
         <div className="space-y-4 border-t pt-4">
           <div className="flex items-center justify-between">
-            <Label className="text-lg font-semibold">Viewers (View-only Access)</Label>
+            <Label className="text-lg font-semibold">Viewers </Label>
             <Button 
               type="button" 
               onClick={() => setShowViewerSearch(!showViewerSearch)} 

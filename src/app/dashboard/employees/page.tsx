@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { HiOutlineServerStack, HiOutlineChartBar } from 'react-icons/hi2';
+import { FaSpinner } from 'react-icons/fa';
 import { isMockDataUser, hasERPConnections } from '@/lib/dataProvider';
 import NoERPConnected from '@/components/NoERPConnected';
 import { IntegrationTourLauncher } from '@/components/tour/IntegrationTourLauncher';
@@ -243,8 +244,8 @@ export default function EmployeesPage() {
     return (
       <div className="flex items-center justify-center h-full">
         <div className="text-center">
-          <div className="w-16 h-16 border-t-4 border-blue-500 border-solid rounded-full animate-spin mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading organization data...</p>
+          <FaSpinner className="animate-spin h-8 w-8 text-purple-600 mx-auto mb-4" />
+          <p className="text-gray-600">Loading organization data...</p>
         </div>
       </div>
     );

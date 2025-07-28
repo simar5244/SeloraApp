@@ -9,12 +9,13 @@ const projectsCollection = 'projects';
 // GET handler to retrieve projects assigned to a goal
 export async function GET(
   request: Request,
-  { params }: { params: { goalId: string } }
+  { params }: { params: Promise<{ goalId: string }> }
 ) {
   const client = new MongoClient(uri);
-  
+
   try {
-    console.log(`GET /api/goals/${params.goalId}/projects request received`);
+    const resolvedParams = await params;
+    console.log(`GET /api/goals/${resolvedParams.goalId}/projects request received`);
     await client.connect();
     
     const url = new URL(request.url);
@@ -52,8 +53,8 @@ export async function GET(
     const projectsCol = db.collection(projectsCollection);
     
     // Get the goal
-    const goal = await goalsCol.findOne({ 
-      _id: ObjectId.isValid(params.goalId) ? new ObjectId(params.goalId) : null 
+    const goal = await goalsCol.findOne({
+      _id: ObjectId.isValid(resolvedParams.goalId) ? new ObjectId(resolvedParams.goalId) : null
     });
     
     if (!goal) {
@@ -95,7 +96,7 @@ export async function GET(
     return NextResponse.json({ 
       success: true, 
       projects,
-      goalId: params.goalId,
+      goalId: resolvedParams.goalId,
       goalTitle: goal.title
     });
     
@@ -113,12 +114,13 @@ export async function GET(
 // POST handler to create new project within a goal or assign existing project to goal
 export async function POST(
   request: Request,
-  { params }: { params: { goalId: string } }
+  { params }: { params: Promise<{ goalId: string }> }
 ) {
   const client = new MongoClient(uri);
-  
+
   try {
-    console.log(`POST /api/goals/${params.goalId}/projects request received`);
+    const resolvedParams = await params;
+    console.log(`POST /api/goals/${resolvedParams.goalId}/projects request received`);
     await client.connect();
     
     const url = new URL(request.url);
@@ -140,9 +142,11 @@ export async function POST(
           const authDb = client.db('auth_db');
           const authUsers = authDb.collection('authUsers');
           const authUser = await authUsers.findOne({ userId: payload.id });
+          console.log('Auth user found:', authUser);
           if (authUser) {
             companyCode = authUser.companyCode || companyCode;
             dbUserRole = authUser.role || '';
+            console.log('User role set to:', dbUserRole);
           }
         } catch (err) {
           console.error('Error loading user from auth_db:', err);
@@ -164,8 +168,8 @@ export async function POST(
     const projectsCol = db.collection(projectsCollection);
     
     // Verify goal exists and user has permission
-    const goal = await goalsCol.findOne({ 
-      _id: ObjectId.isValid(params.goalId) ? new ObjectId(params.goalId) : null 
+    const goal = await goalsCol.findOne({
+      _id: ObjectId.isValid(resolvedParams.goalId) ? new ObjectId(resolvedParams.goalId) : null
     });
     
     if (!goal) {
@@ -173,9 +177,18 @@ export async function POST(
     }
     
     // Check permission
+    console.log('Permission check:', {
+      dbUserRole,
+      userEmail,
+      goalCreatedBy: goal.createdBy,
+      allowedRoles: ['admin', 'top_management_tier_1', 'top_management_tier_2', 'top_management_tier_3']
+    });
+
     const canManageGoal = ['admin', 'top_management_tier_1', 'top_management_tier_2', 'top_management_tier_3'].includes(dbUserRole) ||
                          goal.createdBy === userEmail;
-    
+
+    console.log('Can manage goal:', canManageGoal);
+
     if (!canManageGoal) {
       return NextResponse.json({ error: 'Insufficient privileges to manage goal projects' }, { status: 403 });
     }
@@ -207,7 +220,7 @@ export async function POST(
       
       // Add project to goal's assignedProjects
       const result = await goalsCol.updateOne(
-        { _id: new ObjectId(params.goalId) },
+        { _id: new ObjectId(resolvedParams.goalId) },
         { 
           $push: { 
             assignedProjects: {
@@ -251,7 +264,7 @@ export async function POST(
         companyCode,
         createdBy: userEmail,
         createdByRole: dbUserRole,
-        createdFromGoal: params.goalId,
+        createdFromGoal: resolvedParams.goalId,
         isManagementProject: ['top_management_tier_1', 'top_management_tier_2', 'top_management_tier_3'].includes(dbUserRole),
         visibleToAll: projectData.visibleToAll !== undefined ? projectData.visibleToAll : true,
         
@@ -289,7 +302,7 @@ export async function POST(
       if (projectResult.insertedId) {
         // Assign the new project to the goal
         const goalResult = await goalsCol.updateOne(
-          { _id: new ObjectId(params.goalId) },
+          { _id: new ObjectId(resolvedParams.goalId) },
           { 
             $push: { 
               assignedProjects: {
@@ -333,12 +346,13 @@ export async function POST(
 // DELETE handler to remove project from goal
 export async function DELETE(
   request: Request,
-  { params }: { params: { goalId: string } }
+  { params }: { params: Promise<{ goalId: string }> }
 ) {
   const client = new MongoClient(uri);
-  
+
   try {
-    console.log(`DELETE /api/goals/${params.goalId}/projects request received`);
+    const resolvedParams = await params;
+    console.log(`DELETE /api/goals/${resolvedParams.goalId}/projects request received`);
     await client.connect();
     
     const url = new URL(request.url);
@@ -383,8 +397,8 @@ export async function DELETE(
     const goalsCol = db.collection(goalsCollection);
     
     // Verify goal exists and user has permission
-    const goal = await goalsCol.findOne({ 
-      _id: ObjectId.isValid(params.goalId) ? new ObjectId(params.goalId) : null 
+    const goal = await goalsCol.findOne({
+      _id: ObjectId.isValid(resolvedParams.goalId) ? new ObjectId(resolvedParams.goalId) : null
     });
     
     if (!goal) {
@@ -401,7 +415,7 @@ export async function DELETE(
     
     // Remove project from goal's assignedProjects
     const result = await goalsCol.updateOne(
-      { _id: new ObjectId(params.goalId) },
+      { _id: new ObjectId(resolvedParams.goalId) },
       { 
         $pull: { 
           assignedProjects: { 

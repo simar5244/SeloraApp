@@ -8,12 +8,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'react-hot-toast';
-import { searchUsers } from './api';
-import { FaPlus, FaMinus, FaUser, FaSearch } from 'react-icons/fa';
-import { Target } from 'lucide-react';
+import { FaPlus, FaMinus, FaUser, FaSearch, FaSpinner } from 'react-icons/fa';
+import { Target, ArrowLeft } from 'lucide-react';
 
 interface AddGoalModalProps {
   onAddGoal: (goal: any) => Promise<{ success: boolean; error?: string; goalId?: string }>;
+  onCancel?: () => void;
 }
 
 type KpiEditor = {
@@ -38,7 +38,7 @@ type EmployeeEditor = {
   role: string;
 };
 
-const AddGoalModal = ({ onAddGoal }: AddGoalModalProps) => {
+const AddGoalModal = ({ onAddGoal, onCancel }: AddGoalModalProps) => {
   const router = useRouter();
   const [goalData, setGoalData] = useState({
     title: '',
@@ -50,8 +50,8 @@ const AddGoalModal = ({ onAddGoal }: AddGoalModalProps) => {
     priority: 'medium' as const,
     visibleToAll: true,
     kpis: [] as KpiEditor[],
-    assignedEmployees: [] as EmployeeEditor[],
-    viewers: [] as EmployeeEditor[]
+    employees: [] as any[],
+    viewers: [] as any[]
   });
   
   const [loading, setLoading] = useState(false);
@@ -59,11 +59,13 @@ const AddGoalModal = ({ onAddGoal }: AddGoalModalProps) => {
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [isPrivilegedUser, setIsPrivilegedUser] = useState(false);
 
-  // Employee search states
+  // Employee search states - using user-management pattern
+  const [allUsers, setAllUsers] = useState<any[]>([]);
   const [employeeSearchTerm, setEmployeeSearchTerm] = useState('');
   const [employeeSearchResults, setEmployeeSearchResults] = useState<any[]>([]);
   const [isSearchingEmployees, setIsSearchingEmployees] = useState(false);
   const [showEmployeeSearch, setShowEmployeeSearch] = useState(false);
+  const [isLoadingUsers, setIsLoadingUsers] = useState(false);
 
   // Viewer search states
   const [viewerSearchTerm, setViewerSearchTerm] = useState('');
@@ -79,11 +81,45 @@ const AddGoalModal = ({ onAddGoal }: AddGoalModalProps) => {
   const [showCreateProject, setShowCreateProject] = useState(false);
   const [newProjectData, setNewProjectData] = useState<any>({});
   const [goalProjects, setGoalProjects] = useState<ProjectEditor[]>([]);
+  const [projectsList, setProjectsList] = useState<any[]>([]);
+  const [showLink, setShowLink] = useState(false);
+  const [selectedProjectId, setSelectedProjectId] = useState('');
+
+  // Load all users once for fast client-side search (user-management pattern)
+  const loadAllUsers = async () => {
+    try {
+      setIsLoadingUsers(true);
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/admin/users?limit=0', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to fetch users');
+      }
+
+      setAllUsers(data.users || []);
+    } catch (error) {
+      console.error('Error loading users:', error);
+      // Fallback to empty array if loading fails
+      setAllUsers([]);
+    } finally {
+      setIsLoadingUsers(false);
+    }
+  };
 
   useEffect(() => {
     async function loadUserData() {
       setLoading(true);
       try {
+        // Load all users for search
+        await loadAllUsers();
+
         // Determine current user from localStorage or API
         const storedUser = localStorage.getItem('user');
         let user: any = storedUser ? JSON.parse(storedUser) : {};
@@ -112,8 +148,27 @@ const AddGoalModal = ({ onAddGoal }: AddGoalModalProps) => {
         setLoading(false);
       }
     }
+
+    async function loadProjectsList() {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch('/api/projects?limit=10', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setProjectsList(data.projects || []);
+        }
+      } catch (error) {
+        console.error('Error loading projects list:', error);
+      }
+    }
+
     loadUserData();
     loadTopProjects();
+    loadProjectsList();
   }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -171,7 +226,12 @@ const AddGoalModal = ({ onAddGoal }: AddGoalModalProps) => {
 
     setIsSearchingProjects(true);
     try {
-      const response = await fetch(`/api/projects/search?q=${encodeURIComponent(term)}`);
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/projects/search?q=${encodeURIComponent(term)}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       if (response.ok) {
         const data = await response.json();
         setProjectSearchResults(data.projects || []);
@@ -185,7 +245,12 @@ const AddGoalModal = ({ onAddGoal }: AddGoalModalProps) => {
 
   const loadTopProjects = async () => {
     try {
-      const response = await fetch('/api/projects?limit=5');
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/projects?limit=5', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       if (response.ok) {
         const data = await response.json();
         setTopProjects(data.projects || []);
@@ -315,102 +380,93 @@ const AddGoalModal = ({ onAddGoal }: AddGoalModalProps) => {
   };
 
   // Employee search and management
-  const searchEmployees = async (term: string) => {
+  // Employee search function - using client-side filtering (user-management pattern)
+  const searchEmployees = (term: string) => {
     if (!term.trim()) {
       setEmployeeSearchResults([]);
       return;
     }
 
-    setIsSearchingEmployees(true);
-    try {
-      // Check if it's an email format
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (emailRegex.test(term)) {
-        // If it's an email, create a mock user entry
-        setEmployeeSearchResults([{
-          id: term,
-          email: term,
-          name: term.split('@')[0], // Use part before @ as name
-          firstName: term.split('@')[0],
-          lastName: '',
-          isManualEntry: true
-        }]);
-      } else {
-        // Search for users normally
-        const results = await searchUsers(term);
-        setEmployeeSearchResults(results || []);
-      }
-    } catch (error) {
-      console.error('Error searching employees:', error);
-      // If search fails, still allow manual email entry
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (emailRegex.test(term)) {
-        setEmployeeSearchResults([{
-          id: term,
-          email: term,
-          name: term.split('@')[0],
-          firstName: term.split('@')[0],
-          lastName: '',
-          isManualEntry: true
-        }]);
-      } else {
-        setEmployeeSearchResults([]);
-      }
-    } finally {
-      setIsSearchingEmployees(false);
+    // Filter users client-side for instant results
+    const filteredUsers = allUsers.filter(user => {
+      const matchesSearch =
+        user.username?.toLowerCase().includes(term.toLowerCase()) ||
+        user.email?.toLowerCase().includes(term.toLowerCase()) ||
+        (user.firstName && user.firstName.toLowerCase().includes(term.toLowerCase())) ||
+        (user.lastName && user.lastName.toLowerCase().includes(term.toLowerCase())) ||
+        (user.name && user.name.toLowerCase().includes(term.toLowerCase()));
+
+      return matchesSearch;
+    });
+
+    // Format results to match expected structure
+    const formattedResults = filteredUsers.map(user => ({
+      _id: user._id,
+      id: user._id,
+      email: user.email,
+      name: user.name || `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email.split('@')[0],
+      firstName: user.firstName || '',
+      lastName: user.lastName || '',
+      role: user.role || '',
+      department: user.department || '',
+      jobTitle: user.jobTitle || ''
+    }));
+
+    // Check if the term looks like an email for manual entry
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (emailRegex.test(term) && !formattedResults.some(user => user.email === term)) {
+      // Add manual email entry option
+      formattedResults.unshift({
+        _id: term,
+        id: term,
+        email: term,
+        name: term.split('@')[0],
+        firstName: term.split('@')[0],
+        lastName: '',
+        role: '',
+        department: '',
+        jobTitle: '',
+        isManualEntry: true
+      } as any);
     }
+
+    setEmployeeSearchResults(formattedResults);
   };
 
-  const addEmployee = (employee: any) => {
+  const addEmployee = () => setGoalData(prev => ({ ...prev, employees: [...prev.employees, { name:'',email:'',department:'',role:'',tasks:'',hours:'',toolsUsed:'' }] }));
+  const removeEmployee = (i: number) => setGoalData(prev => { const emps=[...prev.employees]; emps.splice(i,1); return { ...prev, employees: emps }; });
+  const handleEmployeeChange = (i: number, field: string, value: any) => setGoalData(prev => { const emps = [...prev.employees]; emps[i] = { ...emps[i], [field]: value }; return { ...prev, employees: emps }; });
+
+  const addEmployeeFromSearch = (employee: any) => {
     // Check if already added
-    if (goalData.assignedEmployees.some(emp => emp.email === employee.email)) {
-      toast.error('Employee already assigned');
+    if (goalData.employees.some(emp => emp.email === employee.email)) {
+      toast.error('User already added as team member');
       return;
     }
 
     setGoalData(prev => ({
       ...prev,
-      assignedEmployees: [...prev.assignedEmployees, {
-        employeeId: employee.id,
-        name: employee.name || employee.firstName + ' ' + employee.lastName,
+      employees: [...prev.employees, {
+        name: employee.name || `${employee.firstName} ${employee.lastName}`.trim(),
         email: employee.email,
-        role: employee.role || 'Team Member'
+        department: employee.department || '',
+        role: employee.role || 'Team Member',
+        tasks: '',
+        hours: '',
+        toolsUsed: '',
+        addedBy: currentUser?.name || currentUser?.email || 'Current User'
       }]
     }));
 
-    setEmployeeSearchTerm('');
-    setEmployeeSearchResults([]);
-    setShowEmployeeSearch(false);
-    toast.success(`${employee.name || employee.email} assigned to goal`);
-  };
-
-  const removeEmployee = (index: number) => {
-    setGoalData(prev => ({
-      ...prev,
-      assignedEmployees: prev.assignedEmployees.filter((_, i) => i !== index)
-    }));
+    toast.success(`${employee.name || employee.email} added as team member`);
   };
 
   // Viewer search and management
-  const searchViewers = async (term: string) => {
-    if (term.length < 2) {
-      setViewerSearchResults([]);
-      return;
-    }
+  const addMember = () => setGoalData(prev => ({ ...prev, viewers: [...prev.viewers, { name: '', email: '' }] }));
+  const removeMember = (i: number) => setGoalData(prev => { const m = [...prev.viewers]; m.splice(i,1); return { ...prev, viewers: m }; });
+  const handleMemberChange = (i: number, field: 'name' | 'email', value: string) => setGoalData(prev => { const m = [...prev.viewers]; m[i] = { ...m[i], [field]: value }; return { ...prev, viewers: m }; });
 
-    setIsSearchingViewers(true);
-    try {
-      const results = await searchUsers(term);
-      setViewerSearchResults(results);
-    } catch (error) {
-      console.error('Error searching viewers:', error);
-      toast.error('Failed to search viewers');
-    } finally {
-      setIsSearchingViewers(false);
-    }
-  };
-
-  const addViewer = (viewer: any) => {
+  const addViewerFromSearch = (viewer: any) => {
     // Check if already added
     if (goalData.viewers.some(v => v.email === viewer.email)) {
       toast.error('User already added as viewer');
@@ -418,32 +474,21 @@ const AddGoalModal = ({ onAddGoal }: AddGoalModalProps) => {
     }
 
     // Check if already assigned as employee
-    if (goalData.assignedEmployees.some(emp => emp.email === viewer.email)) {
-      toast.error('User is already assigned as employee');
+    if (goalData.employees.some(emp => emp.email === viewer.email)) {
+      toast.error('User is already assigned as team member');
       return;
     }
 
     setGoalData(prev => ({
       ...prev,
       viewers: [...prev.viewers, {
-        employeeId: viewer.id,
-        name: viewer.name || viewer.firstName + ' ' + viewer.lastName,
+        name: viewer.name || `${viewer.firstName} ${viewer.lastName}`.trim(),
         email: viewer.email,
-        role: viewer.role || 'Viewer'
+        addedBy: currentUser?.name || currentUser?.email || 'Current User'
       }]
     }));
 
-    setViewerSearchTerm('');
-    setViewerSearchResults([]);
-    setShowViewerSearch(false);
     toast.success(`${viewer.name || viewer.email} added as viewer`);
-  };
-
-  const removeViewer = (index: number) => {
-    setGoalData(prev => ({
-      ...prev,
-      viewers: prev.viewers.filter((_, i) => i !== index)
-    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -518,8 +563,8 @@ const AddGoalModal = ({ onAddGoal }: AddGoalModalProps) => {
         })),
         
         // Format assigned employees
-        assignedEmployees: goalData.assignedEmployees.map(emp => ({
-          employeeId: emp.employeeId,
+        assignedEmployees: goalData.employees.map(emp => ({
+          employeeId: emp.employeeId || emp.id,
           email: emp.email,
           name: emp.name,
           role: emp.role
@@ -605,7 +650,10 @@ const AddGoalModal = ({ onAddGoal }: AddGoalModalProps) => {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+        <div className="text-center">
+          <FaSpinner className="animate-spin h-8 w-8 text-purple-600 mx-auto mb-4" />
+          <p className="text-gray-600">Loading...</p>
+        </div>
       </div>
     );
   }
@@ -613,7 +661,7 @@ const AddGoalModal = ({ onAddGoal }: AddGoalModalProps) => {
   return (
     <form onSubmit={handleSubmit} className="bg-white text-black space-y-6 w-full">
       {/* Basic Goal Info - Matching Create Project Page */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4" data-tour="basic-goal-fields">
         <div>
           <Label htmlFor="title">Goal Title</Label>
           <Input
@@ -709,9 +757,9 @@ const AddGoalModal = ({ onAddGoal }: AddGoalModalProps) => {
       </div>
 
       {/* KPIs Section */}
-      <div className="space-y-4 border-t pt-4">
+      <div className="space-y-4 border-t pt-4" data-tour="kpi-section">
         <div className="flex items-center justify-between">
-          <Label className="text-lg font-semibold flex items-center">
+          <Label className="text-sm font-medium flex items-center">
             <Target className="mr-2 h-4 w-4" />
             Key Performance Indicators (KPIs)
           </Label>
@@ -784,103 +832,185 @@ const AddGoalModal = ({ onAddGoal }: AddGoalModalProps) => {
         ))}
       </div>
 
-      {/* Project Assignment Section */}
-      <div className="space-y-4 border-t pt-4">
-        <div className="flex items-center justify-between">
-          <Label className="text-lg font-semibold flex items-center">
-            📋 Assigned Projects
+      {/* Linked Projects Selection */}
+      <div className="space-y-2 border-t pt-4" data-tour="linked-projects">
+        <div className="flex items-center space-x-2">
+          <Checkbox
+            id="showLink"
+            checked={showLink}
+            onCheckedChange={(checked) => setShowLink(!!checked)}
+          />
+          <Label htmlFor="showLink" className="text-sm font-medium leading-none">
+            Link this goal to projects
           </Label>
+        </div>
+
+        {showLink && (
+          <div className="mt-2">
+            <div className="flex justify-between items-center mb-2">
+              <Label className="text-sm text-black">Linked Projects</Label>
+              <Button
+                variant="outline"
+                size="sm"
+                type="button"
+                onClick={() => {
+                  if (selectedProjectId) {
+                    const selectedProject = projectsList.find(p => p.id === selectedProjectId);
+                    if (selectedProject && !goalProjects.some(gp => gp.projectId === selectedProjectId)) {
+                      const projectEditor: ProjectEditor = {
+                        projectId: selectedProjectId,
+                        title: selectedProject.project_title || selectedProject.name || 'Unnamed Project',
+                        description: selectedProject.description || selectedProject.project_description,
+                        isNewProject: false
+                      };
+                      setGoalProjects(prev => [...prev, projectEditor]);
+                      setSelectedProjectId('');
+                    }
+                  }
+                }}
+                className="bg-purple-100 hover:bg-purple-200 text-black text-sm"
+              >
+                Add Project
+              </Button>
+            </div>
+
+            <div className="flex items-center gap-2 mb-3">
+              <Select
+                value={selectedProjectId}
+                onValueChange={setSelectedProjectId}
+              >
+                <SelectTrigger className="flex-1 bg-white text-black border-gray-300">
+                  <SelectValue placeholder="Select a project to link" className="text-black" />
+                </SelectTrigger>
+                <SelectContent className="bg-white text-black">
+                  {/* Search Input in Dropdown */}
+                  <div className="p-2 border-b">
+                    <Input
+                      placeholder="Search projects..."
+                      value={projectSearchTerm}
+                      onChange={(e) => {
+                        setProjectSearchTerm(e.target.value);
+                        searchProjects(e.target.value);
+                      }}
+                      className="text-black"
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                  </div>
+
+                  {/* Recent Projects (when no search) */}
+                  {!projectSearchTerm && (
+                    <>
+                      <div className="px-2 py-1 text-xs text-gray-500 font-medium">Recent Projects</div>
+                      {projectsList
+                        .filter(p => {
+                          // Skip if no ID or title
+                          if (!p.id || !(p.project_title || p.name)) return false;
+
+                          // Only show if not already linked
+                          return !goalProjects.some(gp => gp.projectId === p.id);
+                        })
+                        .map(p => (
+                          <SelectItem
+                            key={p.id}
+                            value={p.id}
+                            className="text-black hover:bg-gray-100"
+                          >
+                            {p.project_title || p.name || 'Unnamed Project'}
+                          </SelectItem>
+                        ))}
+                    </>
+                  )}
+
+                  {/* Search Results */}
+                  {projectSearchTerm && projectSearchResults.length > 0 && (
+                    <>
+                      <div className="px-2 py-1 text-xs text-gray-500 font-medium">Search Results</div>
+                      {projectSearchResults
+                        .filter(p => !goalProjects.some(gp => gp.projectId === p.id))
+                        .map(p => (
+                          <SelectItem
+                            key={p.id}
+                            value={p.id}
+                            className="text-black hover:bg-gray-100"
+                          >
+                            {p.project_title || p.title || 'Unnamed Project'}
+                          </SelectItem>
+                        ))}
+                    </>
+                  )}
+
+                  {/* No results */}
+                  {projectSearchTerm && projectSearchResults.length === 0 && !isSearchingProjects && (
+                    <div className="px-2 py-2 text-sm text-gray-500 text-center">
+                      No projects found
+                    </div>
+                  )}
+
+                  {/* Loading */}
+                  {isSearchingProjects && (
+                    <div className="px-2 py-2 text-sm text-gray-500 text-center">
+                      Searching...
+                    </div>
+                  )}
+
+                  {/* No projects available when not searching */}
+                  {!projectSearchTerm && projectsList.filter(p =>
+                    p.id &&
+                    (p.project_title || p.name) &&
+                    !goalProjects.some(gp => gp.projectId === p.id)
+                  ).length === 0 && (
+                    <div className="px-2 py-2 text-sm text-gray-500 text-center">
+                      No projects available to link
+                    </div>
+                  )}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Display selected linked projects */}
+            <div className="space-y-2">
+              {goalProjects.map((linkedProject, idx) => (
+                <div key={idx} className="flex items-center justify-between bg-white border border-gray-200 p-2 rounded-md">
+                  <span className="text-sm text-black flex-1">{linkedProject.title}</span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      // Simply remove the project from the linked projects list
+                      setGoalProjects(prev => prev.filter((_, i) => i !== idx));
+                    }}
+                    className="text-red-500 hover:text-red-700 hover:bg-red-50 h-8 w-8 p-0 flex-shrink-0"
+                    aria-label="Unlink project"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                  </Button>
+                </div>
+              ))}
+
+              {goalProjects.length === 0 && (
+                <p className="text-sm text-gray-500 italic">No linked projects selected</p>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Create New Project Section */}
+      <div className="space-y-2 border-t pt-4">
+        <div className="flex items-center justify-between">
+          <Label className="text-sm font-medium">Need to create a new project?</Label>
           <Button
             type="button"
             onClick={() => setShowCreateProject(!showCreateProject)}
             size="sm"
             variant="outline"
+            className="bg-purple-100 hover:bg-purple-200 text-black text-sm"
           >
             <FaPlus className="mr-2" />
             Create Project
           </Button>
-        </div>
-
-        {/* Assigned Projects List */}
-        {goalProjects.length > 0 && (
-          <div className="mb-4">
-            <div className="flex flex-wrap gap-2">
-              {goalProjects.map((project, pIndex) => (
-                <div key={pIndex} className="flex items-center bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm">
-                  <button
-                    type="button"
-                    onClick={() => window.open(`/dashboard/projects/${project.projectId}`, '_blank')}
-                    className="hover:underline cursor-pointer"
-                    title="Click to view project details"
-                  >
-                    {project.title}
-                  </button>
-                  {project.isNewProject && <span className="ml-1 text-xs">(New)</span>}
-                  <button
-                    type="button"
-                    onClick={() => removeProjectFromGoal(project.projectId)}
-                    className="ml-2 text-purple-600 hover:text-purple-800"
-                    title="Remove project from goal"
-                  >
-                    ×
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Project Search */}
-        <div className="space-y-3">
-          <div>
-            <Input
-              placeholder="Search existing projects..."
-              value={projectSearchTerm}
-              onChange={(e) => {
-                setProjectSearchTerm(e.target.value);
-                searchProjects(e.target.value);
-              }}
-            />
-          </div>
-
-          {/* Search Results */}
-          {projectSearchResults.length > 0 && (
-            <div className="border rounded-lg max-h-32 overflow-y-auto">
-              {projectSearchResults.map((project) => (
-                <div
-                  key={project.id || project._id}
-                  className="p-2 hover:bg-gray-50 cursor-pointer border-b last:border-b-0"
-                  onClick={() => addProjectToGoal(project)}
-                >
-                  <div className="font-medium text-sm">{project.title || project.project_title}</div>
-                  <div className="text-xs text-gray-500 truncate">
-                    {project.description || project.project_description}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* Top 5 Projects */}
-          {!projectSearchTerm && topProjects.length > 0 && (
-            <div>
-              <Label className="text-sm text-gray-600">Top 5 Projects:</Label>
-              <div className="border rounded-lg max-h-32 overflow-y-auto mt-1">
-                {topProjects.map((project) => (
-                  <div
-                    key={project.id || project._id}
-                    className="p-2 hover:bg-gray-50 cursor-pointer border-b last:border-b-0"
-                    onClick={() => addProjectToGoal(project)}
-                  >
-                    <div className="font-medium text-sm">{project.title || project.project_title}</div>
-                    <div className="text-xs text-gray-500 truncate">
-                      {project.description || project.project_description}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
 
         {/* Create New Project Form */}
@@ -1081,170 +1211,242 @@ const AddGoalModal = ({ onAddGoal }: AddGoalModalProps) => {
         )}
       </div>
 
-      {/* Assigned Employees Section */}
-      <div className="space-y-4 border-t pt-4">
-        <div className="flex items-center justify-between">
-          <Label className="text-lg font-semibold flex items-center">
-            <FaUser className="mr-2" />
-            Assigned Employees
-          </Label>
-          <Button 
-            type="button" 
-            onClick={() => setShowEmployeeSearch(!showEmployeeSearch)} 
-            size="sm" 
-            variant="outline"
-          >
-            <FaPlus className="mr-2" />
-            Add Employee
-          </Button>
+      {/* Employees Section */}
+      <div className="space-y-4 border-t pt-4" data-tour="members-section">
+        <div className="flex justify-between items-center">
+          <Label className="text-sm font-medium">Team Members</Label>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              type="button"
+              onClick={() => setShowEmployeeSearch(!showEmployeeSearch)}
+              className="text-black text-sm"
+            >
+              Search & Add
+            </Button>
+            <Button
+              variant="default"
+              size="sm"
+              type="button"
+              onClick={addEmployee}
+              className="bg-purple-100 hover:bg-purple-200 text-black text-sm"
+            >
+              Add Manually
+            </Button>
+          </div>
         </div>
 
         {showEmployeeSearch && (
           <div className="border rounded-lg p-4 bg-blue-50">
-            <div className="flex items-center space-x-2">
-              <FaSearch className="text-gray-500" />
-              <Input
-                placeholder="Search employees by name or email..."
-                value={employeeSearchTerm}
-                onChange={(e) => {
-                  setEmployeeSearchTerm(e.target.value);
-                  searchEmployees(e.target.value);
-                }}
-                className="flex-1"
-              />
-            </div>
-            
-            {isSearchingEmployees && (
-              <div className="text-center py-2">
-                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-600 mx-auto"></div>
+            <div className="space-y-3">
+              <div className="relative">
+                <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                <Input
+                  type="text"
+                  placeholder="Search team members by name or email..."
+                  className="pl-10 pr-4 py-2 w-full"
+                  value={employeeSearchTerm}
+                  onChange={(e) => {
+                    setEmployeeSearchTerm(e.target.value);
+                    searchEmployees(e.target.value);
+                  }}
+                />
               </div>
-            )}
-            
-            {employeeSearchResults.length > 0 && (
-              <div className="mt-3 max-h-40 overflow-y-auto">
-                {employeeSearchResults.map((employee) => (
-                  <div 
-                    key={employee.id}
-                    className="flex items-center justify-between p-2 hover:bg-white rounded cursor-pointer"
-                    onClick={() => addEmployee(employee)}
-                  >
-                    <div>
-                      <div className="font-medium">{employee.name || `${employee.firstName} ${employee.lastName}`}</div>
-                      <div className="text-sm text-gray-600">{employee.email}</div>
+
+              {isLoadingUsers && (
+                <div className="flex items-center justify-center py-4">
+                  <FaSpinner className="animate-spin h-5 w-5 text-purple-600 mr-2" />
+                  <span className="text-sm text-gray-600">Loading users...</span>
+                </div>
+              )}
+
+              {employeeSearchTerm && employeeSearchResults.length > 0 && (
+                <div className="max-h-48 overflow-y-auto border rounded-md bg-white">
+                  {employeeSearchResults.map((employee, index) => (
+                    <div
+                      key={employee.id || index}
+                      className="p-3 hover:bg-gray-50 cursor-pointer border-b last:border-b-0"
+                      onClick={() => {
+                        addEmployeeFromSearch(employee);
+                        setShowEmployeeSearch(false);
+                        setEmployeeSearchTerm('');
+                        setEmployeeSearchResults([]);
+                      }}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="font-medium text-gray-900">
+                            {employee.name || employee.email}
+                            {employee.isManualEntry && (
+                              <span className="ml-2 text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">Manual Entry</span>
+                            )}
+                          </div>
+                          <div className="text-sm text-gray-600">{employee.email}</div>
+                          {employee.department && (
+                            <div className="text-xs text-gray-500">{employee.department} • {employee.role}</div>
+                          )}
+                        </div>
+                      </div>
                     </div>
-                    <Badge variant="outline">{employee.role || 'Employee'}</Badge>
-                  </div>
-                ))}
-              </div>
-            )}
+                  ))}
+                </div>
+              )}
+
+              {employeeSearchTerm && employeeSearchResults.length === 0 && !isLoadingUsers && (
+                <div className="text-center py-4 text-gray-500">
+                  No users found for "{employeeSearchTerm}"
+                </div>
+              )}
+            </div>
           </div>
         )}
-
-        <div className="space-y-2">
-          {goalData.assignedEmployees.map((employee, index) => (
-            <div key={index} className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
-              <div>
-                <div className="font-medium">{employee.name}</div>
-                <div className="text-sm text-gray-600">{employee.email}</div>
+        {goalData.employees.map((emp, idx) => (
+          <div key={idx} className="border p-4 rounded-md space-y-3 bg-gray-50">
+            <div className="flex justify-between items-center">
+              <span className="font-medium">Employee {idx+1}</span>
+              <Button variant="destructive" size="sm" type="button" onClick={() => removeEmployee(idx)}>Remove</Button>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <Input placeholder="Name" value={emp.name} onChange={(e) => handleEmployeeChange(idx,'name',e.target.value)} />
+              <Input placeholder="Email" value={emp.email} onChange={(e) => handleEmployeeChange(idx,'email',e.target.value)} />
+              <Input placeholder="Department" value={emp.department} onChange={(e) => handleEmployeeChange(idx,'department',e.target.value)} />
+              <Input placeholder="Role" value={emp.role} onChange={(e) => handleEmployeeChange(idx,'role',e.target.value)} />
+              <Input
+                placeholder="Added by"
+                value={emp.addedBy || currentUser?.name || currentUser?.email || 'Current User'}
+                disabled
+                className="bg-gray-100 text-gray-600"
+              />
+              <div className="md:col-span-2">
+                <Textarea placeholder="Specific Tasks (comma separated)" value={emp.tasks} onChange={(e) => handleEmployeeChange(idx,'tasks',e.target.value)} rows={2} />
               </div>
-              <div className="flex items-center space-x-2">
-                <Badge variant="outline">{employee.role}</Badge>
-                <Button 
-                  type="button" 
-                  onClick={() => removeEmployee(index)} 
-                  size="sm" 
-                  variant="destructive"
-                >
-                  <FaMinus />
-                </Button>
+              <Input type="number" placeholder="Hours Worked" value={emp.hours} onChange={(e) => handleEmployeeChange(idx,'hours',e.target.value)} />
+              <Input placeholder="Tools Used (comma separated)" value={emp.toolsUsed} onChange={(e) => handleEmployeeChange(idx,'toolsUsed',e.target.value)} />
+              <div className="flex items-center space-x-2 md:col-span-2">
+                <Checkbox
+                  id={`isLead-${idx}`}
+                  checked={emp.isLead || false}
+                  onCheckedChange={(checked) => handleEmployeeChange(idx, 'isLead', !!checked)}
+                />
+                <Label htmlFor={`isLead-${idx}`} className="text-sm">
+                  Is this person the lead of the goal?
+                </Label>
               </div>
             </div>
-          ))}
-        </div>
+          </div>
+        ))}
       </div>
 
-      {/* Viewers Section */}
-      <div className="space-y-4 border-t pt-4">
-        <div className="flex items-center justify-between">
-          <Label className="text-lg font-semibold">Viewers (View-only Access)</Label>
-          <Button 
-            type="button" 
-            onClick={() => setShowViewerSearch(!showViewerSearch)} 
-            size="sm" 
-            variant="outline"
-          >
-            <FaPlus className="mr-2" />
-            Add Viewer
-          </Button>
+      {/* Members (association only) */}
+      <div className="space-y-2 border-t pt-4" data-tour="viewers-section">
+        <div className="flex justify-between items-center">
+          <Label className="text-sm font-medium">Viewers</Label>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              type="button"
+              onClick={() => setShowViewerSearch(!showViewerSearch)}
+              className="text-black text-sm"
+            >
+              Search & Add
+            </Button>
+            <Button
+              variant="default"
+              size="sm"
+              type="button"
+              onClick={addMember}
+              className="bg-purple-100 hover:bg-purple-200 text-black text-sm"
+            >
+              Add Manually
+            </Button>
+          </div>
         </div>
 
         {showViewerSearch && (
           <div className="border rounded-lg p-4 bg-yellow-50">
-            <div className="flex items-center space-x-2">
-              <FaSearch className="text-gray-500" />
-              <Input
-                placeholder="Search users by name or email..."
-                value={viewerSearchTerm}
-                onChange={(e) => {
-                  setViewerSearchTerm(e.target.value);
-                  searchViewers(e.target.value);
-                }}
-                className="flex-1"
-              />
-            </div>
-            
-            {isSearchingViewers && (
-              <div className="text-center py-2">
-                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-600 mx-auto"></div>
+            <div className="space-y-3">
+              <div className="relative">
+                <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                <Input
+                  type="text"
+                  placeholder="Search viewers by name or email..."
+                  className="pl-10 pr-4 py-2 w-full"
+                  value={employeeSearchTerm}
+                  onChange={(e) => {
+                    setEmployeeSearchTerm(e.target.value);
+                    searchEmployees(e.target.value);
+                  }}
+                />
               </div>
-            )}
-            
-            {viewerSearchResults.length > 0 && (
-              <div className="mt-3 max-h-40 overflow-y-auto">
-                {viewerSearchResults.map((viewer) => (
-                  <div 
-                    key={viewer.id}
-                    className="flex items-center justify-between p-2 hover:bg-white rounded cursor-pointer"
-                    onClick={() => addViewer(viewer)}
-                  >
-                    <div>
-                      <div className="font-medium">{viewer.name || `${viewer.firstName} ${viewer.lastName}`}</div>
-                      <div className="text-sm text-gray-600">{viewer.email}</div>
+
+              {isLoadingUsers && (
+                <div className="flex items-center justify-center py-4">
+                  <FaSpinner className="animate-spin h-5 w-5 text-purple-600 mr-2" />
+                  <span className="text-sm text-gray-600">Loading users...</span>
+                </div>
+              )}
+
+              {employeeSearchTerm && employeeSearchResults.length > 0 && (
+                <div className="max-h-48 overflow-y-auto border rounded-md bg-white">
+                  {employeeSearchResults.map((viewer, index) => (
+                    <div
+                      key={viewer.id || index}
+                      className="p-3 hover:bg-gray-50 cursor-pointer border-b last:border-b-0"
+                      onClick={() => {
+                        addViewerFromSearch(viewer);
+                        setShowViewerSearch(false);
+                        setEmployeeSearchTerm('');
+                        setEmployeeSearchResults([]);
+                      }}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="font-medium text-gray-900">
+                            {viewer.name || viewer.email}
+                            {viewer.isManualEntry && (
+                              <span className="ml-2 text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">Manual Entry</span>
+                            )}
+                          </div>
+                          <div className="text-sm text-gray-600">{viewer.email}</div>
+                          {viewer.department && (
+                            <div className="text-xs text-gray-500">{viewer.department} • {viewer.role}</div>
+                          )}
+                        </div>
+                      </div>
                     </div>
-                    <Badge variant="outline">{viewer.role || 'User'}</Badge>
-                  </div>
-                ))}
-              </div>
-            )}
+                  ))}
+                </div>
+              )}
+
+              {employeeSearchTerm && employeeSearchResults.length === 0 && !isLoadingUsers && (
+                <div className="text-center py-4 text-gray-500">
+                  No users found for "{employeeSearchTerm}"
+                </div>
+              )}
+            </div>
           </div>
         )}
 
-        <div className="space-y-2">
-          {goalData.viewers.map((viewer, index) => (
-            <div key={index} className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg">
-              <div>
-                <div className="font-medium">{viewer.name}</div>
-                <div className="text-sm text-gray-600">{viewer.email}</div>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Badge variant="outline">Viewer</Badge>
-                <Button 
-                  type="button" 
-                  onClick={() => removeViewer(index)} 
-                  size="sm" 
-                  variant="destructive"
-                >
-                  <FaMinus />
-                </Button>
-              </div>
-            </div>
-          ))}
-        </div>
+        {goalData.viewers.map((viewer, idx) => (
+          <div key={idx} className="flex gap-2 mb-2">
+            <Input placeholder="Name" value={viewer.name} onChange={e => handleMemberChange(idx, 'name', e.target.value)} />
+            <Input placeholder="Email" value={viewer.email} onChange={e => handleMemberChange(idx, 'email', e.target.value)} />
+            <Input
+              placeholder="Added by"
+              value={viewer.addedBy || currentUser?.name || currentUser?.email || 'Current User'}
+              disabled
+              className="bg-gray-100 text-gray-600"
+            />
+            <Button variant="destructive" size="sm" type="button" onClick={() => removeMember(idx)}>Remove</Button>
+          </div>
+        ))}
       </div>
 
       {/* Visibility Settings */}
-      <div className="space-y-4 border-t pt-4">
-        <Label className="text-lg font-semibold">Visibility Settings</Label>
+      <div className="space-y-4 border-t pt-4" data-tour="visibility-settings">
+        <Label className="text-sm font-medium">Visibility Settings</Label>
         <div className="flex items-center space-x-2">
           <Checkbox
             id="visibleToAll"
@@ -1261,7 +1463,18 @@ const AddGoalModal = ({ onAddGoal }: AddGoalModalProps) => {
       </div>
 
       {/* Submit Button - Matching Project Modal */}
-      <div className="flex justify-end pt-4 border-t">
+      <div className="flex justify-between pt-4 border-t">
+        {onCancel && (
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={onCancel}
+            className="flex items-center gap-2 text-purple-600 hover:text-purple-900"
+          >
+            <ArrowLeft size={16} />
+            Back to Goals
+          </Button>
+        )}
         <Button
           type="submit"
           size="default"

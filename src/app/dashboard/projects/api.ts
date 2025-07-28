@@ -176,9 +176,15 @@ export async function addNewProject(data: any) {
     
     const queryString = params.toString() ? `?${params.toString()}` : '';
     
+    // Get the token for Authorization header
+    const storedToken = localStorage.getItem('token');
+
     const res = await fetch(`/api/projects${queryString}`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        ...(storedToken ? { 'Authorization': `Bearer ${storedToken}` } : {})
+      },
       body: JSON.stringify({
         ...data,
         // Include user info directly in the body as well
@@ -217,7 +223,7 @@ export async function addNewProject(data: any) {
 export async function searchUsers(term: string) {
   const res = await fetch(`/api/users/search?term=${encodeURIComponent(term)}`);
   if (!res.ok) throw new Error('User search failed');
-  return (await res.json()).users || [];
+  return await res.json(); // API returns users directly, not wrapped in 'users' property
 }
 
 export async function addUserToProject(projectId: string, userId: string) {

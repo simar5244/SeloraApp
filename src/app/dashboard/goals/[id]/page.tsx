@@ -1,25 +1,26 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "react-hot-toast";
-import { 
-  FaTarget, FaArrowLeft, FaEdit, FaProjectDiagram, FaUsers, FaPlus, 
-  FaTrash, FaEye, FaCalendarAlt, FaFlag, FaChartLine, FaUserPlus,
-  FaSearch, FaTimes, FaSave, FaSpinner 
+import {
+  FaArrowLeft, FaEdit, FaProjectDiagram, FaPlus,
+  FaTrash, FaEye, FaCalendarAlt, FaChartLine,
+  FaSearch, FaTimes, FaSave, FaSpinner, FaCommentDots
 } from 'react-icons/fa';
 import { fetchGoals, updateGoal, deleteGoal, fetchGoalProjects, createProjectInGoal, assignProjectToGoal, removeProjectFromGoal, searchUsers } from '../api';
 import { fetchProjects } from '../../projects/api';
+import EmployeeSearchInput from '@/components/EmployeeSearchInput';
 
 interface Goal {
   id: string;
@@ -30,7 +31,7 @@ interface Goal {
   startDate: string;
   endDate: string;
   department: string;
-  progress: number;
+
   assignedEmployees: Array<{
     employeeId: string;
     name: string;
@@ -96,6 +97,7 @@ export default function GoalDetailsPage() {
   // Project management states
   const [showCreateProject, setShowCreateProject] = useState(false);
   const [showAssignProject, setShowAssignProject] = useState(false);
+  const [projectSearchTerm, setProjectSearchTerm] = useState('');
   const [createProjectData, setCreateProjectData] = useState({
     title: '',
     description: '',
@@ -104,20 +106,53 @@ export default function GoalDetailsPage() {
     endDate: '',
     status: 'planning',
     priority: 'medium',
-    assignedEmployees: []
+    assignedEmployees: [] as any[]
   });
 
-  // Employee search states
-  const [employeeSearchTerm, setEmployeeSearchTerm] = useState('');
-  const [employeeSearchResults, setEmployeeSearchResults] = useState<any[]>([]);
-  const [isSearchingEmployees, setIsSearchingEmployees] = useState(false);
 
+
+  // Update modal states
+  const [showUpdateModal, setShowUpdateModal] = useState(false);
+  const [updateText, setUpdateText] = useState('');
+  const [isSubmittingUpdate, setIsSubmittingUpdate] = useState(false);
+  const [goalUpdates, setGoalUpdates] = useState<any[]>([]);
+
+  // KPI creation states
+  const [showCreateKPI, setShowCreateKPI] = useState(false);
+  const [createKPIData, setCreateKPIData] = useState({
+    name: '',
+    description: '',
+    target: '',
+    unit: '',
+    dueDate: '',
+    current: '0'
+  });
+
+
+
+  // Load goal updates
   useEffect(() => {
-    if (goalId) {
-      loadGoalData();
-      loadGoalProjects();
-      loadAllProjects();
-    }
+    const loadGoalUpdates = async () => {
+      if (!goalId) return;
+
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`/api/goals/${goalId}/updates`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setGoalUpdates(data.updates || []);
+        }
+      } catch (error) {
+        console.error('Error loading goal updates:', error);
+      }
+    };
+
+    loadGoalUpdates();
   }, [goalId]);
 
   useEffect(() => {
@@ -135,7 +170,7 @@ export default function GoalDetailsPage() {
     }
   }, [goal]);
 
-  const loadGoalData = async () => {
+  const loadGoalData = useCallback(async () => {
     try {
       setLoading(true);
       const result = await fetchGoals();
@@ -154,9 +189,9 @@ export default function GoalDetailsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [goalId, router]);
 
-  const loadGoalProjects = async () => {
+  const loadGoalProjects = useCallback(async () => {
     try {
       const result = await fetchGoalProjects(goalId);
       if (result.projects) {
@@ -165,7 +200,7 @@ export default function GoalDetailsPage() {
     } catch (error) {
       console.error('Error loading goal projects:', error);
     }
-  };
+  }, [goalId]);
 
   const loadAllProjects = async () => {
     try {
@@ -178,6 +213,15 @@ export default function GoalDetailsPage() {
     }
   };
 
+  // Load goal data when component mounts or goalId changes
+  useEffect(() => {
+    if (goalId) {
+      loadGoalData();
+      loadGoalProjects();
+      loadAllProjects();
+    }
+  }, [goalId, loadGoalData, loadGoalProjects]);
+
   const handleSaveChanges = async () => {
     if (!goal) return;
     
@@ -189,7 +233,7 @@ export default function GoalDetailsPage() {
         await loadGoalData(); // Refresh data
         setIsEditing(false);
       } else {
-        toast.error(result.error || 'Failed to update goal');
+        toast.error(String(result.error) || 'Failed to update goal');
       }
     } catch (error) {
       console.error('Error updating goal:', error);
@@ -211,11 +255,142 @@ export default function GoalDetailsPage() {
         toast.success('Goal deleted successfully');
         router.push('/dashboard/goals');
       } else {
-        toast.error(result.error || 'Failed to delete goal');
+        toast.error(String(result.error) || 'Failed to delete goal');
       }
     } catch (error) {
       console.error('Error deleting goal:', error);
       toast.error('Failed to delete goal');
+    }
+  };
+
+  const handleCreateKPI = async () => {
+    try {
+      if (!createKPIData.name || !createKPIData.target || !createKPIData.dueDate) {
+        toast.error('Please fill in all required fields');
+        return;
+      }
+
+      const kpiData = {
+        ...createKPIData,
+        target: Number(createKPIData.target),
+        current: Number(createKPIData.current)
+      };
+
+      // Add KPI to goal's KPIs array
+      const updatedGoal = {
+        ...goal,
+        kpis: [...(goal?.kpis || []), kpiData]
+      };
+
+      const result = await updateGoal(goalId, updatedGoal);
+      if (result.success) {
+        toast.success('KPI created successfully');
+        setGoal(updatedGoal as Goal);
+        setShowCreateKPI(false);
+        setCreateKPIData({
+          name: '',
+          description: '',
+          target: '',
+          unit: '',
+          dueDate: '',
+          current: '0'
+        });
+      } else {
+        toast.error(String(result.error) || 'Failed to create KPI');
+      }
+    } catch (error) {
+      console.error('Error creating KPI:', error);
+      toast.error('Failed to create KPI');
+    }
+  };
+
+  const handleRemoveEmployee = async (index: number) => {
+    try {
+      if (!goal) return;
+
+      const updatedEmployees = goal.assignedEmployees.filter((_, i) => i !== index);
+      const updatedGoal = {
+        ...goal,
+        assignedEmployees: updatedEmployees
+      };
+
+      const result = await updateGoal(goalId, updatedGoal);
+      if (result.success) {
+        toast.success('Employee removed successfully');
+        setGoal(updatedGoal as Goal);
+      } else {
+        toast.error(String(result.error) || 'Failed to remove employee');
+      }
+    } catch (error) {
+      console.error('Error removing employee:', error);
+      toast.error('Failed to remove employee');
+    }
+  };
+
+  const handleRemoveKPI = async (index: number) => {
+    try {
+      if (!goal) return;
+
+      const updatedKPIs = goal.kpis.filter((_, i) => i !== index);
+      const updatedGoal = {
+        ...goal,
+        kpis: updatedKPIs
+      };
+
+      const result = await updateGoal(goalId, updatedGoal);
+      if (result.success) {
+        toast.success('KPI removed successfully');
+        setGoal(updatedGoal as Goal);
+      } else {
+        toast.error(String(result.error) || 'Failed to remove KPI');
+      }
+    } catch (error) {
+      console.error('Error removing KPI:', error);
+      toast.error('Failed to remove KPI');
+    }
+  };
+
+  // Handle goal update submission
+  const handleSubmitUpdate = async () => {
+    if (!updateText.trim()) return;
+
+    setIsSubmittingUpdate(true);
+    try {
+      const token = localStorage.getItem('token');
+      const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+
+      const response = await fetch(`/api/goals/${goalId}/updates`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          message: updateText.trim(),
+          author_id: currentUser?._id || currentUser?.id,
+          author_name: currentUser?.name || `${currentUser?.firstName || ''} ${currentUser?.lastName || ''}`.trim() || currentUser?.email
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to post update');
+      }
+
+      const result = await response.json();
+
+      // Add the new update to the local state
+      setGoalUpdates(prev => [result.update, ...prev]);
+
+      // Clear the form and close modal
+      setUpdateText('');
+      setShowUpdateModal(false);
+
+      toast.success('Update posted successfully!');
+    } catch (error) {
+      console.error('Error posting update:', error);
+      toast.error('Failed to post update. Please try again.');
+    } finally {
+      setIsSubmittingUpdate(false);
     }
   };
 
@@ -246,7 +421,7 @@ export default function GoalDetailsPage() {
           assignedEmployees: []
         });
       } else {
-        toast.error(result.error || 'Failed to create project');
+        toast.error(String(result.error) || 'Failed to create project');
       }
     } catch (error) {
       console.error('Error creating project:', error);
@@ -262,7 +437,7 @@ export default function GoalDetailsPage() {
         await loadGoalProjects();
         setShowAssignProject(false);
       } else {
-        toast.error(result.error || 'Failed to assign project');
+        toast.error(String(result.error) || 'Failed to assign project');
       }
     } catch (error) {
       console.error('Error assigning project:', error);
@@ -280,7 +455,7 @@ export default function GoalDetailsPage() {
         toast.success('Project removed from goal');
         await loadGoalProjects();
       } else {
-        toast.error(result.error || 'Failed to remove project');
+        toast.error(String(result.error) || 'Failed to remove project');
       }
     } catch (error) {
       console.error('Error removing project:', error);
@@ -288,23 +463,7 @@ export default function GoalDetailsPage() {
     }
   };
 
-  const searchEmployees = async (term: string) => {
-    if (term.length < 2) {
-      setEmployeeSearchResults([]);
-      return;
-    }
 
-    setIsSearchingEmployees(true);
-    try {
-      const results = await searchUsers(term);
-      setEmployeeSearchResults(results);
-    } catch (error) {
-      console.error('Error searching employees:', error);
-      toast.error('Failed to search employees');
-    } finally {
-      setIsSearchingEmployees(false);
-    }
-  };
 
   const addEmployeeToProject = (employee: any) => {
     if (createProjectData.assignedEmployees.some((emp: any) => emp.email === employee.email)) {
@@ -324,8 +483,6 @@ export default function GoalDetailsPage() {
       }]
     }));
 
-    setEmployeeSearchTerm('');
-    setEmployeeSearchResults([]);
     toast.success(`${employee.name || employee.email} assigned to project`);
   };
 
@@ -385,21 +542,15 @@ export default function GoalDetailsPage() {
       <div className="mb-8">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
-            <Button 
-              variant="outline" 
-              onClick={() => router.push('/dashboard/goals')}
-            >
-              <FaArrowLeft className="mr-2" />
-              Back to Goals
-            </Button>
+            
             <div>
               <h1 className="text-3xl font-bold text-gray-900 flex items-center">
-                <FaTarget className="mr-3 text-purple-600" />
+
                 {isEditing ? (
                   <Input
                     value={editData.title || ''}
                     onChange={(e) => setEditData({...editData, title: e.target.value})}
-                    className="text-3xl font-bold border-none p-0"
+                    className="text-3xl font-bold border-2 border-purple-300 rounded-md p-2 focus:border-purple-500 focus:ring-2 focus:ring-purple-200"
                   />
                 ) : (
                   goal.title
@@ -413,13 +564,37 @@ export default function GoalDetailsPage() {
           <div className="flex space-x-2">
             {!isEditing ? (
               <>
-                <Button variant="outline" onClick={() => setIsEditing(true)}>
-                  <FaEdit className="mr-2" />
-                  Edit
+                <Button
+                  variant="outline"
+                  onClick={() => setIsEditing(true)}
+                  className="text-purple-600 border-purple-600 hover:bg-purple-50"
+                >
+                  <FaEdit className="w-4 h-4 mr-2" />
+                  Edit Goal
                 </Button>
-                <Button variant="destructive" onClick={handleDeleteGoal}>
-                  <FaTrash className="mr-2" />
-                  Delete
+                <Button
+                  variant="outline"
+                  onClick={() => setShowUpdateModal(true)}
+                  className="text-purple-600 border-purple-600 hover:bg-purple-50"
+                >
+                  <FaCommentDots className="w-4 h-4 mr-2" />
+                  Update
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={handleDeleteGoal}
+                  className="text-red-600 border-red-600 hover:bg-red-50"
+                >
+                  <FaTrash className="w-4 h-4 mr-2" />
+                  Delete Goal
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => router.push('/dashboard/goals')}
+                  className="text-gray-600 border-gray-300 hover:bg-gray-50"
+                >
+                  <FaArrowLeft className="w-4 h-4 mr-2" />
+                  Back
                 </Button>
               </>
             ) : (
@@ -428,12 +603,12 @@ export default function GoalDetailsPage() {
                   <FaTimes className="mr-2" />
                   Cancel
                 </Button>
-                <Button 
-                  onClick={handleSaveChanges} 
+                <Button
+                  onClick={handleSaveChanges}
                   disabled={isSaving}
-                  className="bg-purple-600 hover:bg-purple-700"
+                  className="bg-purple-600 hover:bg-purple-700 text-white"
                 >
-                  {isSaving ? <FaSpinner className="animate-spin mr-2" /> : <FaSave className="mr-2" />}
+                  {isSaving ? <FaSpinner className="animate-spin mr-2 text-white" /> : <FaSave className="mr-2 text-white" />}
                   Save Changes
                 </Button>
               </>
@@ -448,10 +623,7 @@ export default function GoalDetailsPage() {
           {/* Basic Info Card */}
           <Card className="mb-6">
             <CardHeader>
-              <CardTitle className="flex items-center">
-                <FaTarget className="mr-2" />
-                Goal Details
-              </CardTitle>
+              <CardTitle>Goal Details</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
@@ -479,13 +651,7 @@ export default function GoalDetailsPage() {
                     <p className="text-gray-700 mt-1">{goal.department}</p>
                   )}
                 </div>
-                <div>
-                  <Label>Progress</Label>
-                  <div className="mt-1">
-                    <Progress value={goal.progress} className="w-full" />
-                    <p className="text-sm text-gray-600 mt-1">{goal.progress}% Complete</p>
-                  </div>
-                </div>
+
               </div>
 
               <div className="grid grid-cols-2 gap-4">
@@ -590,11 +756,16 @@ export default function GoalDetailsPage() {
               <Card>
                 <CardHeader>
                   <div className="flex items-center justify-between">
-                    <CardTitle>Assigned Projects</CardTitle>
+                    <CardTitle>
+                    <h2 className="text-lg font-medium text-gray-800 mb-4">Assigned Projects</h2>
+                      </CardTitle>
                     <div className="flex space-x-2">
                       <Dialog open={showAssignProject} onOpenChange={setShowAssignProject}>
                         <DialogTrigger asChild>
-                          <Button variant="outline" size="sm">
+                          <Button
+                            size="sm"
+                            className="bg-gray-50 border-purple-600 hover:bg-gray-100 text-purple-600"
+                          >
                             <FaPlus className="mr-2" />
                             Assign Existing
                           </Button>
@@ -604,22 +775,54 @@ export default function GoalDetailsPage() {
                             <DialogTitle>Assign Existing Project</DialogTitle>
                           </DialogHeader>
                           <div className="space-y-4">
-                            {unassignedProjects.length === 0 ? (
+                            {/* Search Input */}
+                            <div className="relative">
+                              <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                              <Input
+                                placeholder="Search projects..."
+                                value={projectSearchTerm}
+                                onChange={(e) => setProjectSearchTerm(e.target.value)}
+                                className="pl-10 pr-10"
+                              />
+                              {projectSearchTerm && (
+                                <button
+                                  onClick={() => setProjectSearchTerm('')}
+                                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                >
+                                  <FaTimes className="w-4 h-4" />
+                                </button>
+                              )}
+                            </div>
+
+                            {unassignedProjects.filter(project =>
+                              project.name.toLowerCase().includes(projectSearchTerm.toLowerCase()) ||
+                              project.description?.toLowerCase().includes(projectSearchTerm.toLowerCase()) ||
+                              project.department?.toLowerCase().includes(projectSearchTerm.toLowerCase())
+                            ).length === 0 ? (
                               <p className="text-gray-500 text-center py-8">
-                                No unassigned projects available
+                                {projectSearchTerm ? 'No projects match your search' : 'No unassigned projects available'}
                               </p>
                             ) : (
-                              <div className="space-y-2 max-h-96 overflow-y-auto">
-                                {unassignedProjects.map(project => (
-                                  <div key={project.id} className="flex items-center justify-between p-3 border rounded-lg">
-                                    <div>
-                                      <h4 className="font-medium">{project.name}</h4>
-                                      <p className="text-sm text-gray-600">{project.description}</p>
-                                      <p className="text-xs text-gray-500">{project.department}</p>
+                              <div className="space-y-3 max-h-96 overflow-y-auto pr-2">
+                                {unassignedProjects.filter(project =>
+                                  project.name.toLowerCase().includes(projectSearchTerm.toLowerCase()) ||
+                                  project.description?.toLowerCase().includes(projectSearchTerm.toLowerCase()) ||
+                                  project.department?.toLowerCase().includes(projectSearchTerm.toLowerCase())
+                                ).map(project => (
+                                  <div key={project.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50">
+                                    <div className="flex-1">
+                                      <h4 className="font-medium text-gray-900">{project.name}</h4>
+                                      {project.description && (
+                                        <p className="text-sm text-gray-600 mt-1">{project.description}</p>
+                                      )}
+                                      {project.department && (
+                                        <p className="text-xs text-gray-500 mt-1">{project.department}</p>
+                                      )}
                                     </div>
-                                    <Button 
+                                    <Button
                                       size="sm"
                                       onClick={() => handleAssignExistingProject(project.id)}
+                                      className="bg-purple-600 hover:bg-purple-700 text-white ml-4"
                                     >
                                       Assign
                                     </Button>
@@ -634,7 +837,7 @@ export default function GoalDetailsPage() {
                       <Button 
                         size="sm" 
                         onClick={() => setShowCreateProject(true)}
-                        className="bg-purple-600 hover:bg-purple-700"
+                        className="bg-purple-600 hover:bg-purple-700 text-white"
                       >
                         <FaPlus className="mr-2" />
                         Create New
@@ -693,7 +896,19 @@ export default function GoalDetailsPage() {
             <TabsContent value="kpis">
               <Card>
                 <CardHeader>
-                  <CardTitle>Key Performance Indicators</CardTitle>
+                  <div className="flex items-center justify-between">
+                    <CardTitle>
+                    <h2 className="text-lg font-medium text-gray-800 mb-4">Assigned Key Performance Indicators</h2>
+                      </CardTitle>
+                    <Button
+                      size="sm"
+                      onClick={() => setShowCreateKPI(true)}
+                      className="bg-purple-600 hover:bg-purple-700 text-white"
+                    >
+                      <FaPlus className="w-4 h-4 mr-2" />
+                      Create KPI
+                    </Button>
+                  </div>
                 </CardHeader>
                 <CardContent>
                   {goal.kpis.length === 0 ? (
@@ -707,9 +922,19 @@ export default function GoalDetailsPage() {
                         <div key={index} className="border rounded-lg p-4">
                           <div className="flex items-center justify-between mb-2">
                             <h4 className="font-medium">{kpi.name}</h4>
-                            <Badge variant="outline">
-                              {kpi.current}/{kpi.target} {kpi.unit}
-                            </Badge>
+                            <div className="flex items-center space-x-2">
+                              <Badge variant="outline">
+                                {kpi.current}/{kpi.target} {kpi.unit}
+                              </Badge>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleRemoveKPI(index)}
+                                className="text-red-600 border-red-300 hover:bg-red-50"
+                              >
+                                <FaTimes className="w-3 h-3" />
+                              </Button>
+                            </div>
                           </div>
                           <p className="text-gray-600 text-sm mb-3">{kpi.description}</p>
                           <div className="space-y-2">
@@ -730,6 +955,52 @@ export default function GoalDetailsPage() {
               </Card>
             </TabsContent>
           </Tabs>
+
+          {/* Goal Updates Timeline */}
+          <div className="mt-6">
+            <h2 className="text-lg font-medium text-gray-800 mb-4">
+              Goal Updates Timeline
+            </h2>
+            <div className="space-y-4">
+              {goalUpdates && goalUpdates.length > 0 ? (
+                goalUpdates.map((update: any, index: number) => (
+                  <div key={update._id || index} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                    <div className="flex items-start space-x-3">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center space-x-2">
+                            <span className="font-medium text-gray-900">
+                              {update.author_name || 'Unknown User'}
+                            </span>
+                            <span className="text-sm text-gray-500">posted an update</span>
+                          </div>
+                          <span className="text-xs text-gray-500">
+                            {new Date(update.created_at).toLocaleDateString('en-US', {
+                              year: 'numeric',
+                              month: 'short',
+                              day: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })}
+                          </span>
+                        </div>
+                        <div className="text-gray-700 text-sm whitespace-pre-wrap break-words">
+                          {update.message}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  <p className="text-base font-medium text-gray-900 mb-2">No updates yet</p>
+                  <p className="text-sm text-gray-500">
+                    Goal updates will appear here when team members post updates.
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
 
         {/* Sidebar */}
@@ -737,25 +1008,37 @@ export default function GoalDetailsPage() {
           {/* Assigned Employees */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center">
-                <FaUsers className="mr-2" />
-                Assigned Employees ({goal.assignedEmployees.length})
-              </CardTitle>
+              <div>
+                <h3 className="text-lg font-medium text-gray-800 mb-4">Assigned Members</h3>
+                <div className="text-sm text-gray-600"> </div>
+                </div>
             </CardHeader>
             <CardContent>
               {goal.assignedEmployees.length === 0 ? (
-                <p className="text-gray-500 text-sm">No employees assigned</p>
+                <p className="text-gray-500 text-sm">No members assigned</p>
               ) : (
                 <div className="space-y-3">
                   {goal.assignedEmployees.map((employee, index) => (
-                    <div key={index} className="flex items-center space-x-3">
-                      <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
-                        <FaUsers className="text-purple-600 text-sm" />
+                    <div key={index} className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
+                          <span className="text-gray-600 text-sm font-medium">
+                            {employee.name.charAt(0).toUpperCase()}
+                          </span>
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-900">{employee.name}</p>
+                          <p className="text-xs text-gray-500">{employee.role}</p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="font-medium text-sm">{employee.name}</p>
-                        <p className="text-xs text-gray-500">{employee.role}</p>
-                      </div>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleRemoveEmployee(index)}
+                        className="text-red-600 border-red-300 hover:bg-red-50"
+                      >
+                        <FaTimes className="w-3 h-3" />
+                      </Button>
                     </div>
                   ))}
                 </div>
@@ -766,10 +1049,10 @@ export default function GoalDetailsPage() {
           {/* Viewers */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center">
-                <FaEye className="mr-2" />
-                Viewers ({goal.viewers.length})
-              </CardTitle>
+              <div>
+                <h3 className="text-lg font-medium text-gray-800 mb-4">Assigned Viewers</h3>
+                <div className="text-sm text-gray-600"> </div>
+                </div>
             </CardHeader>
             <CardContent>
               {goal.viewers.length === 0 ? (
@@ -778,11 +1061,13 @@ export default function GoalDetailsPage() {
                 <div className="space-y-3">
                   {goal.viewers.map((viewer, index) => (
                     <div key={index} className="flex items-center space-x-3">
-                      <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                        <FaEye className="text-blue-600 text-sm" />
+                      <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
+                        <span className="text-gray-600 text-sm font-medium">
+                          {viewer.name.charAt(0).toUpperCase()}
+                        </span>
                       </div>
                       <div>
-                        <p className="font-medium text-sm">{viewer.name}</p>
+                        <p className="text-sm text-gray-900">{viewer.name}</p>
                         <p className="text-xs text-gray-500">View Only</p>
                       </div>
                     </div>
@@ -792,32 +1077,6 @@ export default function GoalDetailsPage() {
             </CardContent>
           </Card>
 
-          {/* Stats */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Quick Stats</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="flex justify-between">
-                <span className="text-sm text-gray-600">Total Projects:</span>
-                <Badge variant="outline">{projects.length}</Badge>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-sm text-gray-600">Total KPIs:</span>
-                <Badge variant="outline">{goal.kpis.length}</Badge>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-sm text-gray-600">Team Size:</span>
-                <Badge variant="outline">{goal.assignedEmployees.length}</Badge>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-sm text-gray-600">Visibility:</span>
-                <Badge variant="outline">
-                  {goal.visibleToAll ? 'Public' : 'Private'}
-                </Badge>
-              </div>
-            </CardContent>
-          </Card>
         </div>
       </div>
 
@@ -826,7 +1085,6 @@ export default function GoalDetailsPage() {
         <Dialog open={showCreateProject} onOpenChange={setShowCreateProject}>
           <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>Create New Project for Goal</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
@@ -914,79 +1172,50 @@ export default function GoalDetailsPage() {
               </div>
 
               {/* Employee Assignment */}
-              <div className="space-y-4 border-t pt-4">
-                <div className="flex items-center justify-between">
-                  <Label className="text-lg font-semibold">Assign Employees</Label>
-                  <div className="flex items-center space-x-2">
-                    <FaSearch className="text-gray-500" />
-                    <Input
-                      placeholder="Search employees..."
-                      value={employeeSearchTerm}
-                      onChange={(e) => {
-                        setEmployeeSearchTerm(e.target.value);
-                        searchEmployees(e.target.value);
-                      }}
-                      className="w-64"
-                    />
-                  </div>
+              <div className="space-y-6 border-t pt-6">
+                <div>
+                  <EmployeeSearchInput
+                    onEmployeeSelect={addEmployeeToProject}
+                    searchFunction={searchUsers}
+                    placeholder="Search employees by name or email..."
+                    label="Assign Employees"
+                    allowManualEmail={true}
+                  />
                 </div>
-
-                {/* Search Results */}
-                {isSearchingEmployees && (
-                  <div className="text-center py-2">
-                    <FaSpinner className="animate-spin h-6 w-6 text-purple-600 mx-auto" />
-                  </div>
-                )}
-
-                {employeeSearchResults.length > 0 && (
-                  <div className="border rounded-lg p-3 bg-gray-50 max-h-40 overflow-y-auto">
-                    {employeeSearchResults.map((employee) => (
-                      <div 
-                        key={employee.id}
-                        className="flex items-center justify-between p-2 hover:bg-white rounded cursor-pointer"
-                        onClick={() => addEmployeeToProject(employee)}
-                      >
-                        <div>
-                          <div className="font-medium">{employee.name || `${employee.firstName} ${employee.lastName}`}</div>
-                          <div className="text-sm text-gray-600">{employee.email}</div>
-                        </div>
-                        <Badge variant="outline">{employee.role || 'Employee'}</Badge>
-                      </div>
-                    ))}
-                  </div>
-                )}
 
                 {/* Assigned Employees */}
-                <div className="space-y-2">
-                  <Label>Assigned Employees ({createProjectData.assignedEmployees.length})</Label>
-                  {createProjectData.assignedEmployees.map((employee: any, index) => (
-                    <div key={index} className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
-                      <div>
-                        <div className="font-medium">{employee.name}</div>
-                        <div className="text-sm text-gray-600">{employee.email}</div>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Badge variant="outline">{employee.role}</Badge>
-                        <Button 
-                          size="sm" 
-                          variant="destructive"
-                          onClick={() => removeEmployeeFromProject(index)}
-                        >
-                          <FaTimes />
-                        </Button>
-                      </div>
+                {createProjectData.assignedEmployees.length > 0 && (
+                  <div className="space-y-3">
+                    <Label className="text-base font-medium">Assigned Employees ({createProjectData.assignedEmployees.length})</Label>
+                    <div className="space-y-3">
+                      {createProjectData.assignedEmployees.map((employee: any, index) => (
+                        <div key={index} className="flex items-center justify-between p-4 bg-green-50 rounded-lg border border-green-200">
+                          <div className="flex-1">
+                            <div className="font-medium text-gray-900">{employee.name}</div>
+                            <div className="text-sm text-gray-600 mt-1">{employee.email}</div>
+                            {employee.role && (
+                              <Badge variant="outline" className="mt-2">{employee.role}</Badge>
+                            )}
+                          </div>
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            onClick={() => removeEmployeeFromProject(index)}
+                            className="ml-4"
+                          >
+                            <FaTimes className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
+                  </div>
+                )}
               </div>
 
-              <div className="flex justify-end space-x-2 pt-4 border-t">
-                <Button variant="outline" onClick={() => setShowCreateProject(false)}>
-                  Cancel
-                </Button>
-                <Button 
+              <div className="flex justify-end pt-6 border-t">
+                <Button
                   onClick={handleCreateProject}
-                  className="bg-purple-600 hover:bg-purple-700"
+                  className="bg-purple-600 hover:bg-purple-700 text-white"
                 >
                   Create Project
                 </Button>
@@ -995,6 +1224,178 @@ export default function GoalDetailsPage() {
           </DialogContent>
         </Dialog>
       )}
+
+      {/* Update Modal */}
+      <Dialog open={showUpdateModal} onOpenChange={setShowUpdateModal}>
+        <DialogContent className="bg-white max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold text-gray-900">Post Goal Update</DialogTitle>
+            <DialogDescription className="text-gray-600 text-base">
+              Write a comprehensive update about this goal's progress in one detailed paragraph.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-6">
+            <div>
+              <Label htmlFor="update-text" className="text-base font-semibold text-gray-800 mb-3 block">
+                Goal Update
+              </Label>
+              <div className="text-sm text-gray-600 mb-3">
+                <p>Write a comprehensive update covering progress toward goal completion, KPI achievements, challenges, team performance, and next steps.</p>
+              </div>
+              <Textarea
+                id="update-text"
+                placeholder="Write a comprehensive goal update in one detailed paragraph. Include progress toward completion, KPI achievements, key milestones reached, challenges and how they're being addressed, team performance highlights, business impact, and upcoming priorities..."
+                value={updateText}
+                onChange={(e) => setUpdateText(e.target.value)}
+                className="mt-2 min-h-[200px] text-base"
+                disabled={isSubmittingUpdate}
+              />
+              <div className="mt-2 text-sm text-gray-500">
+                {updateText.length}/2000 characters • Provide strategic insights for maximum stakeholder value
+              </div>
+            </div>
+
+            {/* Recent Updates */}
+            {goalUpdates.length > 0 && (
+              <div className="border-t pt-4">
+                <h4 className="text-sm font-medium text-gray-700 mb-3">Recent Updates</h4>
+                <div className="space-y-3 max-h-48 overflow-y-auto">
+                  {goalUpdates.slice(0, 3).map((update, index) => (
+                    <div key={index} className="bg-gray-50 p-3 rounded-lg">
+                      <div className="flex justify-between items-start mb-2">
+                        <span className="text-sm font-medium text-gray-900">
+                          {update.author_name || 'Unknown User'}
+                        </span>
+                        <span className="text-xs text-gray-500">
+                          {new Date(update.created_at).toLocaleDateString()}
+                        </span>
+                      </div>
+                      <p className="text-sm text-gray-700">{update.message}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowUpdateModal(false);
+                setUpdateText('');
+              }}
+              disabled={isSubmittingUpdate}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSubmitUpdate}
+              disabled={!updateText.trim() || isSubmittingUpdate || updateText.length > 2000}
+              className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2"
+            >
+              {isSubmittingUpdate ? (
+                <>
+                  <FaSpinner className="animate-spin mr-2 h-4 w-4 text-purple-600" />
+                  Posting Update...
+                </>
+              ) : (
+                'Post Goal Update'
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create KPI Modal */}
+      <Dialog open={showCreateKPI} onOpenChange={setShowCreateKPI}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Create New KPI</DialogTitle>
+            <DialogDescription>
+              Define a key performance indicator to track progress toward this goal.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="kpi-name">KPI Name *</Label>
+                <Input
+                  id="kpi-name"
+                  value={createKPIData.name}
+                  onChange={(e) => setCreateKPIData({...createKPIData, name: e.target.value})}
+                  placeholder="e.g., Monthly Revenue"
+                />
+              </div>
+              <div>
+                <Label htmlFor="kpi-unit">Unit</Label>
+                <Input
+                  id="kpi-unit"
+                  value={createKPIData.unit}
+                  onChange={(e) => setCreateKPIData({...createKPIData, unit: e.target.value})}
+                  placeholder="e.g., USD, %, units"
+                />
+              </div>
+            </div>
+
+            <div>
+              <Label htmlFor="kpi-description">Description</Label>
+              <Textarea
+                id="kpi-description"
+                value={createKPIData.description}
+                onChange={(e) => setCreateKPIData({...createKPIData, description: e.target.value})}
+                placeholder="Describe what this KPI measures..."
+                rows={3}
+              />
+            </div>
+
+            <div className="grid grid-cols-3 gap-4">
+              <div>
+                <Label htmlFor="kpi-target">Target Value *</Label>
+                <Input
+                  id="kpi-target"
+                  type="number"
+                  value={createKPIData.target}
+                  onChange={(e) => setCreateKPIData({...createKPIData, target: e.target.value})}
+                  placeholder="100"
+                />
+              </div>
+              <div>
+                <Label htmlFor="kpi-current">Current Value</Label>
+                <Input
+                  id="kpi-current"
+                  type="number"
+                  value={createKPIData.current}
+                  onChange={(e) => setCreateKPIData({...createKPIData, current: e.target.value})}
+                  placeholder="0"
+                />
+              </div>
+              <div>
+                <Label htmlFor="kpi-due">Due Date *</Label>
+                <Input
+                  id="kpi-due"
+                  type="date"
+                  value={createKPIData.dueDate}
+                  onChange={(e) => setCreateKPIData({...createKPIData, dueDate: e.target.value})}
+                />
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCreateKPI(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleCreateKPI}
+              className="bg-purple-600 hover:bg-purple-700 text-white"
+            >
+              Create KPI
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -28,6 +28,16 @@ export interface IProject extends Document {
       hours: number;
       reportedTech?: string[];
     }[];
+    addedBy?: {
+      userId: string;
+      userName: string;
+      addedAt: Date;
+    };
+    removedBy?: {
+      userId: string;
+      userName: string;
+      removedAt: Date;
+    };
   }[];
   department: string;
   priority: 'low' | 'medium' | 'high' | 'critical';
@@ -35,6 +45,14 @@ export interface IProject extends Document {
     description: string;
     severity: 'low' | 'medium' | 'high';
     status: 'identified' | 'mitigated' | 'resolved';
+  }[];
+  updates?: {
+    _id: mongoose.Types.ObjectId;
+    message: string;
+    author_id: string;
+    author_name: string;
+    created_at: Date;
+    updated_at: Date;
   }[];
   createdAt: Date;
   updatedAt: Date;
@@ -143,7 +161,35 @@ const ProjectSchema: Schema = new Schema({
       reportedTech: [{
         type: String
       }]
-    }]
+    }],
+    addedBy: {
+      userId: {
+        type: String,
+        required: false
+      },
+      userName: {
+        type: String,
+        required: false
+      },
+      addedAt: {
+        type: Date,
+        default: Date.now
+      }
+    },
+    removedBy: {
+      userId: {
+        type: String,
+        required: false
+      },
+      userName: {
+        type: String,
+        required: false
+      },
+      removedAt: {
+        type: Date,
+        required: false
+      }
+    }
   }],
   department: {
     type: String,
@@ -166,9 +212,36 @@ const ProjectSchema: Schema = new Schema({
       default: 'medium'
     },
     status: {
-      type: String, 
+      type: String,
       enum: ['identified', 'mitigated', 'resolved'],
       default: 'identified'
+    }
+  }],
+  updates: [{
+    _id: {
+      type: Schema.Types.ObjectId,
+      default: () => new mongoose.Types.ObjectId()
+    },
+    message: {
+      type: String,
+      required: true,
+      trim: true
+    },
+    author_id: {
+      type: String,
+      required: true
+    },
+    author_name: {
+      type: String,
+      required: true
+    },
+    created_at: {
+      type: Date,
+      default: Date.now
+    },
+    updated_at: {
+      type: Date,
+      default: Date.now
     }
   }]
 }, {
