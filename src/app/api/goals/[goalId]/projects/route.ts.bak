@@ -29,8 +29,7 @@ interface ProjectDocument extends Document {
 
 // GET handler to retrieve projects assigned to a goal
 export async function GET(
-  request: Request,
-  { params }: { params: Promise<{ goalId: string }> }
+// Removed duplicate code fragment
 ) {
   const client = new MongoClient(uri);
 
@@ -221,8 +220,7 @@ export async function GET(
 
 // POST handler to create new project within a goal or assign existing project to goal
 export async function POST(
-  request: Request,
-  { params }: { params: Promise<{ goalId: string }> }
+// Removed duplicate code fragment
 ) {
   const client = new MongoClient(uri);
 
@@ -509,15 +507,374 @@ export async function POST(
 }
 
 // DELETE handler to remove project from goal
-export async function DELETE(
-  request: Request,
-  { params }: { params: Promise<{ goalId: string }> }
+export async function DELETE(request: Request, { params }: { params: Promise<{ goalId: string }> }) {
+  const client = new MongoClient(uri);
+  try {
+    const { goalId } = await params;
+    console.log(`DELETE /api/goals/${goalId}/projects request received`);
+    await client.connect();
+
+    const url = new URL(request.url);
+    const projectId = url.searchParams.get('projectId');
+    const companyCode = url.searchParams.get('companyCode') || '';
+    if (!projectId) {
+      return NextResponse.json({ error: 'Project ID is required' }, { status: 400 });
+    }
+
+    const authHeader = request.headers.get('authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
+    }
+    const token = authHeader.split(' ')[1];
+    const payload = await verifyAuth(token);
+    if (!payload) {
+      return NextResponse.json({ error: 'Invalid or expired token' }, { status: 401 });
+    }
+    const userEmail = payload.email || '';
+    const dbUserRole = payload.role || '';
+
+    if (!companyCode) {
+      return NextResponse.json({ error: 'Company code is required' }, { status: 400 });
+    }
+
+    const dbName = `company_${companyCode.toLowerCase()}`;
+    const db = client.db(dbName);
+    // Cast collections to any to avoid TypeScript errors with MongoDB operators
+    const goalsCol = db.collection<GoalDocument>(goalsCollection) as any;
+    const projectsCol = db.collection<ProjectDocument>(projectsCollection) as any;
+
+    const goal = await goalsCol.findOne({ _id: new ObjectId(goalId) });
+    if (!goal) {
+      return NextResponse.json({ error: 'Goal not found' }, { status: 404 });
+    }
+
+    const allowedRoles = ['admin', 'top_management_tier_1', 'top_management_tier_2', 'top_management_tier_3'];
+    const canManage = allowedRoles.includes(dbUserRole) || goal.createdBy === userEmail;
+    if (!canManage) {
+      return NextResponse.json(
+        { error: 'Insufficient privileges to manage goal projects', details: { allowedRoles, userRole: dbUserRole } },
+        { status: 403 }
+      );
+    }
+
+    // 1. Remove project from goal's assignedProjects
+    console.log(`Removing project ${projectId} from goal ${goalId}'s assignedProjects array`);
+    const pullResult = await goalsCol.updateOne(
+      { _id: new ObjectId(goalId) },
+      {
+        $pull: { assignedProjects: { projectId: new ObjectId(projectId) } },
+        $set: { updatedAt: new Date() }
+      }
+    );
+    console.log('Pulled assignedProjects count:', pullResult.modifiedCount);
+    if (pullResult.modifiedCount === 0) {
+      return NextResponse.json({ error: 'Project not found in goal or already removed' }, { status: 404 });
+    }
+
+    // 2. Unlink project
+    console.log(`Unlinking project ${projectId} from goal context`);
+    await projectsCol.updateOne(
+      { _id: new ObjectId(projectId) },
+      { $set: { linkedToGoal: false, goalContext: null, updatedAt: new Date() } }
+    );
+
+    // 3. Optionally delete if createdFromGoal flag is set
+    const projectDoc = await projectsCol.findOne({ _id: new ObjectId(projectId) });
+    let deletedFromDb = false;
+    if (projectDoc?.createdFromGoal) {
+      console.log(`Project ${projectId} was created from goal, deleting it entirely`);
+      const delRes = await projectsCol.deleteOne({ _id: new ObjectId(projectId) });
+      deletedFromDb = delRes.deletedCount === 1;
+    }
+
+    console.log(`Project ${projectId} removed from goal ${goalId}, deletedFromDb: ${deletedFromDb}`);
+    return NextResponse.json({ 
+      success: true, 
+      message: 'Project removed from goal successfully', 
+      projectId, 
+      deletedFromDb 
+    });
+  } catch (err) {
+    console.error('Error in DELETE /api/goals/[goalId]/projects:', err);
+    return NextResponse.json(
+      { error: 'Failed to remove project from goal', details: err instanceof Error ? err.message : String(err) },
+      { status: 500 }
+    );
+  } finally {
+    await client.close();
+  }
+}
+export async function DELETE(request: Request, { params }: { params: Promise<{ goalId: string }> }) {
+  const client = new MongoClient(uri);
+  try {
+    const { goalId } = await params;
+    console.log(`DELETE /api/goals/${goalId}/projects request received`);
+    await client.connect();
+
+    const url = new URL(request.url);
+    const projectId = url.searchParams.get('projectId');
+    const companyCode = url.searchParams.get('companyCode') || '';
+    if (!projectId) {
+      return NextResponse.json({ error: 'Project ID is required' }, { status: 400 });
+    }
+
+    const authHeader = request.headers.get('authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
+    }
+    const token = authHeader.split(' ')[1];
+    const payload = await verifyAuth(token);
+    if (!payload) {
+      return NextResponse.json({ error: 'Invalid or expired token' }, { status: 401 });
+    }
+    const userEmail = payload.email || '';
+    const dbUserRole = payload.role || '';
+
+    if (!companyCode) {
+      return NextResponse.json({ error: 'Company code is required' }, { status: 400 });
+    }
+
+    const dbName = `company_${companyCode.toLowerCase()}`;
+    const db = client.db(dbName);
+    const goalsCol = db.collection<GoalDocument>(goalsCollection) as any;
+    const projectsCol = db.collection<ProjectDocument>(projectsCollection) as any;
+
+    const goal = await goalsCol.findOne({ _id: new ObjectId(goalId) });
+    if (!goal) {
+      return NextResponse.json({ error: 'Goal not found' }, { status: 404 });
+    }
+
+    const allowedRoles = ['admin', 'top_management_tier_1', 'top_management_tier_2', 'top_management_tier_3'];
+    const canManage = allowedRoles.includes(dbUserRole) || goal.createdBy === userEmail;
+    if (!canManage) {
+      return NextResponse.json(
+        { error: 'Insufficient privileges to manage goal projects', details: { allowedRoles, userRole: dbUserRole } },
+        { status: 403 }
+      );
+    }
+
+    // 1. Remove project from goal's assignedProjects
+    const pullResult = await goalsCol.updateOne(
+      { _id: new ObjectId(goalId) },
+      {
+        $pull: { assignedProjects: { projectId: new ObjectId(projectId) } },
+        $set: { updatedAt: new Date() }
+      }
+    );
+    console.log('Pulled assignedProjects count:', pullResult.modifiedCount);
+    if (pullResult.modifiedCount === 0) {
+      return NextResponse.json({ error: 'Project not found in goal or already removed' }, { status: 404 });
+    }
+
+    // 2. Unlink project
+    await projectsCol.updateOne(
+      { _id: new ObjectId(projectId) },
+      { $set: { linkedToGoal: false, goalContext: null, updatedAt: new Date() } }
+    );
+
+    // 3. Optionally delete if createdFromGoal flag is set
+    const projectDoc = await projectsCol.findOne({ _id: new ObjectId(projectId) });
+    let deletedFromDb = false;
+    if (projectDoc?.createdFromGoal) {
+      const delRes = await projectsCol.deleteOne({ _id: new ObjectId(projectId) });
+      deletedFromDb = delRes.deletedCount === 1;
+    }
+
+    console.log(`Project ${projectId} removed from goal ${goalId}, deletedFromDb: ${deletedFromDb}`);
+    return NextResponse.json({ success: true, message: 'Project removed from goal successfully', projectId, deletedFromDb });
+  } catch (err) {
+    console.error('Error in DELETE /api/goals/[goalId]/projects:', err);
+    return NextResponse.json(
+      { error: 'Failed to remove project from goal', details: err instanceof Error ? err.message : String(err) },
+      { status: 500 }
+    );
+  } finally {
+    await client.close();
+  }
+}
+export async function DELETE(request: Request, { params }: { params: Promise<{ goalId: string }> }) {
+  const client = new MongoClient(uri);
+  try {
+    const { goalId } = await params;
+    console.log(`DELETE /api/goals/${goalId}/projects request received`);
+    await client.connect();
+
+    const url = new URL(request.url);
+    const projectId = url.searchParams.get('projectId');
+    const companyCode = url.searchParams.get('companyCode') || '';
+    if (!projectId) {
+      return NextResponse.json({ error: 'Project ID is required' }, { status: 400 });
+    }
+
+    const authHeader = request.headers.get('authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
+    }
+    const token = authHeader.split(' ')[1];
+    const payload = await verifyAuth(token);
+    if (!payload) {
+      return NextResponse.json({ error: 'Invalid or expired token' }, { status: 401 });
+    }
+    const userEmail = payload.email || '';
+    const dbUserRole = payload.role || '';
+
+    if (!companyCode) {
+      return NextResponse.json({ error: 'Company code is required' }, { status: 400 });
+    }
+
+    const dbName = `company_${companyCode.toLowerCase()}`;
+    const db = client.db(dbName);
+    const goalsCol = db.collection<GoalDocument>(goalsCollection) as any;
+    const projectsCol = db.collection<ProjectDocument>(projectsCollection) as any;
+
+    const goal = await goalsCol.findOne({ _id: new ObjectId(goalId) });
+    if (!goal) {
+      return NextResponse.json({ error: 'Goal not found' }, { status: 404 });
+    }
+
+    const allowedRoles = ['admin', 'top_management_tier_1', 'top_management_tier_2', 'top_management_tier_3'];
+    const canManage = allowedRoles.includes(dbUserRole) || goal.createdBy === userEmail;
+    if (!canManage) {
+      return NextResponse.json(
+        { error: 'Insufficient privileges to manage goal projects', details: { allowedRoles, userRole: dbUserRole } },
+        { status: 403 }
+      );
+    }
+
+    // 1. Remove project from goal's assignedProjects
+    const pullResult = await goalsCol.updateOne(
+      { _id: new ObjectId(goalId) },
+      {
+        $pull: { assignedProjects: { projectId: new ObjectId(projectId) } },
+        $set: { updatedAt: new Date() }
+      }
+    );
+    console.log('Pulled assignedProjects count:', pullResult.modifiedCount);
+    if (pullResult.modifiedCount === 0) {
+      return NextResponse.json({ error: 'Project not found in goal or already removed' }, { status: 404 });
+    }
+
+    // 2. Unlink project
+    await projectsCol.updateOne(
+      { _id: new ObjectId(projectId) },
+      { $set: { linkedToGoal: false, goalContext: null, updatedAt: new Date() } }
+    );
+
+    // 3. Optionally delete if createdFromGoal flag is set
+    const projectDoc = await projectsCol.findOne({ _id: new ObjectId(projectId) });
+    let deletedFromDb = false;
+    if (projectDoc?.createdFromGoal) {
+      const delRes = await projectsCol.deleteOne({ _id: new ObjectId(projectId) });
+      deletedFromDb = delRes.deletedCount === 1;
+    }
+
+    console.log(`Project ${projectId} removed from goal ${goalId}, deletedFromDb: ${deletedFromDb}`);
+    return NextResponse.json({ success: true, message: 'Project removed from goal successfully', projectId, deletedFromDb });
+  } catch (err) {
+    console.error('Error in DELETE /api/goals/[goalId]/projects:', err);
+    return NextResponse.json(
+      { error: 'Failed to remove project from goal', details: err instanceof Error ? err.message : String(err) },
+      { status: 500 }
+    );
+  } finally {
+    await client.close();
+  }
+}
+export async function DELETE(request: Request, { params }: { params: Promise<{ goalId: string }> }) {
+  const client = new MongoClient(uri);
+  try {
+    const { goalId } = await params;
+    console.log(`DELETE /api/goals/${goalId}/projects request received`);
+    await client.connect();
+
+    const url = new URL(request.url);
+    const projectId = url.searchParams.get('projectId');
+    let companyCode = url.searchParams.get('companyCode') || '';
+    if (!projectId) {
+      return NextResponse.json({ error: 'Project ID is required' }, { status: 400 });
+    }
+
+    const authHeader = request.headers.get('authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
+    }
+    const token = authHeader.split(' ')[1];
+    const payload = await verifyAuth(token);
+    if (!payload) {
+      return NextResponse.json({ error: 'Invalid or expired token' }, { status: 401 });
+    }
+    const userEmail = payload.email || '';
+    const dbUserRole = payload.role || '';
+
+    if (!companyCode) {
+      return NextResponse.json({ error: 'Company code is required' }, { status: 400 });
+    }
+
+    const dbName = `company_${companyCode.toLowerCase()}`;
+    const db = client.db(dbName);
+    const goalsCol = db.collection<GoalDocument>(goalsCollection);
+    const projectsCol = db.collection<ProjectDocument>(projectsCollection);
+
+    const goal = await goalsCol.findOne({ _id: new ObjectId(goalId) });
+    if (!goal) {
+      return NextResponse.json({ error: 'Goal not found' }, { status: 404 });
+    }
+
+    const allowedRoles = ['admin', 'top_management_tier_1', 'top_management_tier_2', 'top_management_tier_3'];
+    const canManage = allowedRoles.includes(dbUserRole) || goal.createdBy === userEmail;
+    if (!canManage) {
+      return NextResponse.json(
+        { error: 'Insufficient privileges to manage goal projects', details: { allowedRoles, userRole: dbUserRole } },
+        { status: 403 }
+      );
+    }
+
+    // 1. Remove project from goal's assignedProjects
+    const pullResult = await goalsCol.updateOne(
+      { _id: new ObjectId(goalId) },
+      {
+        $pull: { assignedProjects: { projectId: new ObjectId(projectId) } },
+        $set: { updatedAt: new Date() }
+      }
+    );
+    console.log('Pulled assignedProjects count:', pullResult.modifiedCount);
+    if (pullResult.modifiedCount === 0) {
+      return NextResponse.json({ error: 'Project not found in goal or already removed' }, { status: 404 });
+    }
+
+    // 2. Unlink project
+    await projectsCol.updateOne(
+      { _id: new ObjectId(projectId) },
+      {
+        $set: { linkedToGoal: false, goalContext: null, updatedAt: new Date() }
+      }
+    );
+
+    // 3. Optionally delete if createdFromGoal flag is set
+    const projectDoc = await projectsCol.findOne({ _id: new ObjectId(projectId) });
+    let deletedFromDb = false;
+    if (projectDoc?.createdFromGoal) {
+      const delRes = await projectsCol.deleteOne({ _id: new ObjectId(projectId) });
+      deletedFromDb = delRes.deletedCount === 1;
+    }
+
+    console.log(`Project ${projectId} removed from goal ${goalId}, deletedFromDb: ${deletedFromDb}`);
+    return NextResponse.json({ success: true, message: 'Project removed from goal successfully', projectId, deletedFromDb });
+  } catch (err) {
+    console.error('Error in DELETE /api/goals/[goalId]/projects:', err);
+    return NextResponse.json(
+      { error: 'Failed to remove project from goal', details: err instanceof Error ? err.message : String(err) },
+      { status: 500 }
+    );
+  } finally {
+    await client.close();
+  }
+}(
+// Removed duplicate code fragment
 ) {
   const client = new MongoClient(uri);
 
-  try {
-    const resolvedParams = await params;
-    console.log(`DELETE /api/goals/${resolvedParams.goalId}/projects request received`);
+// Removed duplicate code fragment
     await client.connect();
     
     const url = new URL(request.url);
@@ -594,119 +951,71 @@ export async function DELETE(
       }, { status: 403 });
     }
     
-    // Start a session for the transaction
-    // Flag to indicate if project doc was deleted from DB
-      let deletedFromDb = false;
-      const session = client.startSession();
-    
-    try {
-      await session.withTransaction(async () => {
-        console.log('Attempting to remove project:', projectId, 'from goal:', resolvedParams.goalId);
-        
-        const goalObjectId = new ObjectId(resolvedParams.goalId);
-        const projectObjectId = new ObjectId(projectId);
-        
-        // 1. Remove project from goal's assignedProjects
-        // Try to match both string and ObjectId formats
-        const projectIdStr = projectObjectId.toString();
-        console.log('Removing project with ID:', projectIdStr, 'from goal assignedProjects');
-        
-        let result = await goalsCol.updateOne(
-          { _id: goalObjectId },
-          { 
-            $pull: { 
-              assignedProjects: { 
-                $or: [
-                  { projectId: projectObjectId },
-                  { projectId: projectIdStr },
-                  { _id: projectObjectId },
-                  { _id: projectIdStr }
-                ]
-              } as any // Type assertion needed for complex $or in $pull
-            },
-            $set: { updatedAt: new Date() }
-          },
-          { session }
-        );
-        
-        console.log('Goal update result:', result);
-        
-        // If no match, try direct array manipulation as fallback
-        if (result.modifiedCount === 0) {
-          const goal = await goalsCol.findOne({ _id: goalObjectId }, { session });
-          if (goal && Array.isArray(goal.assignedProjects)) {
-            const projectIdStr = projectObjectId.toString();
-            const updatedProjects = goal.assignedProjects.filter(p => {
-              if (!p) return false;
-              const pId = p.projectId?.toString() || p._id?.toString();
-              return pId !== projectIdStr;
-            });
-            
-            if (updatedProjects.length < goal.assignedProjects.length) {
-              result = await goalsCol.updateOne(
-                { _id: goalObjectId },
-                { 
-                  $set: { 
-                    assignedProjects: updatedProjects,
-                    updatedAt: new Date() 
-                  }
-                },
-                { session }
-              );
-            }
-          }
-        }
-        
-        if (result.modifiedCount === 0) {
-          throw new Error('Project not found in goal or already removed');
-        }
-        
-        // 2. Update the project's linkedToGoal status and clear goalContext
-        await projectsCol.updateOne(
-          { _id: projectObjectId },
-          { 
-            $set: { 
-              linkedToGoal: false,
-              goalContext: null,
-              updatedAt: new Date()
-            } 
-          },
-          { session }
-        );
+    // Remove project from goal's assignedProjects
+    const goalObjectId = new ObjectId(resolvedParams.goalId);
+    const projectObjectId = new ObjectId(projectId);
 
-                // If project was originally created in this goal, remove it entirely
-        const projectDoc = await projectsCol.findOne({ _id: projectObjectId }, { session });
-        console.log('Fetched projectDoc for deletion check:', projectDoc);
-        console.log('Comparing createdFromGoal:', projectDoc?.createdFromGoal, 'with goalId:', resolvedParams.goalId);
-        if (projectDoc?.createdFromGoal) {
-              console.log('Deleting project since createdFromGoal is truthy:', projectDoc.createdFromGoal);
-          const delRes = await projectsCol.deleteOne({ _id: projectObjectId }, { session });
-          deletedFromDb = delRes.deletedCount === 1;
-        }
-      });
-      
-      console.log(`Project ${projectId} removed from goal ${resolvedParams.goalId} and updated successfully`);
-      return NextResponse.json({ 
-        success: true, 
-        message: 'Project removed from goal successfully',
-        projectId,
-        deletedFromDb
-      });
-      
-    } catch (error) {
-      console.error('Error in transaction:', error);
-      throw error;
-    } finally {
-      await session.endSession();
+    // 1. Pull project from goal
+    const pullResult = await goalsCol.updateOne(
+      { _id: goalObjectId },
+      {
+        $pull: {
+          assignedProjects: {
+            $or: [
+              { projectId: projectObjectId },
+              { _id: projectObjectId }
+            ]
+          }
+        },
+        $set: { updatedAt: new Date() }
+      }
+    );
+    console.log('Pulled assignedProjects count:', pullResult.modifiedCount);
+    if (pullResult.modifiedCount === 0) {
+      return NextResponse.json({ error: 'Project not found in goal or already removed' }, { status: 404 });
     }
+
+    // 2. Unlink project
+    await projectsCol.updateOne(
+      { _id: projectObjectId },
+      {
+        $set: {
+          linkedToGoal: false,
+          goalContext: null,
+          updatedAt: new Date()
+        }
+      }
+    );
+
+    // 3. Optionally delete
+    const projectDoc = await projectsCol.findOne({ _id: projectObjectId });
+    let deletedFromDb = false;
+    if (projectDoc?.createdFromGoal) {
+      const delRes = await projectsCol.deleteOne({ _id: projectObjectId });
+      deletedFromDb = delRes.deletedCount === 1;
+    }
+
+    console.log(`Project ${projectId} removed from goal ${resolvedParams.goalId}, deletedFromDb: ${deletedFromDb}`);
+    return NextResponse.json({
+      success: true,
+      message: 'Project removed from goal successfully',
+      projectId,
+      deletedFromDb
+    });
+
+        
+// Removed duplicate code fragment
+// Removed duplicate code fragment
+// Removed duplicate code fragment
+        
+// Removed duplicate code fragment
+        
+// Removed duplicate code fragment
+
+// Removed duplicate code fragment
+// Removed duplicate code fragment
+      
+// Removed duplicate code fragment
     
-  } catch (error) {
-    console.error('Error in goal projects DELETE:', error);
-    return NextResponse.json({ 
-      error: 'Failed to remove project from goal',
-      details: error instanceof Error ? error.message : 'Unknown error'
-    }, { status: 500 });
-  } finally {
-    await client.close();
-  }
+// Removed duplicate code fragment
 }

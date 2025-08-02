@@ -428,27 +428,24 @@ export async function createProjectInGoal(goalId: string, projectData: any) {
       throw new Error('Authentication required');
     }
     
-    // Get user data for params
+    // Get company code from user data
     const storedUser = localStorage.getItem('user');
-    let currentUser = null;
-    let userInfo = {};
+    let companyCode = '';
     
     if (storedUser) {
       try {
-        currentUser = JSON.parse(storedUser);
-        userInfo = {
-          userEmail: currentUser.email,
-          companyCode: currentUser.companyCode || currentUser.company_code
-        };
+        const currentUser = JSON.parse(storedUser);
+        companyCode = currentUser.companyCode || currentUser.company_code || '';
       } catch (e) {
         console.error('Failed to parse stored user:', e);
       }
     }
     
-    // Build query parameters
+    // Only include company code in query params if available
     const params = new URLSearchParams();
-    if ((userInfo as any).userEmail) params.append('userEmail', (userInfo as any).userEmail);
-    if ((userInfo as any).companyCode) params.append('companyCode', (userInfo as any).companyCode);
+    if (companyCode) {
+      params.append('companyCode', companyCode);
+    }
     
     const queryString = params.toString() ? `?${params.toString()}` : '';
     
@@ -490,29 +487,24 @@ export async function assignProjectToGoal(goalId: string, projectId: string) {
       throw new Error('Authentication required');
     }
     
-    // Get user data for params
+    // Get company code from user data
     const storedUser = localStorage.getItem('user');
-    let currentUser = null;
-    let userInfo = {};
+    let companyCode = '';
     
     if (storedUser) {
       try {
-        currentUser = JSON.parse(storedUser);
-        userInfo = {
-          userEmail: currentUser.email,
-          userRole: currentUser.role,
-          companyCode: currentUser.companyCode || currentUser.company_code
-        };
+        const currentUser = JSON.parse(storedUser);
+        companyCode = currentUser.companyCode || currentUser.company_code || '';
       } catch (e) {
         console.error('Failed to parse stored user:', e);
       }
     }
     
-    // Build query parameters
+    // Only include company code in query params if available
     const params = new URLSearchParams();
-    if ((userInfo as any).userEmail) params.append('userEmail', (userInfo as any).userEmail);
-    if ((userInfo as any).userRole) params.append('userRole', (userInfo as any).userRole);
-    if ((userInfo as any).companyCode) params.append('companyCode', (userInfo as any).companyCode);
+    if (companyCode) {
+      params.append('companyCode', companyCode);
+    }
     
     const queryString = params.toString() ? `?${params.toString()}` : '';
     
@@ -553,36 +545,35 @@ export async function removeProjectFromGoal(goalId: string, projectId: string) {
       throw new Error('Authentication required');
     }
     
-    // Get user data for params
+    // Get company code from user data
     const storedUser = localStorage.getItem('user');
-    let currentUser = null;
-    let userInfo = {};
+    let companyCode = '';
     
     if (storedUser) {
       try {
-        currentUser = JSON.parse(storedUser);
-        userInfo = {
-          userEmail: currentUser.email,
-          userRole: currentUser.role,
-          companyCode: currentUser.companyCode || currentUser.company_code
-        };
+        const currentUser = JSON.parse(storedUser);
+        companyCode = currentUser.companyCode || currentUser.company_code || '';
       } catch (e) {
         console.error('Failed to parse stored user:', e);
       }
     }
     
-    // Build query parameters
+    // Only include company code in query params if available
     const params = new URLSearchParams();
-    params.append('projectId', projectId);
-    if ((userInfo as any).userEmail) params.append('userEmail', (userInfo as any).userEmail);
-    if ((userInfo as any).userRole) params.append('userRole', (userInfo as any).userRole);
-    if ((userInfo as any).companyCode) params.append('companyCode', (userInfo as any).companyCode);
+    if (companyCode) {
+      params.append('companyCode', companyCode);
+    }
     
+    // Add projectId to query params
+    params.append('projectId', projectId);
+    
+    // Build query string with all parameters
     const queryString = params.toString() ? `?${params.toString()}` : '';
     
     const res = await fetch(`/api/goals/${goalId}/projects${queryString}`, {
       method: 'DELETE',
       headers: { 
+        'Content-Type': 'application/json',
         'Authorization': `Bearer ${storedToken}`
       }
     });

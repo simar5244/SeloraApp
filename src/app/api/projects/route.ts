@@ -210,6 +210,8 @@ export async function GET(request: Request) {
     const projectId = url.searchParams.get('projectId');
     const userId = url.searchParams.get('userId') || '';
     const userEmail = url.searchParams.get('userEmail') || userId;
+    const linkedToGoal = url.searchParams.get('linkedToGoal');
+    const goalId = url.searchParams.get('goalId');
     
     // Get token from request headers
     const authHeader = request.headers.get('authorization');
@@ -342,8 +344,18 @@ export async function GET(request: Request) {
       // Define the base query for projects in this company
       let query: any = {};
       
+      // Add linkedToGoal filter if specified
+      if (linkedToGoal === 'true') {
+        query.linkedToGoal = true;
+        
+        // If goalId is also specified, filter by that specific goal
+        if (goalId) {
+          query['goalContext.goalId'] = goalId;
+          console.log(`Filtering projects linked to goal: ${goalId}`);
+        }
+      } else if (userEmail) {
       // Apply filters based on user role and permissions
-      if (userEmail) {
+      
         // Users can see projects if:
         // 1. They are in top management (can see all projects), OR
         // 2. The project is marked visibleToAll, OR
@@ -503,15 +515,28 @@ export async function POST(request: Request) {
     const visibleToAll = requestData.visibleToAll !== false;
     
     // Prepare the document to be inserted
-    const dataToInsert = {
+    const dataToInsert: any = {
       ...requestData, // Include all fields passed from frontend
       createdByRole: creatorRole, // Ensure createdByRole is set
       isManagementProject: isTopManagementCreator, // Flag if created by top management
       visibleToAll: visibleToAll, // Make visible by default
       companyCode: companyCode, // Store company code in the project document
       created_at: new Date(), // Add creation timestamp
-      updated_at: new Date()  // Add initial update timestamp
+      updated_at: new Date(), // Add initial update timestamp
+      linked_projects: [], // Initialize empty array for linked projects
+      linkedToGoal: false // Initialize linkedToGoal flag
     };
+    
+    // If linked_projects is provided, ensure it's properly formatted
+    if (requestData.linked_projects) {
+      dataToInsert.linked_projects = Array.isArray(requestData.linked_projects) 
+        ? requestData.linked_projects.map((p: any) => ({
+            projectId: p.projectId || p._id || p.id,
+            linkedAt: new Date(),
+            linkedBy: creatorEmail
+          }))
+        : [];
+    }
 
     // Handle field name mapping
     if (requestData.name && !requestData.project_title) {
@@ -781,9 +806,17 @@ export async function PUT(req: Request) {
       delete updateData.criticality;
     }
     
-    // Convert linkedProjects IDs to ObjectId before update
-    if (updateData.linkedProjects && Array.isArray(updateData.linkedProjects)) {
-      (updateData as any).linkedProjects = (updateData.linkedProjects as string[]).map(id => new ObjectId(id));
+    // Handle linked_projects updates
+    if (updateData.linked_projects !== undefined) {
+      if (Array.isArray(updateData.linked_projects)) {
+        updateData.linked_projects = updateData.linked_projects.map((p: any) => ({
+          projectId: p.projectId || p._id || p.id,
+          linkedAt: p.linkedAt || new Date(),
+          linkedBy: p.linkedBy || userEmail
+        }));
+      } else {
+        updateData.linked_projects = [];
+      }
     }
     
     // Update the project

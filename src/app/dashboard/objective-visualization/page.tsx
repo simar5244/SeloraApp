@@ -7,20 +7,27 @@ import ReactFlow, {
   useNodesState,
   useEdgesState,
   ReactFlowProvider,
+  Panel,
   BackgroundVariant,
   MiniMap,
   Node,
   Edge,
-  ReactFlowInstance
+  ReactFlowInstance,
+  MarkerType,
+  Handle,
+  Position,
+  EdgeProps,
+  getStraightPath
 } from 'reactflow';
 import 'reactflow/dist/style.css';
+import './styles.css';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { FaSearch, FaFilter, FaTimes, FaCamera, FaSyncAlt, FaUndo } from 'react-icons/fa';
+import { FaSearch, FaFilter, FaTimes, FaCamera, FaSyncAlt, FaUndo, FaExpandAlt, FaSpinner } from 'react-icons/fa';
 import { Target, Users, Briefcase, Calendar, AlertCircle, CheckCircle, Clock, Pause } from 'lucide-react';
 import { toast } from "react-hot-toast";
 import html2canvas from 'html2canvas';
@@ -154,82 +161,77 @@ const GoalNode = ({ data }: { data: ObjectiveNode['data'] }) => {
   };
 
   return (
-    <Card className={`w-80 cursor-pointer hover:shadow-xl transition-all duration-200 transform hover:scale-105 ${priorityColors[goal.priority]} border-2 shadow-md`}>
-      <CardHeader className="pb-3">
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center space-x-2">
-            <Target className="w-5 h-5 text-purple-600" />
-            <Badge variant="outline" className="text-xs font-semibold border-purple-300 text-purple-700">
-              GOAL
-            </Badge>
-          </div>
-          <Badge className={`text-xs font-medium ${statusColors[goal.status]}`}>
-            {goal.status.replace('-', ' ').toUpperCase()}
-          </Badge>
-        </div>
-        <CardTitle className="text-lg font-bold text-gray-900 line-clamp-2 leading-tight">
-          {goal.title}
-        </CardTitle>
-        <CardDescription className="text-sm text-gray-600 line-clamp-2 mt-1">
-          {goal.description}
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="pt-0">
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
+    <div className="relative">
+      {/* Output handle for connecting to projects */}
+      <Handle
+        type="source"
+        position={Position.Bottom}
+        id="goal-output"
+        style={{ background: '#8B5CF6', border: '2px solid #ffffff' }}
+      />
+      
+      <Card className={`w-80 cursor-pointer hover:shadow-xl transition-all duration-200 transform hover:scale-105 ${priorityColors[goal.priority]} border-2 shadow-md`}>
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between mb-2">
             <div className="flex items-center space-x-2">
-              {statusIcons[goal.status]}
-              <span className="text-sm font-medium text-gray-700 capitalize">
-                {goal.status.replace('-', ' ')}
-              </span>
+              <Target className="w-5 h-5 text-purple-600" />
+              <Badge variant="outline" className="text-xs font-semibold border-purple-300 text-purple-700">
+                GOAL
+              </Badge>
             </div>
-            <Badge variant="outline" className="text-xs bg-gray-100 text-gray-700">
-              {goal.department}
+            <Badge className={`text-xs font-medium ${statusColors[goal.status]}`}>
+              {goal.status.replace('-', ' ').toUpperCase()}
             </Badge>
           </div>
-
-          <div className="grid grid-cols-2 gap-2 text-xs text-gray-600">
-            <div className="flex items-center space-x-1">
-              <Calendar className="w-3 h-3" />
-              <span>{new Date(goal.startDate).toLocaleDateString()}</span>
+          <CardTitle className="text-lg font-bold text-gray-900 line-clamp-2 leading-tight">
+            {goal.title}
+          </CardTitle>
+          <CardDescription className="text-sm text-gray-600 line-clamp-2 mt-1">
+            {goal.description}
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="pt-0">
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                {statusIcons[goal.status]}
+                <span className="text-sm font-medium text-gray-700 capitalize">
+                  {goal.status.replace('-', ' ')}
+                </span>
+              </div>
+              <Badge variant="outline" className="text-xs bg-gray-100 text-gray-700">
+                {goal.department}
+              </Badge>
             </div>
-            <div className="flex items-center space-x-1">
-              <Users className="w-3 h-3" />
-              <span>{goal.assignedProjects.length} projects</span>
+
+            <div className="grid grid-cols-2 gap-2 text-xs text-gray-600">
+              <div className="flex items-center space-x-1">
+                <Calendar className="w-3 h-3" />
+                <span>{new Date(goal.startDate).toLocaleDateString()}</span>
+              </div>
+              <div className="flex items-center space-x-1">
+                <Users className="w-3 h-3" />
+                <span>{goal.assignedProjects.length} projects</span>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between pt-1">
+              <Badge variant="outline" className={`text-xs font-medium ${
+                goal.priority === 'critical' ? 'border-red-400 text-red-700' :
+                goal.priority === 'high' ? 'border-orange-400 text-orange-700' :
+                goal.priority === 'medium' ? 'border-yellow-400 text-yellow-700' :
+                'border-green-400 text-green-700'
+              }`}>
+                {goal.priority.toUpperCase()} PRIORITY
+              </Badge>
+              {goal.kpis && goal.kpis.length > 0 && (
+                <span className="text-xs text-gray-500">{goal.kpis.length} KPIs</span>
+              )}
             </div>
           </div>
-
-          {goal.progress !== undefined && (
-            <div className="space-y-2">
-              <div className="flex justify-between text-xs font-medium text-gray-700">
-                <span>Progress</span>
-                <span>{goal.progress}%</span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-2.5">
-                <div
-                  className="bg-gradient-to-r from-purple-500 to-purple-600 h-2.5 rounded-full transition-all duration-300"
-                  style={{ width: `${goal.progress}%` }}
-                />
-              </div>
-            </div>
-          )}
-
-          <div className="flex items-center justify-between pt-1">
-            <Badge variant="outline" className={`text-xs font-medium ${
-              goal.priority === 'critical' ? 'border-red-400 text-red-700' :
-              goal.priority === 'high' ? 'border-orange-400 text-orange-700' :
-              goal.priority === 'medium' ? 'border-yellow-400 text-yellow-700' :
-              'border-green-400 text-green-700'
-            }`}>
-              {goal.priority.toUpperCase()} PRIORITY
-            </Badge>
-            {goal.kpis && goal.kpis.length > 0 && (
-              <span className="text-xs text-gray-500">{goal.kpis.length} KPIs</span>
-            )}
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 
@@ -256,70 +258,88 @@ const ProjectNode = ({ data }: { data: ObjectiveNode['data'] }) => {
   const teamSize = (project.employee_contributions || project.employees || []).length;
 
   return (
-    <Card className={`${isMainProject ? 'w-72' : 'w-64'} cursor-pointer hover:shadow-xl transition-all duration-200 transform hover:scale-105 border-2 shadow-md ${priorityColors[project.priority as keyof typeof priorityColors] || 'border-gray-400 bg-gray-50 hover:bg-gray-100'}`}>
-      <CardHeader className="pb-3">
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center space-x-2">
-            <Briefcase className={`${isMainProject ? 'w-5 h-5' : 'w-4 h-4'} text-blue-600`} />
-            <Badge variant={isMainProject ? "default" : "outline"} className={`text-xs font-semibold ${
-              isMainProject ? 'bg-blue-100 text-blue-800 border-blue-300' : 'bg-gray-100 text-gray-700'
-            }`}>
-              {isMainProject ? 'MAIN PROJECT' : 'LINKED PROJECT'}
-            </Badge>
-          </div>
-        </div>
-        <CardTitle className={`${isMainProject ? 'text-base' : 'text-sm'} font-bold text-gray-900 line-clamp-2 leading-tight`}>
-          {project.project_title}
-        </CardTitle>
-        <CardDescription className="text-xs text-gray-600 line-clamp-2 mt-1">
-          {project.project_description}
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="pt-0">
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <Badge className={`text-xs font-medium capitalize ${statusColors[project.status as keyof typeof statusColors] || 'bg-gray-100 text-gray-800'}`}>
-              {project.status.replace('-', ' ')}
-            </Badge>
-            <Badge variant="outline" className="text-xs bg-gray-100 text-gray-700">
-              {project.department}
-            </Badge>
-          </div>
-
-          <div className="grid grid-cols-2 gap-2 text-xs text-gray-600">
-            <div className="flex items-center space-x-1">
-              <Calendar className="w-3 h-3" />
-              <span>{project.start_date ? new Date(project.start_date).toLocaleDateString() : 'No date'}</span>
-            </div>
-            <div className="flex items-center space-x-1">
-              <Users className="w-3 h-3" />
-              <span>{teamSize} {teamSize === 1 ? 'member' : 'members'}</span>
+    <div className="relative">
+      {/* Input handle for connections from goals or other projects */}
+      <Handle
+        type="target"
+        position={Position.Top}
+        id="project-input"
+        style={{ background: '#3B82F6', border: '2px solid #ffffff' }}
+      />
+      
+      {/* Output handle for connecting to employees or linked projects */}
+      <Handle
+        type="source"
+        position={Position.Bottom}
+        id="project-output"
+        style={{ background: '#3B82F6', border: '2px solid #ffffff' }}
+      />
+      
+      <Card className={`${isMainProject ? 'w-72' : 'w-64'} cursor-pointer hover:shadow-xl transition-all duration-200 transform hover:scale-105 border-2 shadow-md ${priorityColors[project.priority as keyof typeof priorityColors] || 'border-gray-400 bg-gray-50 hover:bg-gray-100'}`}>
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center space-x-2">
+              <Briefcase className={`${isMainProject ? 'w-5 h-5' : 'w-4 h-4'} text-blue-600`} />
+              <Badge variant={isMainProject ? "default" : "outline"} className={`text-xs font-semibold ${
+                isMainProject ? 'bg-blue-100 text-blue-800 border-blue-300' : 'bg-gray-100 text-gray-700'
+              }`}>
+                {isMainProject ? 'MAIN PROJECT' : 'LINKED PROJECT'}
+              </Badge>
             </div>
           </div>
-
-          {project.total_budget > 0 && (
-            <div className="flex items-center justify-between text-xs">
-              <span className="text-gray-600">Budget:</span>
-              <span className="font-medium text-gray-800">${project.total_budget.toLocaleString()}</span>
+          <CardTitle className={`${isMainProject ? 'text-base' : 'text-sm'} font-bold text-gray-900 line-clamp-2 leading-tight`}>
+            {project.project_title}
+          </CardTitle>
+          <CardDescription className="text-xs text-gray-600 line-clamp-2 mt-1">
+            {project.project_description}
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="pt-0">
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <Badge className={`text-xs font-medium capitalize ${statusColors[project.status as keyof typeof statusColors] || 'bg-gray-100 text-gray-800'}`}>
+                {project.status.replace('-', ' ')}
+              </Badge>
+              <Badge variant="outline" className="text-xs bg-gray-100 text-gray-700">
+                {project.department}
+              </Badge>
             </div>
-          )}
 
-          <div className="flex items-center justify-between pt-1">
-            <Badge variant="outline" className={`text-xs font-medium ${
-              project.priority === 'critical' ? 'border-red-400 text-red-700' :
-              project.priority === 'high' ? 'border-orange-400 text-orange-700' :
-              project.priority === 'medium' ? 'border-yellow-400 text-yellow-700' :
-              'border-green-400 text-green-700'
-            }`}>
-              {project.priority?.toUpperCase() || 'MEDIUM'} PRIORITY
-            </Badge>
-            {project.linkedProjects && project.linkedProjects.length > 0 && (
-              <span className="text-xs text-gray-500">{project.linkedProjects.length} linked</span>
+            <div className="grid grid-cols-2 gap-2 text-xs text-gray-600">
+              <div className="flex items-center space-x-1">
+                <Calendar className="w-3 h-3" />
+                <span>{project.start_date ? new Date(project.start_date).toLocaleDateString() : 'No date'}</span>
+              </div>
+              <div className="flex items-center space-x-1">
+                <Users className="w-3 h-3" />
+                <span>{teamSize} {teamSize === 1 ? 'member' : 'members'}</span>
+              </div>
+            </div>
+
+            {project.total_budget > 0 && (
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-gray-600">Budget:</span>
+                <span className="font-medium text-gray-800">${project.total_budget.toLocaleString()}</span>
+              </div>
             )}
+
+            <div className="flex items-center justify-between pt-1">
+              <Badge variant="outline" className={`text-xs font-medium ${
+                project.priority === 'critical' ? 'border-red-400 text-red-700' :
+                project.priority === 'high' ? 'border-orange-400 text-orange-700' :
+                project.priority === 'medium' ? 'border-yellow-400 text-yellow-700' :
+                'border-green-400 text-green-700'
+              }`}>
+                {project.priority?.toUpperCase() || 'MEDIUM'} PRIORITY
+              </Badge>
+              {project.linkedProjects && project.linkedProjects.length > 0 && (
+                <span className="text-xs text-gray-500">{project.linkedProjects.length} linked</span>
+              )}
+            </div>
           </div>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 
@@ -344,16 +364,25 @@ const EmployeeNode = ({ data }: { data: ObjectiveNode['data'] }) => {
   };
 
   return (
-    <Card className={`${isHighLevel ? 'w-56' : 'w-52'} cursor-pointer hover:shadow-xl transition-all duration-200 transform hover:scale-105 border-2 shadow-md ${levelColors[data.level as keyof typeof levelColors] || 'border-gray-300 bg-gray-50 hover:bg-gray-100'}`}>
-      <CardHeader className="pb-3">
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center space-x-2">
-            <Users className={`${isHighLevel ? 'w-4 h-4' : 'w-3 h-3'} text-green-600`} />
-            <Badge variant="outline" className={`text-xs font-semibold ${levelBadgeColors[data.level as keyof typeof levelBadgeColors] || 'bg-gray-100 text-gray-700'}`}>
-              {isHighLevel ? 'DIRECT' : 'INDIRECT'}
-            </Badge>
+    <div className="relative">
+      {/* Input handle for connections from projects */}
+      <Handle
+        type="target"
+        position={Position.Top}
+        id="employee-input"
+        style={{ background: '#10B981', border: '2px solid #ffffff' }}
+      />
+      
+      <Card className={`${isHighLevel ? 'w-56' : 'w-52'} cursor-pointer hover:shadow-xl transition-all duration-200 transform hover:scale-105 border-2 shadow-md ${levelColors[data.level as keyof typeof levelColors] || 'border-gray-300 bg-gray-50 hover:bg-gray-100'}`}>
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center space-x-2">
+              <Users className={`${isHighLevel ? 'w-4 h-4' : 'w-3 h-3'} text-green-600`} />
+              <Badge variant="outline" className={`text-xs font-semibold ${levelBadgeColors[data.level as keyof typeof levelBadgeColors] || 'bg-gray-100 text-gray-700'}`}>
+                {isHighLevel ? 'DIRECT' : 'INDIRECT'}
+              </Badge>
+            </div>
           </div>
-        </div>
         <CardTitle className={`${isHighLevel ? 'text-sm' : 'text-xs'} font-bold text-gray-900 line-clamp-1 leading-tight`}>
           {name || 'Unknown Employee'}
         </CardTitle>
@@ -401,6 +430,51 @@ const EmployeeNode = ({ data }: { data: ObjectiveNode['data'] }) => {
         </div>
       </CardContent>
     </Card>
+    </div>
+  );
+};
+
+// Custom Edge Component - Only horizontal and vertical lines like org-chart
+const CustomObjectiveEdge: React.FC<EdgeProps> = (props) => {
+  const { sourceX, sourceY, targetX, targetY, id, style } = props;
+  
+  // Calculate path with only horizontal and vertical lines - improved version
+  // Use source and target handle positions for better alignment
+  const midY = sourceY + Math.abs(targetY - sourceY) / 2;
+  
+  // Create clean step-path: down from source, horizontal to target X, down to target
+  // This ensures proper horizontal and vertical only connections
+  const path = `M ${sourceX},${sourceY} L ${sourceX},${midY} L ${targetX},${midY} L ${targetX},${targetY}`;
+  
+  return (
+    <g>
+      <path
+        id={id}
+        className="react-flow__edge-path"
+        d={path}
+        stroke={style?.stroke || '#374151'}
+        strokeWidth={style?.strokeWidth || 2}
+        fill="none"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        markerEnd={props.markerEnd}
+      />
+      {/* Add connection points for better visual clarity */}
+      <circle
+        cx={sourceX}
+        cy={midY}
+        r="2"
+        fill={style?.stroke || '#374151'}
+        opacity="0.6"
+      />
+      <circle
+        cx={targetX}
+        cy={midY}
+        r="2"
+        fill={style?.stroke || '#374151'}
+        opacity="0.6"
+      />
+    </g>
   );
 };
 
@@ -409,6 +483,260 @@ const nodeTypes = {
   goalNode: GoalNode,
   projectNode: ProjectNode,
   employeeNode: EmployeeNode,
+};
+
+// Custom edge types
+const edgeTypes = {
+  customObjective: CustomObjectiveEdge,
+};
+
+// Layout constants - optimized for symmetrical heap layout
+const LEVEL_HEIGHT = 450; // Increased by 15% from 300
+const NODE_WIDTH = 200;
+const NODE_PADDING = 50;
+const HORIZONTAL_GAP = 10; // Reduced by 25% from 100
+const MIN_NODE_SPACING = 10; // Minimum space between nodes to prevent overlap
+
+// Heap sort utility for symmetrical arrangement
+const heapSort = (arr: any[], compareFn: (a: any, b: any) => number): any[] => {
+  const sorted = [...arr].sort(compareFn);
+  
+  // Arrange in heap-like symmetrical structure
+  if (sorted.length <= 1) return sorted;
+  
+  const result: any[] = [];
+  const queue = [...sorted];
+  
+  // Place center item first
+  const centerIndex = Math.floor(queue.length / 2);
+  result.push(queue.splice(centerIndex, 1)[0]);
+  
+  // Alternate left and right placement for symmetry
+  let left = true;
+  while (queue.length > 0) {
+    if (left && queue.length > 0) {
+      result.unshift(queue.shift()!);
+    }
+    if (!left && queue.length > 0) {
+      result.push(queue.pop()!);
+    }
+    left = !left;
+  }
+  
+  return result;
+};
+
+// Enhanced layout utility functions with heap symmetry and abnormal data handling
+const calculateSubtreeWidth = (nodeId: string, graph: Record<string, string[]>, subtreeWidths: Record<string, number>): number => {
+  const children = graph[nodeId] || [];
+  
+  // Handle abnormal case: no children
+  if (children.length === 0) {
+    const width = NODE_WIDTH + NODE_PADDING;
+    subtreeWidths[nodeId] = width;
+    return width;
+  }
+  
+  // Handle abnormal case: too many children (> 10)
+  const maxChildren = Math.min(children.length, 10); // Limit for visual clarity
+  const activeChildren = children.slice(0, maxChildren);
+  
+  // Recursively calculate children widths
+  const childrenWidths = activeChildren.map(childId => 
+    calculateSubtreeWidth(childId, graph, subtreeWidths)
+  );
+  
+  const totalChildrenWidth = childrenWidths.reduce((sum, width) => sum + width, 0);
+  const spacingWidth = Math.max(0, (activeChildren.length - 1) * HORIZONTAL_GAP);
+  
+  // Ensure minimum width and symmetric distribution
+  const calculatedWidth = totalChildrenWidth + spacingWidth;
+  const minimumWidth = NODE_WIDTH + NODE_PADDING;
+  const width = Math.max(minimumWidth, calculatedWidth);
+  
+  subtreeWidths[nodeId] = width;
+  return width;
+};
+
+const applySymmetricalLayout = (nodes: ObjectiveNode[], edges: Edge[]): ObjectiveNode[] => {
+  if (!nodes.length) return [];
+  
+  // Build graph structure with validation
+  const graph: Record<string, string[]> = {};
+  const parentMap: Record<string, string> = {};
+  const nodeMap: Record<string, ObjectiveNode> = {};
+  
+  // Initialize graph and validate nodes
+  nodes.forEach(node => {
+    if (!node || !node.id) {
+      console.warn('Invalid node detected, skipping:', node);
+      return;
+    }
+    graph[node.id] = [];
+    nodeMap[node.id] = node;
+  });
+  
+  // Fill graph with connections and validate edges
+  edges.forEach(edge => {
+    if (!edge || !edge.source || !edge.target) {
+      console.warn('Invalid edge detected, skipping:', edge);
+      return;
+    }
+    
+    // Only add edge if both nodes exist
+    if (graph[edge.source] && nodeMap[edge.target]) {
+      graph[edge.source].push(edge.target);
+      parentMap[edge.target] = edge.source;
+    }
+  });
+  
+  // Find root nodes (goals without parents) - handle abnormal case of no roots
+  const rootNodes = nodes.filter(node => !parentMap[node.id]).map(node => node.id);
+  if (rootNodes.length === 0) {
+    console.warn('No root nodes found, using first node as root');
+    rootNodes.push(nodes[0].id);
+  }
+  
+  // Calculate levels with heap-like distribution
+  const levels: Record<string, number> = {};
+  rootNodes.forEach(nodeId => {
+    levels[nodeId] = 0;
+  });
+  
+  const queue = [...rootNodes];
+  while (queue.length > 0) {
+    const nodeId = queue.shift()!;
+    const children = graph[nodeId] || [];
+    
+    children.forEach(childId => {
+      levels[childId] = levels[nodeId] + 1;
+      queue.push(childId);
+    });
+  }
+  
+  // Group nodes by level
+  const nodesByLevel: Record<number, string[]> = {};
+  Object.keys(levels).forEach(nodeId => {
+    const level = levels[nodeId];
+    if (!nodesByLevel[level]) {
+      nodesByLevel[level] = [];
+    }
+    nodesByLevel[level].push(nodeId);
+  });
+  
+  const maxLevel = Math.max(...Object.keys(nodesByLevel).map(Number));
+  
+  // Calculate subtree widths for heap-like symmetry
+  const subtreeWidths: Record<string, number> = {};
+  
+  // Process from bottom to top
+  for (let level = maxLevel; level >= 0; level--) {
+    const levelNodes = nodesByLevel[level] || [];
+    for (const nodeId of levelNodes) {
+      calculateSubtreeWidth(nodeId, graph, subtreeWidths);
+    }
+  }
+  
+  // Position nodes with symmetrical arrangement
+  const nodePositions: Record<string, { x: number, y: number }> = {};
+  
+  // Position root nodes symmetrically
+  let currentX = 0;
+  const totalRootWidth = rootNodes.reduce((sum, rootId) => sum + subtreeWidths[rootId], 0) + 
+                        (rootNodes.length - 1) * HORIZONTAL_GAP;
+  
+  let startX = -totalRootWidth / 2;
+  
+  for (const rootId of rootNodes) {
+    nodePositions[rootId] = {
+      x: startX + subtreeWidths[rootId] / 2 - NODE_WIDTH / 2,
+      y: 0
+    };
+    startX += subtreeWidths[rootId] + HORIZONTAL_GAP;
+  }
+  
+  // Position children recursively with heap symmetry
+  const positionChildren = (parentId: string, parentLevel: number) => {
+    const children = graph[parentId] || [];
+    if (children.length === 0) return;
+    
+    // Sort children for heap-like symmetrical arrangement
+    const sortedChildren = heapSort(children, (a, b) => {
+      const nodeA = nodeMap[a];
+      const nodeB = nodeMap[b];
+      
+      // Sort by priority, then by type, then by title
+      const priorityOrder = { critical: 0, high: 1, medium: 2, low: 3 };
+      const typeOrder = { goal: 0, project: 1, employee: 2 };
+      
+      const aPriority = priorityOrder[nodeA?.data?.priority as keyof typeof priorityOrder] ?? 2;
+      const bPriority = priorityOrder[nodeB?.data?.priority as keyof typeof priorityOrder] ?? 2;
+      
+      if (aPriority !== bPriority) return aPriority - bPriority;
+      
+      const aType = typeOrder[nodeA?.data?.type as keyof typeof typeOrder] ?? 2;
+      const bType = typeOrder[nodeB?.data?.type as keyof typeof typeOrder] ?? 2;
+      
+      if (aType !== bType) return aType - bType;
+      
+      return (nodeA?.data?.title || '').localeCompare(nodeB?.data?.title || '');
+    });
+    
+    // Get parent position
+    const parentPos = nodePositions[parentId];
+    if (!parentPos) return;
+    
+    const parentX = parentPos.x + NODE_WIDTH / 2; // Center of parent
+    const childLevel = parentLevel + 1;
+    const childY = childLevel * LEVEL_HEIGHT;
+    
+    // Calculate total width needed for all children
+    const totalWidth = sortedChildren.reduce((sum, childId) => sum + subtreeWidths[childId], 0) +
+                      Math.max(0, (sortedChildren.length - 1) * HORIZONTAL_GAP);
+    
+    // Start positioning from left edge of the available space
+    let currentX = parentX - totalWidth / 2;
+    
+    sortedChildren.forEach(childId => {
+      const childWidth = subtreeWidths[childId];
+      const childX = currentX + childWidth / 2 - NODE_WIDTH / 2;
+      
+      // Ensure minimum spacing to prevent overlap
+      const adjustedX = Math.max(currentX, childX);
+      
+      nodePositions[childId] = {
+        x: adjustedX,
+        y: childY
+      };
+      
+      currentX += childWidth + HORIZONTAL_GAP;
+      
+      // Recursively position this child's children
+      positionChildren(childId, childLevel);
+    });
+  };
+  
+  // Apply positioning to all root nodes and their descendants
+  rootNodes.forEach(rootId => {
+    positionChildren(rootId, 0);
+  });
+  
+  // Return nodes with updated positions
+  return nodes.map(node => {
+    const position = nodePositions[node.id];
+    return position ? {
+      ...node,
+      position: {
+        x: position.x,
+        y: position.y
+      },
+      style: {
+        ...node.style,
+        width: NODE_WIDTH,
+        height: 'auto'
+      }
+    } : node;
+  });
 };
 
 // Main Component
@@ -429,12 +757,69 @@ const ObjectiveVisualizationPage = () => {
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedDetail, setSelectedDetail] = useState<any>(null);
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  
+  // Handler for new connections (maintain edge type consistency)
+  const onConnect = useCallback((params: any) => {
+    const newEdge = {
+      ...params,
+      id: `${params.source}-${params.target}`,
+      type: 'customObjective',
+      style: { 
+        strokeWidth: 2, 
+        stroke: '#374151',
+        strokeLinecap: 'round',
+        strokeLinejoin: 'round'
+      }
+    };
+    setEdges(eds => [...eds, newEdge]);
+  }, [setEdges]);
+  
+  // Force relayout function similar to org-chart
+  const forceRelayout = useCallback(() => {
+    if (nodes.length > 0 && edges.length > 0) {
+      const relayoutedNodes = applySymmetricalLayout(nodes as ObjectiveNode[], edges).map(node => ({
+        ...node,
+        draggable: true,
+        focusable: true,
+        style: {
+          ...node.style,
+          cursor: 'grab'
+        }
+      }));
+      setNodes(relayoutedNodes as any);
+      
+      // Fit view after relayout
+      setTimeout(() => {
+        if (reactFlowInstance) {
+          reactFlowInstance.fitView({
+            padding: 0.2,
+            includeHiddenNodes: false,
+            minZoom: 0.1,
+            maxZoom: 1.5,
+            duration: 800
+          });
+        }
+      }, 100);
+    }
+  }, [nodes, edges, reactFlowInstance, setNodes]);
 
   // Data states
   const [goals, setGoals] = useState<Goal[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [departments, setDepartments] = useState<string[]>([]);
+  
+  const toggleFullScreen = useCallback(() => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(err => {
+        console.error(`Error attempting to enable fullscreen: ${err.message}`);
+      });
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      }
+    }
+  }, []);
   const [statuses, setStatuses] = useState<string[]>([]);
   const [priorities, setPriorities] = useState<string[]>([]);
 
@@ -559,7 +944,16 @@ const ObjectiveVisualizationPage = () => {
       });
 
       // Build visualization
-      buildVisualization(processedGoals, processedProjects, processedEmployees);
+      buildVisualization(
+        processedGoals, 
+        processedProjects, 
+        processedEmployees,
+        selectedGoal,
+        selectedDepartment,
+        selectedStatus,
+        selectedPriority,
+        searchQuery
+      );
 
       console.log(`Data loaded successfully: ${processedGoals.length} goals, ${processedProjects.length} projects, and ${processedEmployees.length} employees.`);
 
@@ -676,7 +1070,9 @@ const ObjectiveVisualizationPage = () => {
   };
 
   // Build visualization
-  const buildVisualization = (goals: Goal[], projects: Project[], employees: Employee[]) => {
+  const buildVisualization = useCallback((goals: Goal[], projects: Project[], employees: Employee[], 
+    selectedGoal?: string, selectedDepartment?: string, selectedStatus?: string, 
+    selectedPriority?: string, searchQuery?: string) => {
     console.log('Building visualization with:', { goals: goals.length, projects: projects.length, employees: employees.length });
 
     if (goals.length === 0) {
@@ -740,22 +1136,106 @@ const ObjectiveVisualizationPage = () => {
 
     const newNodes: ObjectiveNode[] = [];
     const newEdges: Edge[] = [];
+    
+    // Proper tree layout algorithm to prevent branch crossings
+    // First pass: calculate the width each subtree needs
+    const calculateSubtreeWidth = (goalId: string, goalProjects: any[]): number => {
+      let totalWidth = 0;
+      
+      goalProjects.forEach(project => {
+        // Count direct employees for this project
+        const directEmployees = project.employee_contributions?.length || 0;
+        
+        // Count linked projects (limit to 1 per main project)
+        const linkedProjectsCount = 1; // We limit to 1 linked project per main project
+        
+        // Each project needs space for its employees and linked projects
+        // Use consistent spacing based on our spacing constants
+        const projectSubtreeWidth = Math.max(
+          NODE_WIDTH, // Minimum width for the project itself
+          (directEmployees + linkedProjectsCount) * EMPLOYEE_HORIZONTAL_SPACING
+        );
+        
+        totalWidth += projectSubtreeWidth + PROJECT_HORIZONTAL_SPACING;
+      });
+      
+      return Math.max(totalWidth - HORIZONTAL_GAP, NODE_WIDTH); // Remove last gap
+    };
+    
+    // Track allocated areas for each goal to prevent crossings
+    const goalAreas: Record<string, {start: number, end: number}> = {};
+    
+    // Track nodes by level and their positions to ensure proper tree layout
+    const levelNodes: Record<number, { id: string, width: number, position: {x: number, y: number} }[]> = {
+      1: [], // Goals (level 1)
+      2: [], // Projects (level 2)
+      3: [], // Direct employees and linked projects (level 3)
+      4: []  // Indirect employees (level 4)
+    };
+    
+    // Track employee IDs to prevent duplicates and ensure they're properly positioned
+    const employeeTracker: Record<string, { 
+      nodeIds: string[], // IDs of nodes representing this employee
+      parentIds: string[], // IDs of parent nodes (projects) this employee is connected to
+      positions: {x: number, y: number}[] // Positions of each instance of this employee
+    }> = {};
 
-    // NEW - proper spacing
-    const LEVEL_HEIGHT = 400; // Vertical spacing between levels
-    const GOAL_HORIZONTAL_SPACING = 600; // Horizontal spacing for goals
-    const PROJECT_HORIZONTAL_SPACING = 280; // Spacing for projects
-    const EMPLOYEE_HORIZONTAL_SPACING = 240; // Spacing for employees
+    // Layout constants for tree visualization
+    const NODE_WIDTH = 320; // Width of node cards
+    const NODE_HEIGHT = 180; // Approximate height of node cards
+    const LEVEL_HEIGHT = 400; // Vertical space between levels
+    const HORIZONTAL_GAP = 240; // Minimum horizontal gap between nodes (increased for better spacing)
+    
+    // Calculate spacing based on node dimensions and gap
+    const GOAL_HORIZONTAL_SPACING = NODE_WIDTH + HORIZONTAL_GAP * 2; // Spacing for goals
+    const PROJECT_HORIZONTAL_SPACING = NODE_WIDTH + HORIZONTAL_GAP * 2; // Spacing for projects
+    const EMPLOYEE_HORIZONTAL_SPACING = NODE_WIDTH + HORIZONTAL_GAP; // Consistent spacing for employees
+    
+    // Helper function to create marker end configuration
+    const createMarkerEnd = (color: string) => ({
+      type: MarkerType.ArrowClosed,
+      color,
+      width: 20,
+      height: 20
+    });
 
     // Calculate total width needed and center the tree
     const totalGoals = filteredGoals.length;
     const totalWidth = Math.max(1, totalGoals - 1) * GOAL_HORIZONTAL_SPACING;
     const startX = -totalWidth / 2; // Center the tree
 
+    // First pass: calculate areas for each goal
+    let currentX = startX;
     filteredGoals.forEach((goal, goalIndex) => {
-      // Level 1: Goal nodes (TOP of tree)
       const goalNodeId = `goal-${goal.id}`;
-      const goalX = startX + (goalIndex * GOAL_HORIZONTAL_SPACING);
+      
+      // Get projects for this goal
+      let mainProjects = projects.filter(p => {
+        return goal.assignedProjects.some(ap => {
+          const projectId = typeof ap === 'string' ? ap : ap.projectId;
+          return projectId === p._id || projectId === p._id.toString();
+        });
+      });
+      
+      if (mainProjects.length === 0) {
+        mainProjects = projects.filter(p => {
+          return p.project_title.toLowerCase().includes(goal.title.toLowerCase().split(' ')[0]) ||
+                 p.project_description.toLowerCase().includes(goal.title.toLowerCase().split(' ')[0]) ||
+                 p.department === goal.department;
+        }).slice(0, 3);
+      }
+      
+      // Calculate the width this goal's subtree needs
+      const subtreeWidth = calculateSubtreeWidth(goal.id, mainProjects);
+      
+      // Allocate area for this goal
+      const goalX = currentX + (subtreeWidth / 2); // Center the goal in its allocated area
+      goalAreas[goal.id] = {
+        start: currentX,
+        end: currentX + subtreeWidth
+      };
+      
+      currentX += subtreeWidth + HORIZONTAL_GAP * 2; // Move to next area
 
       newNodes.push({
         id: goalNodeId,
@@ -775,42 +1255,44 @@ const ObjectiveVisualizationPage = () => {
           details: goal
         }
       });
-
-      // Level 2: Main projects (directly assigned to goal)
-      let mainProjects = projects.filter(p => {
-        // Check if project is directly assigned to this goal
-        return goal.assignedProjects.some(ap => {
-          const projectId = typeof ap === 'string' ? ap : ap.projectId;
-          return projectId === p._id || projectId === p._id.toString();
-        });
+      
+      // Track this goal node in level 1
+      levelNodes[1].push({
+        id: goalNodeId,
+        width: NODE_WIDTH,
+        position: { x: goalX, y: 0 }
       });
 
-      // If no projects found through assignedProjects, try alternative matching
-      if (mainProjects.length === 0) {
-        // Try matching by goal ID in project data or other relationships
-        mainProjects = projects.filter(p => {
-          // Check if project mentions this goal in any way
-          return p.project_title.toLowerCase().includes(goal.title.toLowerCase().split(' ')[0]) ||
-                 p.project_description.toLowerCase().includes(goal.title.toLowerCase().split(' ')[0]) ||
-                 p.department === goal.department;
-        }).slice(0, 3); // Limit to 3 projects per goal to avoid clutter
-      }
-
+      // Level 2: Main projects (directly assigned to goal) - use the projects we already calculated
       console.log(`Goal "${goal.title}" has ${mainProjects.length} main projects:`, mainProjects.map(p => p.project_title));
 
-      // Calculate horizontal positioning for main projects (Level 2)
-      // NEW - proper distributionÏ
-      const projectSpacing = PROJECT_HORIZONTAL_SPACING;
-      const totalProjectWidth = Math.max(0, mainProjects.length - 1) * projectSpacing;
-      let currentProjectX = goalX - (totalProjectWidth / 2);
-
-      mainProjects.forEach((project) => {
+      // Position projects symmetrically within this goal's allocated area
+      const goalArea = goalAreas[goal.id];
+      const availableWidth = goalArea.end - goalArea.start;
+      
+      // Ensure minimum width for proper spacing
+      const effectiveWidth = Math.max(availableWidth, mainProjects.length * PROJECT_HORIZONTAL_SPACING);
+      
+      mainProjects.forEach((project, projectIndex) => {
         const projectNodeId = `project-main-${project._id}`;
+        
+        // Center projects symmetrically under the goal
+        let projectX;
+        if (mainProjects.length === 1) {
+          // Single project: center it under the goal
+          projectX = goalX;
+        } else {
+          // Multiple projects: distribute them symmetrically with consistent spacing
+          const projectSpacing = PROJECT_HORIZONTAL_SPACING; // Use consistent spacing
+          const totalProjectsWidth = (mainProjects.length - 1) * projectSpacing;
+          const startX = goalX - (totalProjectsWidth / 2);
+          projectX = startX + (projectIndex * projectSpacing);
+        }
 
         newNodes.push({
           id: projectNodeId,
           type: 'projectNode',
-          position: { x: currentProjectX, y: LEVEL_HEIGHT }, // Level 2 - below goals
+          position: { x: projectX, y: LEVEL_HEIGHT }, // Level 2 - below goals
           data: {
             id: project._id,
             type: 'project',
@@ -824,24 +1306,26 @@ const ObjectiveVisualizationPage = () => {
             details: project
           }
         });
+        
+        // Track this project node in level 2
+        levelNodes[2].push({
+          id: projectNodeId,
+          width: NODE_WIDTH,
+          position: { x: projectX, y: LEVEL_HEIGHT }
+        });
 
-        // Connect goal to main project
-        // NEW - visible edges
-        const goalToProjectEdge = {
-          id: `${goalNodeId}-${projectNodeId}`,
+        // Connect goal to main project with custom edge type
+        const goalToProjectEdge: Edge = {
+          id: `goal-${goal.id}-project-${project._id}`,
           source: goalNodeId,
           target: projectNodeId,
-          type: 'default',
+          type: 'customObjective',
           style: { 
             strokeWidth: 3, 
-            stroke: '#8B5CF6',
-            strokeDasharray: 'none'
+            stroke: '#8B5CF6'
           },
-          animated: false,
-          markerEnd: {
-            type: 'arrow',
-            color: '#8B5CF6'
-          }
+          animated: true,
+          markerEnd: createMarkerEnd('#8B5CF6')
         };
         newEdges.push(goalToProjectEdge);
         console.log('Added goal-to-project edge:', goalToProjectEdge);
@@ -894,13 +1378,11 @@ const ObjectiveVisualizationPage = () => {
           linkedProjects = projects.filter(p =>
             p._id !== project._id && // Don't include the same project
             p.department === project.department && // Same department
-            p.project_title.toLowerCase().includes('support') ||
+            (p.project_title.toLowerCase().includes('support') ||
             p.project_title.toLowerCase().includes('assist') ||
-            p.project_description.toLowerCase().includes(project.project_title.toLowerCase().split(' ')[0])
+            p.project_description.toLowerCase().includes(project.project_title.toLowerCase().split(' ')[0]))
           ).slice(0, 1); // Limit to 1 linked project per main project
         }
-
-
 
         linkedProjects.forEach(linkedProject => {
           level3Items.push({
@@ -912,23 +1394,77 @@ const ObjectiveVisualizationPage = () => {
 
         console.log(`Project "${project.project_title}" has ${projectEmployees.length} direct employees and ${linkedProjects.length} linked projects`);
 
-        // Position level 3 items (direct employees and linked projects)
+        // Position level 3 items (direct employees and linked projects) symmetrically
         if (level3Items.length > 0) {
-          const employeeSpacing = EMPLOYEE_HORIZONTAL_SPACING; // Use employee spacing
-          const totalLevel3Width = level3Items.length * employeeSpacing;
-          let level3StartX = currentProjectX - (totalLevel3Width / 2) + (employeeSpacing / 2);
-
-          level3Items.forEach((item, index) => {
-            const itemX = level3StartX + (index * employeeSpacing);
+          level3Items.forEach((item, itemIndex) => {
+            // Center items symmetrically under the project
+            let itemX;
+            if (level3Items.length === 1) {
+              // Single item: center it under the project
+              itemX = projectX;
+            } else {
+              // Multiple items: distribute them symmetrically with consistent spacing
+              const itemSpacing = EMPLOYEE_HORIZONTAL_SPACING; // Use consistent spacing
+              const totalItemsWidth = (level3Items.length - 1) * itemSpacing;
+              const startX = projectX - (totalItemsWidth / 2);
+              itemX = startX + (itemIndex * itemSpacing);
+            }
+            const itemY = LEVEL_HEIGHT * 2; // Level 3
 
             if (item.type === 'employee') {
               // Direct employee from main project (Level 3)
               const empNodeId = item.id;
 
+              // Generate a consistent employee ID for tracking duplicates
+              const employeeId = item.data.email || item.data.employee_id || '';
+              
+              // Check if this employee has already been added
+              let empX = itemX;
+              let empY = itemY;
+              
+              if (employeeId && employeeTracker[employeeId]) {
+                // This is a duplicate employee - find a new position in the tree
+                const parentId = projectNodeId;
+                
+                // If we've seen this employee before, place it in a new position
+                // that maintains the tree structure but avoids overlap
+                if (!employeeTracker[employeeId].parentIds.includes(parentId)) {
+                  // Add this parent to the employee's parent list
+                  employeeTracker[employeeId].parentIds.push(parentId);
+                  employeeTracker[employeeId].nodeIds.push(empNodeId);
+                  
+                  // Find the index of this project among level 2 nodes
+                  const projectIndex = levelNodes[2].findIndex(n => n.id === parentId);
+                  if (projectIndex !== -1) {
+                    // Position this instance of the employee under its parent project
+                    empX = levelNodes[2][projectIndex].position.x;
+                  }
+                  
+                  // Store this position
+                  employeeTracker[employeeId].positions.push({ x: empX, y: empY });
+                  
+                  console.log(`Positioned employee ${employeeId} under project ${parentId}: x=${empX}, y=${empY}`);
+                }
+              } else if (employeeId) {
+                // First time seeing this employee
+                employeeTracker[employeeId] = {
+                  nodeIds: [empNodeId],
+                  parentIds: [projectNodeId],
+                  positions: [{ x: empX, y: empY }]
+                };
+              }
+              
+              // Add this node to level tracking
+              levelNodes[3].push({
+                id: empNodeId,
+                width: NODE_WIDTH,
+                position: { x: empX, y: empY }
+              });
+              
               newNodes.push({
                 id: empNodeId,
                 type: 'employeeNode',
-                position: { x: itemX, y: LEVEL_HEIGHT * 2 }, // Level 3
+                position: { x: empX, y: empY },
                 data: {
                   id: item.data.email || item.data.employee_id || empNodeId,
                   type: 'employee',
@@ -941,12 +1477,16 @@ const ObjectiveVisualizationPage = () => {
                 }
               });
 
-              const projectToEmpEdge = {
+              const projectToEmpEdge: Edge = {
                 id: `${projectNodeId}-${empNodeId}`,
                 source: projectNodeId,
                 target: empNodeId,
-                type: 'smoothstep',
-                style: { strokeWidth: 2, stroke: '#10B981' }
+                type: 'straight',
+                style: { 
+                  strokeWidth: 2, 
+                  stroke: '#10B981'
+                },
+                markerEnd: createMarkerEnd('#10B981')
               };
               newEdges.push(projectToEmpEdge);
               console.log('Added project-to-employee edge:', projectToEmpEdge);
@@ -957,7 +1497,7 @@ const ObjectiveVisualizationPage = () => {
               newNodes.push({
                 id: linkedProjectNodeId,
                 type: 'projectNode',
-                position: { x: itemX, y: LEVEL_HEIGHT * 2 }, // Level 3
+                position: { x: itemX, y: itemY },
                 data: {
                   id: item.data._id,
                   type: 'project',
@@ -971,16 +1511,29 @@ const ObjectiveVisualizationPage = () => {
                   details: item.data
                 }
               });
-
-              const projectToLinkedEdge = {
+              
+              // Track this linked project node in level 3
+              levelNodes[3].push({
+                id: linkedProjectNodeId,
+                width: NODE_WIDTH,
+                position: { x: itemX, y: itemY }
+              });
+              
+              // Connect project to linked project with smooth edge and arrow
+              const projectToLinkedEdge: Edge = {
                 id: `${projectNodeId}-${linkedProjectNodeId}`,
                 source: projectNodeId,
                 target: linkedProjectNodeId,
-                type: 'smoothstep',
-                style: { strokeWidth: 2, stroke: '#3B82F6' }
+                type: 'straight',
+                style: { 
+                  strokeWidth: 2, 
+                  stroke: '#F59E0B'
+                  // Solid line for linked projects (removed strokeDasharray)
+                },
+                markerEnd: createMarkerEnd('#F59E0B')
               };
               newEdges.push(projectToLinkedEdge);
-              console.log('Added project-to-linked edge:', projectToLinkedEdge);
+              console.log('Added project-to-linked-project edge:', projectToLinkedEdge);
 
               // Level 4: Employees from linked projects (indirect employees)
               let linkedEmployees = item.data.employee_contributions || item.data.employees || [];
@@ -1006,54 +1559,109 @@ const ObjectiveVisualizationPage = () => {
                 }));
               }
 
-              if (linkedEmployees.length > 0) {
-                const indirectSpacing = EMPLOYEE_HORIZONTAL_SPACING * 0.8; // Smaller spacing for indirect employees
-                const totalEmpWidth = linkedEmployees.length * indirectSpacing;
-                let empStartX = itemX - (totalEmpWidth / 2) + (indirectSpacing / 2);
+              // Position level 4 employees symmetrically under the linked project
+              linkedEmployees.forEach((emp: any, empIndex: number) => {
+                const empNodeId = `emp-indirect-${linkedProjectNodeId}-${empIndex}`;
+                
+                // Center employees symmetrically under the linked project
+                let empX;
+                if (linkedEmployees.length === 1) {
+                  // Single employee: center it under the linked project
+                  empX = itemX;
+                } else {
+                  // Multiple employees: distribute them symmetrically with consistent spacing
+                  const empSpacing = EMPLOYEE_HORIZONTAL_SPACING; // Use consistent spacing
+                  const totalEmpsWidth = (linkedEmployees.length - 1) * empSpacing;
+                  const startX = itemX - (totalEmpsWidth / 2);
+                  empX = startX + (empIndex * empSpacing);
+                }
+                const empY = LEVEL_HEIGHT * 3; // Level 4
 
-                linkedEmployees.forEach((emp: any, empIndex: number) => {
-                  const empNodeId = `emp-indirect-${linkedProjectNodeId}-${empIndex}`;
-                  const empX = empStartX + (empIndex * indirectSpacing);
-
-                  newNodes.push({
-                    id: empNodeId,
-                    type: 'employeeNode',
-                    position: { x: empX, y: LEVEL_HEIGHT * 3 }, // Level 4
-                    data: {
-                      id: emp.email || emp.employee_id || empNodeId,
-                      type: 'employee',
-                      level: 4,
-                      title: emp.name || `${emp.firstName || ''} ${emp.lastName || ''}`.trim() || 'Unknown Employee',
-                      role: emp.role || emp.jobTitle,
-                      email: emp.email,
-                      department: emp.department,
-                      details: emp
+                // Generate a consistent employee ID for tracking duplicates
+                const employeeId = emp.email || emp.employee_id || '';
+                
+                // Check if this employee has already been added
+                let finalEmpX = empX;
+                let finalEmpY = empY;
+                
+                if (employeeId && employeeTracker[employeeId]) {
+                  // This is a duplicate employee - find a new position in the tree
+                  const parentId = linkedProjectNodeId;
+                  
+                  // If we've seen this employee before, place it in a new position
+                  // that maintains the tree structure but avoids overlap
+                  if (!employeeTracker[employeeId].parentIds.includes(parentId)) {
+                    // Add this parent to the employee's parent list
+                    employeeTracker[employeeId].parentIds.push(parentId);
+                    employeeTracker[employeeId].nodeIds.push(empNodeId);
+                    
+                    // Find the index of this linked project among level 3 nodes
+                    const projectIndex = levelNodes[3].findIndex(n => n.id === parentId);
+                    if (projectIndex !== -1) {
+                      // Position this instance of the employee under its parent project
+                      finalEmpX = levelNodes[3][projectIndex].position.x;
                     }
-                  });
-
-                  const linkedToEmpEdge = {
-                    id: `${linkedProjectNodeId}-${empNodeId}`,
-                    source: linkedProjectNodeId,
-                    target: empNodeId,
-                    type: 'smoothstep',
-                    style: { strokeWidth: 1.5, stroke: '#10B981', strokeDasharray: '5,5' }
+                    
+                    // Store this position
+                    employeeTracker[employeeId].positions.push({ x: finalEmpX, y: finalEmpY });
+                    
+                    console.log(`Positioned employee ${employeeId} under linked project ${parentId}: x=${finalEmpX}, y=${finalEmpY}`);
+                  }
+                } else if (employeeId) {
+                  // First time seeing this employee
+                  employeeTracker[employeeId] = {
+                    nodeIds: [empNodeId],
+                    parentIds: [linkedProjectNodeId],
+                    positions: [{ x: finalEmpX, y: finalEmpY }]
                   };
-                  newEdges.push(linkedToEmpEdge);
-                  console.log('Added linked-to-employee edge:', linkedToEmpEdge);
+                }
+                
+                // Add this node to level tracking
+                levelNodes[4].push({
+                  id: empNodeId,
+                  width: NODE_WIDTH,
+                  position: { x: finalEmpX, y: finalEmpY }
                 });
-              }
+                
+                newNodes.push({
+                  id: empNodeId,
+                  type: 'employeeNode',
+                  position: { x: finalEmpX, y: finalEmpY },
+                  data: {
+                    id: emp.email || emp.employee_id || empNodeId,
+                    type: 'employee',
+                    level: 4,
+                    title: emp.name || `${emp.firstName || ''} ${emp.lastName || ''}`.trim() || 'Unknown Employee',
+                    role: emp.role || emp.jobTitle,
+                    email: emp.email,
+                    department: emp.department,
+                    details: emp
+                  }
+                });
+
+                const linkedToEmpEdge: Edge = {
+                  id: `${linkedProjectNodeId}-${empNodeId}`,
+                  source: linkedProjectNodeId,
+                  target: empNodeId,
+                  type: 'straight',
+                  style: { 
+                    strokeWidth: 1.5, 
+                    stroke: '#10B981'
+                    // Solid line (removed strokeDasharray)
+                  },
+                  markerEnd: createMarkerEnd('#10B981')
+                };
+                newEdges.push(linkedToEmpEdge);
+                console.log('Added linked-to-employee edge:', linkedToEmpEdge);
+              });
             }
           });
         }
-
-        // Move to next project position
-        currentProjectX += projectSpacing;
       });
 
       // If no main projects, still show the goal
       if (mainProjects.length === 0) {
         console.log(`Goal "${goal.title}" has no assigned projects`);
-        // Still create the goal node even without projects
       }
     });
 
@@ -1068,15 +1676,33 @@ const ObjectiveVisualizationPage = () => {
       projects: newNodes.filter(n => n.data.type === 'project').length,
       employees: newNodes.filter(n => n.data.type === 'employee').length
     });
-    console.log('Sample edges:', newEdges.slice(0, 3));
     console.log('All edge IDs:', newEdges.map(e => e.id));
 
-    setNodes(newNodes as any);
-    setEdges(newEdges);
+    // Apply symmetrical layout with heap sort logic and draggable capability
+    const layoutedNodes = applySymmetricalLayout(newNodes as ObjectiveNode[], newEdges).map(node => ({
+      ...node,
+      draggable: true, // Enable dragging for all nodes
+      focusable: true, // Enable focus for better interaction
+      style: {
+        ...node.style,
+        cursor: 'grab' // Show grab cursor
+      }
+    }));
+
+    setNodes(layoutedNodes as any);
+    setEdges(newEdges.map(edge => ({
+      ...edge,
+      type: 'customObjective', // Ensure all edges use the custom horizontal/vertical type
+      style: {
+        ...edge.style,
+        strokeLinecap: 'round',
+        strokeLinejoin: 'round'
+      }
+    })));
 
     console.log('Nodes and edges set successfully');
 
-    // Auto-fit view after a short delay to ensure proper rendering
+    // Auto-fit view after a short delay to ensure proper rendering  
     setTimeout(() => {
       if (reactFlowInstance) {
         reactFlowInstance.fitView({
@@ -1087,12 +1713,21 @@ const ObjectiveVisualizationPage = () => {
         });
       }
     }, 200);
-  };
+  }, [selectedGoal, selectedDepartment, selectedStatus, selectedPriority, searchQuery, reactFlowInstance]);
 
   // Rebuild visualization when dependencies change
   useEffect(() => {
     if (goals.length > 0) {
-      buildVisualization(goals, projects, employees);
+      buildVisualization(
+        goals, 
+        projects, 
+        employees,
+        selectedGoal,
+        selectedDepartment,
+        selectedStatus,
+        selectedPriority,
+        searchQuery
+      );
     }
   }, [selectedGoal, selectedDepartment, selectedStatus, selectedPriority, searchQuery, goals, projects, employees]);
 
@@ -1139,7 +1774,16 @@ const ObjectiveVisualizationPage = () => {
       if (goals.length > 0) {
         // Debounce the rebuild to avoid excessive re-renders
         const timeoutId = setTimeout(() => {
-          buildVisualization(goals, projects, employees);
+          buildVisualization(
+            goals, 
+            projects, 
+            employees,
+            selectedGoal,
+            selectedDepartment,
+            selectedStatus,
+            selectedPriority,
+            searchQuery
+          );
         }, 300);
         return () => clearTimeout(timeoutId);
       }
@@ -1153,7 +1797,7 @@ const ObjectiveVisualizationPage = () => {
     return (
       <div className="flex items-center justify-center h-screen bg-gray-50">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500 mx-auto mb-4"></div>
+          <FaSpinner className="animate-spin text-4xl text-purple-600 mx-auto mb-4" />
           <span className="ml-3 text-lg text-gray-700">Loading objective visualization...</span>
         </div>
       </div>
@@ -1180,59 +1824,26 @@ const ObjectiveVisualizationPage = () => {
 
   return (
     <div className="w-full h-full flex flex-col overflow-hidden">
-      {/* Header - exact copy from org-chart */}
       <div className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white p-3 flex items-center justify-between shadow-md z-10">
-        <div className="flex items-center">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="text-white hover:bg-white/20 mr-2"
-            onClick={() => window.history.back()}
-            title="Close"
-          >
-            <FaTimes className="w-4 h-4" />
-          </Button>
+        <div className="flex-1">
+          <h1 className="text-xl font-semibold">Objective Visualization</h1>
         </div>
-
-        <div className="flex items-center space-x-2">
-          <Button
-            variant="outline"
-            size="sm"
-            className="bg-white/10 hover:bg-white/20 text-white border-white/20"
-            onClick={loadData}
-          >
-            <FaSyncAlt className="w-4 h-4 mr-2" />
-            Refresh
-          </Button>
-
-          <Button
-            variant="outline"
-            size="sm"
-            className="bg-white/10 hover:bg-white/20 text-white border-white/20"
-            onClick={handleScreenshot}
-          >
-            <FaCamera className="w-4 h-4 mr-2" />
-            Screenshot
-          </Button>
-
-          <div className="relative">
+        
+        <div className="flex items-center space-x-3">
+          {/* Search Bar */}
+          <div className="relative w-64">
             <Input
               placeholder="Search objectives..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="bg-white text-black placeholder:text-gray-500 border border-gray-300 w-60"
+              className="bg-white/10 text-white placeholder:text-white/70 border-white/20 focus-visible:ring-0 focus-visible:ring-offset-0"
             />
-            <Button
-              variant="ghost"
-              size="sm"
-              className="absolute right-0 top-0 h-full text-gray-600 hover:bg-transparent"
-            >
-              <FaSearch className="w-4 h-4" />
-            </Button>
+            <FaSearch className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white/70 w-4 h-4" />
           </div>
-
+          
+          {/* Department Filter */}
           <Select value={selectedDepartment} onValueChange={setSelectedDepartment}>
-            <SelectTrigger className="bg-white/10 text-white border-white/20 w-44">
+            <SelectTrigger className="bg-white/10 text-white border-white/20 w-48">
               <SelectValue placeholder="All Departments" />
             </SelectTrigger>
             <SelectContent>
@@ -1244,8 +1855,124 @@ const ObjectiveVisualizationPage = () => {
               ))}
             </SelectContent>
           </Select>
+          
+          {/* Status Filter */}
+          <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+            <SelectTrigger className="bg-white/10 text-white border-white/20 w-36">
+              <SelectValue placeholder="All Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Status</SelectItem>
+              <SelectItem value="planning">Planning</SelectItem>
+              <SelectItem value="active">Active</SelectItem>
+              <SelectItem value="completed">Completed</SelectItem>
+              <SelectItem value="on-hold">On Hold</SelectItem>
+              <SelectItem value="canceled">Canceled</SelectItem>
+            </SelectContent>
+          </Select>
+          
+          {/* Priority Filter */}
+          <Select value={selectedPriority} onValueChange={setSelectedPriority}>
+            <SelectTrigger className="bg-white/10 text-white border-white/20 w-32">
+              <SelectValue placeholder="All Priorities" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Priorities</SelectItem>
+              <SelectItem value="low">Low</SelectItem>
+              <SelectItem value="medium">Medium</SelectItem>
+              <SelectItem value="high">High</SelectItem>
+              <SelectItem value="critical">Critical</SelectItem>
+            </SelectContent>
+          </Select>
+          
+          {/* Action Buttons */}
+          <div className="flex items-center space-x-2 ml-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-white hover:bg-white/20"
+              onClick={handleScreenshot}
+              title="Screenshot"
+            >
+              <FaCamera className="w-4 h-4" />
+            </Button>
+            
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-white hover:bg-white/20"
+              onClick={toggleFullScreen}
+              title="Full Screen"
+            >
+              <FaExpandAlt className="w-4 h-4" />
+            </Button>
+          </div>
         </div>
       </div>
+
+      {/* Advanced Filters */}
+      {showAdvancedFilters && (
+        <div className="bg-white border-b border-gray-200 p-4">
+          <div className="flex items-center space-x-4">
+            <Select value={selectedGoal} onValueChange={setSelectedGoal}>
+              <SelectTrigger className="w-48">
+                <SelectValue placeholder="All Goals" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Goals</SelectItem>
+                {goals.map(goal => (
+                  <SelectItem key={goal.id} value={goal.id}>
+                    {goal.title}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+              <SelectTrigger className="w-40">
+                <SelectValue placeholder="All Statuses" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Statuses</SelectItem>
+                {statuses.map(status => (
+                  <SelectItem key={status} value={status}>
+                    {status.charAt(0).toUpperCase() + status.slice(1)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Select value={selectedPriority} onValueChange={setSelectedPriority}>
+              <SelectTrigger className="w-40">
+                <SelectValue placeholder="All Priorities" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Priorities</SelectItem>
+                {priorities.map(priority => (
+                  <SelectItem key={priority} value={priority}>
+                    {priority.charAt(0).toUpperCase() + priority.slice(1)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Button
+              onClick={() => {
+                setSearchQuery('');
+                setSelectedGoal('all');
+                setSelectedDepartment('all');
+                setSelectedStatus('all');
+                setSelectedPriority('all');
+              }}
+              variant="outline"
+              size="sm"
+            >
+              <FaTimes className="w-4 h-4 mr-2" />
+              Clear All
+            </Button>
+          </div>
+        </div>
+      )}
 
       {/* Visualization */}
       <div className="flex-1 relative" ref={containerRef}>
@@ -1307,45 +2034,59 @@ const ObjectiveVisualizationPage = () => {
                 key={`${nodes.length}-${edges.length}`} // Force re-render when data changes
                 onNodesChange={onNodesChange}
                 onEdgesChange={onEdgesChange}
+                onConnect={onConnect}
                 onInit={(instance: ReactFlowInstance) => {
                   setReactFlowInstance(instance);
                   console.log('ReactFlow initialized with nodes:', nodes.length, 'edges:', edges.length);
+                  console.log('Sample edges:', edges.slice(0, 3));
                   setTimeout(() => {
                     instance.fitView({ padding: 0.2, duration: 800 });
                     console.log('Fit view applied');
-                  }, 1000);
+                  }, 100);
                 }}
                 onNodeClick={handleNodeClick}
                 nodeTypes={nodeTypes}
                 fitView
                 fitViewOptions={{
-                  padding: 0.2,
+                  padding: 0.1,
                   includeHiddenNodes: false,
-                  minZoom: 0.1,
+                  minZoom: 0.05,
                   maxZoom: 1.5
                 }}
                 attributionPosition="bottom-left"
-                minZoom={0.1}
-                maxZoom={2.5}
+                minZoom={0.05}
+                maxZoom={2.0}
                 defaultEdgeOptions={{
-                  type: 'default',
-                  style: { strokeWidth: 3, stroke: '#888' },
-                  markerEnd: { type: 'arrow', color: '#888' }
+                  type: 'smoothstep',
+                  animated: false,
+                  style: { 
+                    strokeWidth: 2, 
+                    stroke: '#6b7280'
+                  }
                 }}
-                className="bg-gray-50 w-full h-full"
+                nodeExtent={[
+                  [-10000, -100],
+                  [10000, 10000]
+                ]}
+                className="bg-white w-full h-full"
                 nodesDraggable={true}
+                nodesConnectable={false}
                 elementsSelectable={true}
+                edgesFocusable={false}
+                nodesFocusable={true}
                 panOnScroll={true}
                 zoomOnScroll={true}
                 panOnDrag={true}
                 zoomOnPinch={true}
                 zoomOnDoubleClick={false}
-                preventScrolling={true}
+                preventScrolling={false}
                 selectNodesOnDrag={false}
-                tabIndex={0}
-                proOptions={{
-                  hideAttribution: true
-                }}
+                deleteKeyCode={null}
+                panActivationKeyCode={null}
+                selectionKeyCode={null}
+                multiSelectionKeyCode={null}
+                snapToGrid={false}
+                snapGrid={[15, 15]}
               >
                 <Background
                   variant={BackgroundVariant.Dots}
@@ -1353,16 +2094,28 @@ const ObjectiveVisualizationPage = () => {
                   size={1}
                   color="#aaa"
                 />
-                <Controls />
-                <MiniMap
-                  nodeColor="#8B5CF6"
-                  maskColor="rgba(255, 255, 255, 0.8)"
-                  style={{
-                    height: 120,
-                    width: 200,
-                  }}
-                />
-
+                
+                {/* Zoom controls */}
+                <div className="absolute right-8 top-1/4 transform -translate-y-1/2 flex flex-col gap-2 z-10">
+                  <Button 
+                    variant="default" 
+                    size="sm" 
+                    className="rounded-full bg-white shadow-lg hover:bg-gray-100 border border-gray-300 text-black h-10 w-10 flex items-center justify-center"
+                    onClick={() => reactFlowInstance?.zoomIn()}
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                  </Button>
+                  <Button 
+                    variant="default" 
+                    size="sm" 
+                    className="rounded-full bg-white shadow-lg hover:bg-gray-100 border border-gray-300 text-black h-10 w-10 flex items-center justify-center"
+                    onClick={() => reactFlowInstance?.zoomOut()}
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                  </Button>
+                </div>
+                
+                
               </ReactFlow>
             </Suspense>
           </ReactFlowProvider>
@@ -1386,19 +2139,82 @@ const DetailModal = ({ data, onClose }: { data: any; onClose: () => void }): JSX
 
   const renderGoalContent = (goal: Goal) => {
     const statusColors = {
-      planning: 'bg-blue-100 text-blue-800',
-      active: 'bg-green-100 text-green-800',
-      completed: 'bg-green-100 text-green-800',
-      'on-hold': 'bg-yellow-100 text-yellow-800',
-      canceled: 'bg-red-100 text-red-800'
+      planning: 'bg-blue-100 text-blue-800 hover:bg-blue-200',
+      active: 'bg-green-100 text-green-800 hover:bg-green-200',
+      completed: 'bg-green-100 text-green-800 hover:bg-green-200',
+      'on-hold': 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200',
+      canceled: 'bg-red-100 text-red-800 hover:bg-red-200'
     };
 
     const priorityColors = {
-      low: 'bg-green-100 text-green-800',
-      medium: 'bg-yellow-100 text-yellow-800',
-      high: 'bg-orange-100 text-orange-800',
-      critical: 'bg-red-100 text-red-800'
+      low: 'bg-green-100 text-green-800 hover:bg-green-200',
+      medium: 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200',
+      high: 'bg-orange-100 text-orange-800 hover:bg-orange-200',
+      critical: 'bg-red-100 text-red-800 hover:bg-red-200'
     };
+
+    // Get all projects and employees from the component's state
+    const { projects = [], employees: allEmployees = [] } = data?.state || { projects: [], employees: [] };
+    
+    // Find all projects linked to this goal (directly or indirectly)
+    const linkedProjectIds = new Set<string>();
+    const linkedEmployeeIds = new Set<string>();
+    
+    // Helper function to extract ID from various object shapes
+    const getId = (item: any, idFields: string[] = ['id', '_id', 'projectId', 'employeeId']): string | null => {
+      if (!item) return null;
+      if (typeof item === 'string') return item;
+      for (const field of idFields) {
+        if (item[field]) return String(item[field]);
+      }
+      return null;
+    };
+    
+    // Add directly assigned projects and employees
+    if (goal.assignedProjects && Array.isArray(goal.assignedProjects)) {
+      goal.assignedProjects.forEach((projectRef) => {
+        const projectId = getId(projectRef);
+        if (!projectId) return;
+        
+        linkedProjectIds.add(projectId);
+        
+        // Find employees in these projects
+        const project = projects.find((p) => {
+          const pId = getId(p);
+          return pId === projectId;
+        });
+        
+        if (project) {
+          // Add employees from the project's employee_contributions
+          if (project.employee_contributions && Array.isArray(project.employee_contributions)) {
+            project.employee_contributions.forEach((emp) => {
+              const empId = getId(emp, ['id', '_id', 'employeeId']);
+              if (empId) linkedEmployeeIds.add(empId);
+            });
+          }
+          
+          // Add employees from the project's employees array
+          if (project.employees && Array.isArray(project.employees)) {
+            project.employees.forEach((emp) => {
+              const empId = getId(emp, ['id', '_id', 'employeeId']);
+              if (empId) linkedEmployeeIds.add(empId);
+            });
+          }
+        }
+      });
+    }
+    
+    // Add directly assigned employees
+    if (goal.assignedEmployees && Array.isArray(goal.assignedEmployees)) {
+      goal.assignedEmployees.forEach((empRef) => {
+        const empId = getId(empRef, ['id', '_id', 'employeeId']);
+        if (empId) linkedEmployeeIds.add(empId);
+      });
+    }
+    
+    // Count unique projects and employees
+    const projectCount = linkedProjectIds.size;
+    const employeeCount = linkedEmployeeIds.size;
 
     return (
       <div className="space-y-6">
@@ -1423,22 +2239,6 @@ const DetailModal = ({ data, onClose }: { data: any; onClose: () => void }): JSX
             </div>
           </div>
         </div>
-
-        {/* Progress Bar */}
-        {goal.progress !== undefined && (
-          <div className="bg-gray-50 p-4 rounded-lg">
-            <div className="flex justify-between items-center mb-2">
-              <span className="text-sm font-medium text-gray-700">Progress</span>
-              <span className="text-sm font-bold text-gray-900">{goal.progress}%</span>
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-3">
-              <div
-                className="bg-gradient-to-r from-purple-500 to-purple-600 h-3 rounded-full transition-all duration-300"
-                style={{ width: `${goal.progress}%` }}
-              />
-            </div>
-          </div>
-        )}
 
         {/* Tabs */}
         <div className="border-b border-gray-200">
@@ -1484,15 +2284,15 @@ const DetailModal = ({ data, onClose }: { data: any; onClose: () => void }): JSX
                 <div className="space-y-2">
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-gray-600">Projects:</span>
-                    <span className="font-medium">{goal.assignedProjects.length}</span>
+                    <span className="font-medium">{projectCount}</span>
                   </div>
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-gray-600">Employees:</span>
-                    <span className="font-medium">{goal.assignedEmployees.length}</span>
+                    <span className="font-medium">{employeeCount}</span>
                   </div>
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-gray-600">KPIs:</span>
-                    <span className="font-medium">{goal.kpis.length}</span>
+                    <span className="font-medium">{goal.kpis?.length || 0}</span>
                   </div>
                 </div>
               </Card>
@@ -1603,19 +2403,20 @@ const DetailModal = ({ data, onClose }: { data: any; onClose: () => void }): JSX
 
   const renderProjectContent = (project: Project) => {
     const statusColors = {
-      planning: 'bg-blue-100 text-blue-800',
-      ongoing: 'bg-green-100 text-green-800',
-      active: 'bg-green-100 text-green-800',
-      completed: 'bg-gray-100 text-gray-800',
-      'on-hold': 'bg-yellow-100 text-yellow-800',
-      canceled: 'bg-red-100 text-red-800'
+      planning: 'bg-blue-100 text-blue-800 hover:bg-blue-200',
+      ongoing: 'bg-green-100 text-green-800 hover:bg-green-200',
+      active: 'bg-green-100 text-green-800 hover:bg-green-200',
+      completed: 'bg-gray-100 text-gray-800 hover:bg-gray-200',
+      'on-hold': 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200',
+      canceled: 'bg-red-100 text-red-800 hover:bg-red-200',
+      default: 'bg-gray-100 text-gray-800 hover:bg-gray-200'
     };
 
     const priorityColors = {
-      low: 'bg-green-100 text-green-800',
-      medium: 'bg-yellow-100 text-yellow-800',
-      high: 'bg-orange-100 text-orange-800',
-      critical: 'bg-red-100 text-red-800'
+      low: 'bg-green-100 text-green-800 hover:bg-green-200',
+      medium: 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200',
+      high: 'bg-orange-100 text-orange-800 hover:bg-orange-200',
+      critical: 'bg-red-100 text-red-800 hover:bg-red-200'
     };
 
     const teamMembers = project.employee_contributions || project.employees || [];
@@ -1781,14 +2582,11 @@ const DetailModal = ({ data, onClose }: { data: any; onClose: () => void }): JSX
                           <div className="mt-3 pt-3 border-t border-gray-100">
                             <p className="text-xs font-medium text-gray-700 mb-1">Tasks:</p>
                             <div className="flex flex-wrap gap-1">
-                              {emp.tasks.slice(0, 3).map((task: string, taskIndex: number) => (
+                              {emp.tasks.map((task: string, taskIndex: number) => (
                                 <Badge key={taskIndex} variant="outline" className="text-xs">
                                   {task}
                                 </Badge>
                               ))}
-                              {emp.tasks.length > 3 && (
-                                <span className="text-xs text-gray-500">+{emp.tasks.length - 3} more</span>
-                              )}
                             </div>
                           </div>
                         )}
@@ -1994,9 +2792,12 @@ const DetailModal = ({ data, onClose }: { data: any; onClose: () => void }): JSX
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-hidden shadow-2xl">
-        <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gray-50">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" onClick={onClose}>
+      <div 
+        className="bg-white rounded-lg w-full max-w-4xl max-h-[90vh] flex flex-col shadow-2xl"
+        onClick={e => e.stopPropagation()}
+      >
+        <div className="flex-shrink-0 flex items-center justify-between p-6 border-b border-gray-200 bg-gray-50">
           <div className="flex items-center space-x-3">
             {data.type === 'goal' && <Target className="w-6 h-6 text-purple-600" />}
             {data.type === 'project' && <Briefcase className="w-6 h-6 text-blue-600" />}
@@ -2011,8 +2812,10 @@ const DetailModal = ({ data, onClose }: { data: any; onClose: () => void }): JSX
           </Button>
         </div>
 
-        <div className="p-6 overflow-y-auto max-h-[calc(90vh-80px)]">
-          {renderContent()}
+        <div className="overflow-y-auto" style={{ maxHeight: 'calc(90vh - 80px)' }}>
+          <div className="p-6">
+            {renderContent()}
+          </div>
         </div>
       </div>
     </div>

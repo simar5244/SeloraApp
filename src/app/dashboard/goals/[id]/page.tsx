@@ -65,6 +65,8 @@ interface Goal {
 }
 
 interface Project {
+  _id?: string;  // MongoDB ObjectId string
+
   id: string;
   name: string;
   description: string;
@@ -84,15 +86,31 @@ interface Project {
 export default function GoalDetailsPage() {
   const router = useRouter();
   const params = useParams();
-  const goalId = params.id as string;
+  const goalId = params?.id as string || '';
 
-  const [goal, setGoal] = useState<Goal | null>(null);
+  const [goal, setGoal] = useState<Goal>({} as Goal);
   const [projects, setProjects] = useState<Project[]>([]);
+
+  // Debug: log projects state to inspect object shape
+  useEffect(() => {
+    console.log('GoalDetailsPage projects state:', projects);
+  }, [projects]);
   const [allProjects, setAllProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [editData, setEditData] = useState<Partial<Goal>>({});
+
+  // Employee search states
+  const [employeeSearchTerm, setEmployeeSearchTerm] = useState('');
+  const [employeeSearchResults, setEmployeeSearchResults] = useState<any[]>([]);
+  const [allUsers, setAllUsers] = useState<any[]>([]);
+  const [showEmployeeSearch, setShowEmployeeSearch] = useState(false);
+
+  // Viewer search states
+  const [viewerSearchTerm, setViewerSearchTerm] = useState('');
+  const [viewerSearchResults, setViewerSearchResults] = useState<any[]>([]);
+  const [showViewerSearch, setShowViewerSearch] = useState(false);
 
   // Project management states
   const [showCreateProject, setShowCreateProject] = useState(false);
@@ -113,7 +131,7 @@ export default function GoalDetailsPage() {
 
   // Update modal states
   const [showUpdateModal, setShowUpdateModal] = useState(false);
-  const [updateText, setUpdateText] = useState('');
+  // Removed single updateText state in favor of structured updateFields
   const [isSubmittingUpdate, setIsSubmittingUpdate] = useState(false);
   const [goalUpdates, setGoalUpdates] = useState<any[]>([]);
 
@@ -170,14 +188,75 @@ export default function GoalDetailsPage() {
     }
   }, [goal]);
 
-  const loadGoalData = useCallback(async () => {
+  const loadGoalData = useCallback(async (forceRefresh = false) => {
     try {
       setLoading(true);
+      
+      // Add a cache-busting parameter if forcing refresh
+      const cacheBuster = forceRefresh ? `&_t=${Date.now()}` : '';
+      
+      // First, load the goal data
       const result = await fetchGoals();
       if (result.goals) {
         const foundGoal = result.goals.find((g: any) => g.id === goalId);
         if (foundGoal) {
+          // Set the goal data
           setGoal(foundGoal);
+          
+          // Load projects linked to this goal by querying projects collection
+          try {
+            console.log(`Loading projects linked to goal ${goalId}`);
+            
+            // Query projects collection for projects linked to this goal with cache busting
+            const response = await fetch(`/api/projects?linkedToGoal=true&goalId=${goalId}${cacheBuster}`, {
+              headers: { 
+                'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                'Cache-Control': 'no-cache, no-store, must-revalidate',
+                'Pragma': 'no-cache',
+                'Expires': '0'
+              },
+              cache: 'no-store'
+            });
+            
+            if (response.ok) {
+              const result = await response.json();
+              console.log('Linked projects result:', result);
+              
+              if (result.projects && Array.isArray(result.projects)) {
+                // Filter projects that are specifically linked to this goal
+                const linkedProjects = result.projects.filter((project: any) => 
+                  project.linkedToGoal === true && 
+                  project.goalContext && 
+                  project.goalContext.goalId === goalId
+                );
+                
+                console.log(`Found ${linkedProjects.length} projects linked to goal ${goalId}`);
+                setProjects(linkedProjects);
+              } else {
+                console.log('No linked projects found in response');
+                setProjects([]);
+              }
+            } else {
+              console.error('Failed to fetch linked projects:', response.status, response.statusText);
+              // Fallback: try the old API endpoint
+              const projectsResult = await fetchGoalProjects(goalId);
+              if (projectsResult.projects) {
+                setProjects(projectsResult.projects);
+              }
+            }
+          } catch (error) {
+            console.error('Error loading linked projects:', error);
+            // Fallback: try the old API endpoint
+            try {
+              const projectsResult = await fetchGoalProjects(goalId);
+              if (projectsResult.projects) {
+                setProjects(projectsResult.projects);
+              }
+            } catch (fallbackError) {
+              console.error('Error with fallback project loading:', fallbackError);
+              setProjects([]); // Clear projects to avoid showing stale data
+            }
+          }
         } else {
           toast.error('Goal not found');
           router.push('/dashboard/goals');
@@ -214,13 +293,165 @@ export default function GoalDetailsPage() {
   };
 
   // Load goal data when component mounts or goalId changes
+  // Load all users for employee search
+  const loadAllUsers = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      
+      // Use the same API endpoint as in AddGoalModal
+      const response = await fetch('/api/admin/users?limit=0', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to fetch users');
+      }
+
+      setAllUsers(data.users || []);
+      console.log('Loaded users:', data.users?.length || 0);
+    } catch (error) {
+      console.error('Error loading users:', error);
+      // Fallback to empty array if loading fails
+      setAllUsers([]);
+    }
+  };
+  
+  // Employee search function
+  const searchEmployees = (term: string) => {
+    if (!term.trim()) {
+      setEmployeeSearchResults([]);
+      return;
+    }
+
+    // Filter users client-side for instant results
+    const filteredUsers = allUsers.filter(user => {
+      const matchesSearch =
+        user.username?.toLowerCase().includes(term.toLowerCase()) ||
+        user.email?.toLowerCase().includes(term.toLowerCase()) ||
+        (user.firstName && user.firstName.toLowerCase().includes(term.toLowerCase())) ||
+        (user.lastName && user.lastName.toLowerCase().includes(term.toLowerCase())) ||
+        (user.name && user.name.toLowerCase().includes(term.toLowerCase()));
+
+      return matchesSearch;
+    });
+
+    // Format results to match expected structure
+    const formattedResults = filteredUsers.map(user => ({
+      _id: user._id,
+      id: user._id,
+      email: user.email,
+      name: user.name || `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email.split('@')[0],
+      firstName: user.firstName || '',
+      lastName: user.lastName || '',
+      role: user.role || '',
+      department: user.department || '',
+      jobTitle: user.jobTitle || ''
+    }));
+
+    // Check if the term looks like an email for manual entry
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (emailRegex.test(term) && !formattedResults.some(user => user.email === term)) {
+      // Add manual email entry option
+      formattedResults.unshift({
+        _id: term,
+        id: term,
+        email: term,
+        name: term.split('@')[0],
+        firstName: term.split('@')[0],
+        lastName: '',
+        role: '',
+        department: '',
+        jobTitle: '',
+        isManualEntry: true
+      } as any);
+    }
+
+    setEmployeeSearchResults(formattedResults);
+  };
+  
+  // Add employee to goal
+  const addEmployeeToGoal = (employee: any) => {
+    // Check if already added
+    if (goal.assignedEmployees?.some(emp => emp.email === employee.email)) {
+      toast.error('User already added as team member');
+      return;
+    }
+    
+    const newEmployee = {
+      employeeId: employee._id || employee.id || `manual-${employee.email}`,
+      email: employee.email,
+      name: employee.name || `${employee.firstName || ''} ${employee.lastName || ''}`.trim() || employee.email.split('@')[0],
+      role: employee.role || 'member'
+    };
+    
+    // Update goal state and edit data
+    const updatedEmployees = [...(goal.assignedEmployees || []), newEmployee];
+    setGoal({...goal, assignedEmployees: updatedEmployees});
+    setEditData({...editData, assignedEmployees: updatedEmployees});
+    
+    // Reset search
+    setEmployeeSearchTerm('');
+    setEmployeeSearchResults([]);
+    setShowEmployeeSearch(false);
+  };
+  
+  // Add viewer to goal
+  const addViewerToGoal = (viewer: any) => {
+    // Check if already added
+    if (goal.viewers?.some(v => v.email === viewer.email)) {
+      toast.error('User already added as viewer');
+      return;
+    }
+    
+    const newViewer = {
+      employeeId: viewer._id || viewer.id || `manual-${viewer.email}`,
+      email: viewer.email,
+      name: viewer.name || `${viewer.firstName || ''} ${viewer.lastName || ''}`.trim() || viewer.email.split('@')[0]
+    };
+    
+    // Update goal state and edit data
+    const updatedViewers = [...(goal.viewers || []), newViewer];
+    setGoal({...goal, viewers: updatedViewers});
+    setEditData({...editData, viewers: updatedViewers});
+    
+    // Reset search
+    setViewerSearchTerm('');
+    setViewerSearchResults([]);
+    setShowViewerSearch(false);
+  };
+  
+  // Remove employee from goal
+  const handleRemoveEmployee = (index: number) => {
+    const updatedEmployees = [...goal.assignedEmployees];
+    updatedEmployees.splice(index, 1);
+    setGoal({...goal, assignedEmployees: updatedEmployees});
+    setEditData({...editData, assignedEmployees: updatedEmployees});
+  };
+  
+  // Remove viewer from goal
+  const handleRemoveViewer = (index: number) => {
+    const updatedViewers = [...goal.viewers];
+    updatedViewers.splice(index, 1);
+    setGoal({...goal, viewers: updatedViewers});
+    setEditData({...editData, viewers: updatedViewers});
+  };
+  
   useEffect(() => {
     if (goalId) {
-      loadGoalData();
-      loadGoalProjects();
-      loadAllProjects();
+      // Load all the necessary data when the component mounts
+      const loadData = async () => {
+        await loadGoalData(); // This will also load projects now
+        await loadAllProjects();
+        await loadAllUsers();
+      };
+      loadData();
     }
-  }, [goalId, loadGoalData, loadGoalProjects]);
+  }, [goalId, loadGoalData]);
 
   const handleSaveChanges = async () => {
     if (!goal) return;
@@ -304,28 +535,8 @@ export default function GoalDetailsPage() {
     }
   };
 
-  const handleRemoveEmployee = async (index: number) => {
-    try {
-      if (!goal) return;
-
-      const updatedEmployees = goal.assignedEmployees.filter((_, i) => i !== index);
-      const updatedGoal = {
-        ...goal,
-        assignedEmployees: updatedEmployees
-      };
-
-      const result = await updateGoal(goalId, updatedGoal);
-      if (result.success) {
-        toast.success('Employee removed successfully');
-        setGoal(updatedGoal as Goal);
-      } else {
-        toast.error(String(result.error) || 'Failed to remove employee');
-      }
-    } catch (error) {
-      console.error('Error removing employee:', error);
-      toast.error('Failed to remove employee');
-    }
-  };
+  // This function is now handled by the new implementation above
+  // that updates the state and editData for batch saving
 
   const handleRemoveKPI = async (index: number) => {
     try {
@@ -350,14 +561,37 @@ export default function GoalDetailsPage() {
     }
   };
 
+  // State for structured goal update fields
+  const [updateFields, setUpdateFields] = useState({
+    progress: '',
+    achievements: '',
+    challenges: '',
+    nextSteps: '',
+    comments: ''
+  });
+
   // Handle goal update submission
   const handleSubmitUpdate = async () => {
-    if (!updateText.trim()) return;
+    // Check if at least one required field is filled
+    if (!updateFields.progress.trim() && !updateFields.achievements.trim() && 
+        !updateFields.challenges.trim() && !updateFields.nextSteps.trim()) {
+      toast.error('Please fill at least one of the required fields');
+      return;
+    }
 
     setIsSubmittingUpdate(true);
     try {
       const token = localStorage.getItem('token');
       const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+      
+      // Format the message from the structured fields
+      const formattedMessage = [
+        updateFields.progress ? `**Progress:** ${updateFields.progress}` : '',
+        updateFields.achievements ? `**Achievements:** ${updateFields.achievements}` : '',
+        updateFields.challenges ? `**Challenges:** ${updateFields.challenges}` : '',
+        updateFields.nextSteps ? `**Next Steps:** ${updateFields.nextSteps}` : '',
+        updateFields.comments ? `**Additional Comments:** ${updateFields.comments}` : ''
+      ].filter(Boolean).join('\n\n');
 
       const response = await fetch(`/api/goals/${goalId}/updates`, {
         method: 'POST',
@@ -366,7 +600,7 @@ export default function GoalDetailsPage() {
           'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
-          message: updateText.trim(),
+          message: formattedMessage,
           author_id: currentUser?._id || currentUser?.id,
           author_name: currentUser?.name || `${currentUser?.firstName || ''} ${currentUser?.lastName || ''}`.trim() || currentUser?.email
         })
@@ -382,7 +616,13 @@ export default function GoalDetailsPage() {
       setGoalUpdates(prev => [result.update, ...prev]);
 
       // Clear the form and close modal
-      setUpdateText('');
+      setUpdateFields({
+        progress: '',
+        achievements: '',
+        challenges: '',
+        nextSteps: '',
+        comments: ''
+      });
       setShowUpdateModal(false);
 
       toast.success('Update posted successfully!');
@@ -434,7 +674,11 @@ export default function GoalDetailsPage() {
       const result = await assignProjectToGoal(goalId, projectId);
       if (result.success) {
         toast.success('Project assigned to goal');
-        await loadGoalProjects();
+        // Force a complete refresh of all data
+        await Promise.all([
+          loadGoalData(true),  // Force refresh with cache busting
+          loadAllProjects()    // Refresh the projects list
+        ]);
         setShowAssignProject(false);
       } else {
         toast.error(String(result.error) || 'Failed to assign project');
@@ -446,20 +690,24 @@ export default function GoalDetailsPage() {
   };
 
   const handleRemoveProject = async (projectId: string) => {
-    const confirmRemove = window.confirm('Are you sure you want to remove this project from the goal?');
-    if (!confirmRemove) return;
-
+      console.log('handleRemoveProject called for goal:', goalId, 'project:', projectId);
+    if (!confirm('Are you sure you want to remove this project from the goal?')) return;
+    
     try {
       const result = await removeProjectFromGoal(goalId, projectId);
       if (result.success) {
         toast.success('Project removed from goal');
-        await loadGoalProjects();
+        // Force a complete refresh of all data
+        await Promise.all([
+          loadGoalData(true),  // Force refresh with cache busting
+          loadAllProjects()    // Refresh the projects list
+        ]);
       } else {
-        toast.error(String(result.error) || 'Failed to remove project');
+        toast.error(typeof result.error === 'string' ? result.error : 'Failed to remove project from goal');
       }
     } catch (error) {
-      console.error('Error removing project:', error);
-      toast.error('Failed to remove project');
+      console.error('Error removing project from goal:', error);
+      toast.error('Failed to remove project from goal');
     }
   };
 
@@ -770,7 +1018,7 @@ export default function GoalDetailsPage() {
                             Assign Existing
                           </Button>
                         </DialogTrigger>
-                        <DialogContent className="max-w-2xl">
+                        <DialogContent className="max-w-2xl border border-purple-300 shadow-md shadow-purple-100">
                           <DialogHeader>
                             <DialogTitle>Assign Existing Project</DialogTitle>
                           </DialogHeader>
@@ -872,16 +1120,17 @@ export default function GoalDetailsPage() {
                                 variant="outline"
                                 onClick={() => router.push(`/dashboard/projects/${project.id}`)}
                               >
-                                <FaEye className="mr-1" />
-                                View
+                                <FaEye />
                               </Button>
                               <Button 
                                 size="sm" 
                                 variant="destructive"
-                                onClick={() => handleRemoveProject(project.id)}
+                                onClick={() => {
+                                        console.log('Remove button click project:', project);
+                                        handleRemoveProject(project._id || project.id);
+                                      }}
                               >
-                                <FaTrash className="mr-1" />
-                                Remove
+                                <FaTrash />
                               </Button>
                             </div>
                           </div>
@@ -937,16 +1186,9 @@ export default function GoalDetailsPage() {
                             </div>
                           </div>
                           <p className="text-gray-600 text-sm mb-3">{kpi.description}</p>
-                          <div className="space-y-2">
-                            <div className="flex justify-between text-sm">
-                              <span>Progress</span>
-                              <span>{Math.round((kpi.current / kpi.target) * 100)}%</span>
-                            </div>
-                            <Progress value={(kpi.current / kpi.target) * 100} />
                             <p className="text-xs text-gray-500">
                               Due: {new Date(kpi.dueDate).toLocaleDateString()}
                             </p>
-                          </div>
                         </div>
                       ))}
                     </div>
@@ -1008,72 +1250,227 @@ export default function GoalDetailsPage() {
           {/* Assigned Employees */}
           <Card>
             <CardHeader>
-              <div>
-                <h3 className="text-lg font-medium text-gray-800 mb-4">Assigned Members</h3>
-                <div className="text-sm text-gray-600"> </div>
-                </div>
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-medium text-gray-800">Assigned Members</h3>
+                {isEditing && (
+                  <Button 
+                    size="sm" 
+                    onClick={() => setShowEmployeeSearch(true)}
+                    className="bg-purple-600 hover:bg-purple-700 text-white"
+                  >
+                    <FaPlus />
+                  </Button>
+                )}
+              </div>
             </CardHeader>
             <CardContent>
-              {goal.assignedEmployees.length === 0 ? (
+              {goal.assignedEmployees?.length === 0 ? (
                 <p className="text-gray-500 text-sm">No members assigned</p>
               ) : (
                 <div className="space-y-3">
-                  {goal.assignedEmployees.map((employee, index) => (
+                  {goal.assignedEmployees?.map((employee, index) => (
                     <div key={index} className="flex items-center justify-between">
                       <div className="flex items-center space-x-3">
                         <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
                           <span className="text-gray-600 text-sm font-medium">
-                            {employee.name.charAt(0).toUpperCase()}
+                            {employee.name?.charAt(0).toUpperCase()}
                           </span>
                         </div>
                         <div>
                           <p className="text-sm text-gray-900">{employee.name}</p>
-                          <p className="text-xs text-gray-500">{employee.role}</p>
+                          <p className="text-xs text-gray-500">{employee.role || 'Member'}</p>
                         </div>
                       </div>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleRemoveEmployee(index)}
-                        className="text-red-600 border-red-300 hover:bg-red-50"
-                      >
-                        <FaTimes className="w-3 h-3" />
-                      </Button>
+                      {isEditing && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleRemoveEmployee(index)}
+                          className="text-red-600 border-red-300 hover:bg-red-50"
+                        >
+                          <FaTimes className="w-3 h-3" />
+                        </Button>
+                      )}
                     </div>
                   ))}
                 </div>
               )}
+              
+              {/* Employee Search Dialog */}
+              <Dialog open={showEmployeeSearch} onOpenChange={setShowEmployeeSearch}>
+                <DialogContent className="sm:max-w-md border border-purple-300 shadow-md shadow-purple-100">
+                  <DialogHeader>
+                    <DialogTitle>Add Team Member</DialogTitle>
+                    <DialogDescription>
+                      Search for employees by name or email
+                    </DialogDescription>
+                  </DialogHeader>
+                  
+                  <div className="space-y-4 py-4">
+                    <div className="flex items-center space-x-2">
+                      <Input
+                        placeholder="Search by name or email"
+                        value={employeeSearchTerm}
+                        onChange={(e) => {
+                          setEmployeeSearchTerm(e.target.value);
+                          searchEmployees(e.target.value);
+                        }}
+                        className="flex-1"
+                      />
+                    </div>
+                    
+                    <div className="max-h-72 overflow-y-auto space-y-2">
+                      {employeeSearchResults.length === 0 ? (
+                        <p className="text-center text-gray-500 py-4">
+                          {employeeSearchTerm ? 'No results found' : 'Type to search'}
+                        </p>
+                      ) : (
+                        employeeSearchResults.map((employee) => (
+                          <div
+                            key={employee.id || employee.email}
+                            className="flex items-center justify-between p-3 border rounded-md hover:bg-gray-50 cursor-pointer"
+                            onClick={() => addEmployeeToGoal(employee)}
+                          >
+                            <div className="flex items-center space-x-3">
+                              <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
+                                <span className="text-gray-600 text-sm font-medium">
+                                  {employee.name?.charAt(0).toUpperCase()}
+                                </span>
+                              </div>
+                              <div>
+                                <p className="text-sm font-medium">{employee.name}</p>
+                                <p className="text-xs text-gray-500">{employee.email}</p>
+                                {employee.isManualEntry && (
+                                  <Badge variant="outline" className="mt-1 text-xs">
+                                    Manual Entry
+                                  </Badge>
+                                )}
+                              </div>
+                            </div>
+                            <Button size="sm" className="bg-purple-600 hover:bg-purple-700 text-white">
+                              <FaPlus className="w-3 h-3" />
+                            </Button>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
             </CardContent>
           </Card>
 
           {/* Viewers */}
           <Card>
             <CardHeader>
-              <div>
-                <h3 className="text-lg font-medium text-gray-800 mb-4">Assigned Viewers</h3>
-                <div className="text-sm text-gray-600"> </div>
-                </div>
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-medium text-gray-800">Assigned Viewers</h3>
+                {isEditing && (
+                  <Button 
+                    size="sm" 
+                    onClick={() => setShowViewerSearch(true)}
+                    className="bg-purple-600 hover:bg-purple-700 text-white"
+                  >
+                    <FaPlus   />
+
+                  </Button>
+                )}
+              </div>
             </CardHeader>
             <CardContent>
-              {goal.viewers.length === 0 ? (
+              {goal.viewers?.length === 0 ? (
                 <p className="text-gray-500 text-sm">No viewers assigned</p>
               ) : (
                 <div className="space-y-3">
-                  {goal.viewers.map((viewer, index) => (
-                    <div key={index} className="flex items-center space-x-3">
-                      <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
-                        <span className="text-gray-600 text-sm font-medium">
-                          {viewer.name.charAt(0).toUpperCase()}
-                        </span>
+                  {goal.viewers?.map((viewer, index) => (
+                    <div key={index} className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
+                          <span className="text-gray-600 text-sm font-medium">
+                            {viewer.name?.charAt(0).toUpperCase()}
+                          </span>
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-900">{viewer.name}</p>
+                          <p className="text-xs text-gray-500">View Only</p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-sm text-gray-900">{viewer.name}</p>
-                        <p className="text-xs text-gray-500">View Only</p>
-                      </div>
+                      {isEditing && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleRemoveViewer(index)}
+                          className="text-red-600 border-red-300 hover:bg-red-50"
+                        >
+                          <FaTimes className="w-3 h-3" />
+                        </Button>
+                      )}
                     </div>
                   ))}
                 </div>
               )}
+              
+              {/* Viewer Search Dialog */}
+              <Dialog open={showViewerSearch} onOpenChange={setShowViewerSearch}>
+                <DialogContent className="sm:max-w-md border border-purple-300 shadow-md shadow-purple-100">
+                  <DialogHeader>
+                    <DialogTitle>Add Viewer</DialogTitle>
+                    <DialogDescription>
+                      Search for employees to add as viewers
+                    </DialogDescription>
+                  </DialogHeader>
+                  
+                  <div className="space-y-4 py-4">
+                    <div className="flex items-center space-x-2">
+                      <Input
+                        placeholder="Search by name or email"
+                        value={viewerSearchTerm}
+                        onChange={(e) => {
+                          setViewerSearchTerm(e.target.value);
+                          searchEmployees(e.target.value);
+                        }}
+                        className="flex-1"
+                      />
+                    </div>
+                    
+                    <div className="max-h-72 overflow-y-auto space-y-2">
+                      {employeeSearchResults.length === 0 ? (
+                        <p className="text-center text-gray-500 py-4">
+                          {viewerSearchTerm ? 'No results found' : 'Type to search'}
+                        </p>
+                      ) : (
+                        employeeSearchResults.map((viewer) => (
+                          <div
+                            key={viewer.id || viewer.email}
+                            className="flex items-center justify-between p-3 border rounded-md hover:bg-gray-50 cursor-pointer"
+                            onClick={() => addViewerToGoal(viewer)}
+                          >
+                            <div className="flex items-center space-x-3">
+                              <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
+                                <span className="text-gray-600 text-sm font-medium">
+                                  {viewer.name?.charAt(0).toUpperCase()}
+                                </span>
+                              </div>
+                              <div>
+                                <p className="text-sm font-medium">{viewer.name}</p>
+                                <p className="text-xs text-gray-500">{viewer.email}</p>
+                                {viewer.isManualEntry && (
+                                  <Badge variant="outline" className="mt-1 text-xs">
+                                    Manual Entry
+                                  </Badge>
+                                )}
+                              </div>
+                            </div>
+                            <Button size="sm" className="bg-purple-600 hover:bg-purple-700 text-white">
+                              <FaPlus className="w-3 h-3" />
+                            </Button>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
             </CardContent>
           </Card>
 
@@ -1083,7 +1480,7 @@ export default function GoalDetailsPage() {
       {/* Create Project Modal */}
       {showCreateProject && (
         <Dialog open={showCreateProject} onOpenChange={setShowCreateProject}>
-          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto border border-purple-300 shadow-md shadow-purple-100">
             <DialogHeader>
             </DialogHeader>
             <div className="space-y-4">
@@ -1176,7 +1573,32 @@ export default function GoalDetailsPage() {
                 <div>
                   <EmployeeSearchInput
                     onEmployeeSelect={addEmployeeToProject}
-                    searchFunction={searchUsers}
+                    searchFunction={(term) => {
+                      // Use the same client-side filtering approach that works in edit members section
+                      const filteredUsers = allUsers.filter(user => {
+                        const matchesSearch =
+                          user.username?.toLowerCase().includes(term.toLowerCase()) ||
+                          user.email?.toLowerCase().includes(term.toLowerCase()) ||
+                          (user.firstName && user.firstName.toLowerCase().includes(term.toLowerCase())) ||
+                          (user.lastName && user.lastName.toLowerCase().includes(term.toLowerCase())) ||
+                          (user.name && user.name.toLowerCase().includes(term.toLowerCase()));
+                        return matchesSearch;
+                      });
+                      
+                      // Format results to match expected structure
+                      const formattedResults = filteredUsers.map(user => ({
+                        _id: user._id,
+                        id: user._id,
+                        email: user.email,
+                        name: user.name || `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email.split('@')[0],
+                        firstName: user.firstName || '',
+                        lastName: user.lastName || '',
+                        role: user.role || '',
+                        department: user.department || ''
+                      }));
+                      
+                      return Promise.resolve(formattedResults);
+                    }}
                     placeholder="Search employees by name or email..."
                     label="Assign Employees"
                     allowManualEmail={true}
@@ -1227,7 +1649,7 @@ export default function GoalDetailsPage() {
 
       {/* Update Modal */}
       <Dialog open={showUpdateModal} onOpenChange={setShowUpdateModal}>
-        <DialogContent className="bg-white max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="bg-white max-w-4xl max-h-[90vh] overflow-y-auto border border-purple-300 shadow-md shadow-purple-100">
           <DialogHeader>
             <DialogTitle className="text-xl font-bold text-gray-900">Post Goal Update</DialogTitle>
             <DialogDescription className="text-gray-600 text-base">
@@ -1237,22 +1659,92 @@ export default function GoalDetailsPage() {
 
           <div className="space-y-6">
             <div>
-              <Label htmlFor="update-text" className="text-base font-semibold text-gray-800 mb-3 block">
+              <Label htmlFor="update-progress" className="text-base font-semibold text-gray-800 mb-3 block">
                 Goal Update
               </Label>
               <div className="text-sm text-gray-600 mb-3">
-                <p>Write a comprehensive update covering progress toward goal completion, KPI achievements, challenges, team performance, and next steps.</p>
+                <p>Please provide updates on the following aspects of this goal:</p>
               </div>
-              <Textarea
-                id="update-text"
-                placeholder="Write a comprehensive goal update in one detailed paragraph. Include progress toward completion, KPI achievements, key milestones reached, challenges and how they're being addressed, team performance highlights, business impact, and upcoming priorities..."
-                value={updateText}
-                onChange={(e) => setUpdateText(e.target.value)}
-                className="mt-2 min-h-[200px] text-base"
-                disabled={isSubmittingUpdate}
-              />
-              <div className="mt-2 text-sm text-gray-500">
-                {updateText.length}/2000 characters • Provide strategic insights for maximum stakeholder value
+              
+              <div className="space-y-4">
+                {/* Progress Field */}
+                <div>
+                  <Label htmlFor="update-progress" className="text-sm font-medium text-gray-700">
+                    Current Progress <span className="text-purple-600">*</span>
+                  </Label>
+                  <Textarea
+                    id="update-progress"
+                    placeholder="Describe the current progress toward goal completion (e.g., 50% complete, on track, behind schedule)..."
+                    value={updateFields.progress}
+                    onChange={(e) => setUpdateFields({...updateFields, progress: e.target.value})}
+                    className="mt-1 h-20 text-sm"
+                    disabled={isSubmittingUpdate}
+                  />
+                </div>
+                
+                {/* Achievements Field */}
+                <div>
+                  <Label htmlFor="update-achievements" className="text-sm font-medium text-gray-700">
+                    Recent Achievements <span className="text-purple-600">*</span>
+                  </Label>
+                  <Textarea
+                    id="update-achievements"
+                    placeholder="List key milestones reached, KPI achievements, or other successes since the last update..."
+                    value={updateFields.achievements}
+                    onChange={(e) => setUpdateFields({...updateFields, achievements: e.target.value})}
+                    className="mt-1 h-20 text-sm"
+                    disabled={isSubmittingUpdate}
+                  />
+                </div>
+                
+                {/* Challenges Field */}
+                <div>
+                  <Label htmlFor="update-challenges" className="text-sm font-medium text-gray-700">
+                    Challenges & Blockers <span className="text-purple-600">*</span>
+                  </Label>
+                  <Textarea
+                    id="update-challenges"
+                    placeholder="Describe any challenges encountered and how they're being addressed..."
+                    value={updateFields.challenges}
+                    onChange={(e) => setUpdateFields({...updateFields, challenges: e.target.value})}
+                    className="mt-1 h-20 text-sm"
+                    disabled={isSubmittingUpdate}
+                  />
+                </div>
+                
+                {/* Next Steps Field */}
+                <div>
+                  <Label htmlFor="update-next-steps" className="text-sm font-medium text-gray-700">
+                    Next Steps <span className="text-purple-600">*</span>
+                  </Label>
+                  <Textarea
+                    id="update-next-steps"
+                    placeholder="Outline upcoming priorities and actions planned for the next period..."
+                    value={updateFields.nextSteps}
+                    onChange={(e) => setUpdateFields({...updateFields, nextSteps: e.target.value})}
+                    className="mt-1 h-20 text-sm"
+                    disabled={isSubmittingUpdate}
+                  />
+                </div>
+                
+                {/* Optional Comments Field */}
+                <div>
+                  <Label htmlFor="update-comments" className="text-sm font-medium text-gray-700">
+                    Additional Comments <span className="text-gray-400">(Optional)</span>
+                  </Label>
+                  <Textarea
+                    id="update-comments"
+                    placeholder="Any other information you'd like to share about this goal..."
+                    value={updateFields.comments}
+                    onChange={(e) => setUpdateFields({...updateFields, comments: e.target.value})}
+                    className="mt-1 h-20 text-sm"
+                    disabled={isSubmittingUpdate}
+                  />
+                </div>
+              </div>
+              
+              <div className="mt-4 text-sm text-gray-500">
+                <span className="text-purple-600">*</span> Required fields - please fill at least one
               </div>
             </div>
 
@@ -1284,7 +1776,13 @@ export default function GoalDetailsPage() {
               variant="outline"
               onClick={() => {
                 setShowUpdateModal(false);
-                setUpdateText('');
+                setUpdateFields({
+                  progress: '',
+                  achievements: '',
+                  challenges: '',
+                  nextSteps: '',
+                  comments: ''
+                });
               }}
               disabled={isSubmittingUpdate}
             >
@@ -1292,7 +1790,7 @@ export default function GoalDetailsPage() {
             </Button>
             <Button
               onClick={handleSubmitUpdate}
-              disabled={!updateText.trim() || isSubmittingUpdate || updateText.length > 2000}
+              disabled={(!updateFields.progress.trim() && !updateFields.achievements.trim() && !updateFields.challenges.trim() && !updateFields.nextSteps.trim()) || isSubmittingUpdate}
               className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2"
             >
               {isSubmittingUpdate ? (
@@ -1310,7 +1808,7 @@ export default function GoalDetailsPage() {
 
       {/* Create KPI Modal */}
       <Dialog open={showCreateKPI} onOpenChange={setShowCreateKPI}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl border border-purple-300 shadow-md shadow-purple-100">
           <DialogHeader>
             <DialogTitle>Create New KPI</DialogTitle>
             <DialogDescription>

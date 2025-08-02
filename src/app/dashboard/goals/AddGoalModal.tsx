@@ -8,20 +8,59 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'react-hot-toast';
-import { FaPlus, FaMinus, FaUser, FaSearch, FaSpinner } from 'react-icons/fa';
+import { FaPlus, FaMinus, FaUser, FaSearch, FaSpinner, FaTrash } from 'react-icons/fa';
 import { Target, ArrowLeft } from 'lucide-react';
+import { v4 as uuidv4 } from 'uuid';
 
 interface AddGoalModalProps {
   onAddGoal: (goal: any) => Promise<{ success: boolean; error?: string; goalId?: string }>;
   onCancel?: () => void;
 }
 
+type Employee = {
+  id?: string;
+  employeeId?: string;
+  name: string;
+  email: string;
+  department: string;
+  role: string;
+  tasks: string;
+  hours: string;
+  toolsUsed: string;
+  addedBy?: string;
+  isLead?: boolean;
+};
+
+type Viewer = {
+  id?: string;
+  employeeId?: string;
+  name: string;
+  email: string;
+  addedBy?: string;
+};
+
+type GoalData = {
+  title: string;
+  description: string;
+  department: string;
+  status: string;
+  priority: string;
+  startDate: string;
+  endDate: string;
+  employees: Employee[];
+  viewers: Viewer[];
+  visibleToAll?: boolean;
+  kpis?: KpiEditor[];
+  [key: string]: any; // For other dynamic properties
+};
+
 type KpiEditor = {
   name: string;
   description: string;
-  target: number;
+  target: string | number;
+  current?: string | number;
   unit: string;
-  dueDate: string;
+  dueDate?: string;
 };
 
 type ProjectEditor = {
@@ -38,24 +77,37 @@ type EmployeeEditor = {
   role: string;
 };
 
+interface ProjectFormData {
+  title: string;
+  description: string;
+  budget: number;
+  startDate: string;
+  endDate: string;
+  status: 'planning' | 'active' | 'on-hold' | 'completed';
+  priority: 'low' | 'medium' | 'high' | 'critical';
+  assignedEmployees: Array<{ employeeId: string; name: string; email: string }>;
+  visibleToAll: boolean;
+}
+
 const AddGoalModal = ({ onAddGoal, onCancel }: AddGoalModalProps) => {
+  const [submitting, setSubmitting] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
   const router = useRouter();
-  const [goalData, setGoalData] = useState({
+  const [goalData, setGoalData] = useState<GoalData>({
     title: '',
     description: '',
     department: '',
+    status: 'not_started',
+    priority: 'medium',
     startDate: '',
     endDate: '',
-    status: 'planning' as const,
-    priority: 'medium' as const,
+    employees: [],
+    viewers: [],
     visibleToAll: true,
-    kpis: [] as KpiEditor[],
-    employees: [] as any[],
-    viewers: [] as any[]
+    kpis: []
   });
   
-  const [loading, setLoading] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
+  // State managed by parent component
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [isPrivilegedUser, setIsPrivilegedUser] = useState(false);
 
@@ -79,6 +131,7 @@ const AddGoalModal = ({ onAddGoal, onCancel }: AddGoalModalProps) => {
   const [isSearchingProjects, setIsSearchingProjects] = useState(false);
   const [topProjects, setTopProjects] = useState<any[]>([]);
   const [showCreateProject, setShowCreateProject] = useState(false);
+  const [showAssignProject, setShowAssignProject] = useState(false);
   const [newProjectData, setNewProjectData] = useState<any>({});
   const [goalProjects, setGoalProjects] = useState<ProjectEditor[]>([]);
   const [projectsList, setProjectsList] = useState<any[]>([]);
@@ -135,6 +188,12 @@ const AddGoalModal = ({ onAddGoal, onCancel }: AddGoalModalProps) => {
         }
         
         setCurrentUser(user);
+        // Cache companyCode for API calls
+        if (user.companyCode) {
+          localStorage.setItem('companyCode', user.companyCode);
+        } else if ((user as any).company_code) {
+          localStorage.setItem('companyCode', (user as any).company_code);
+        }
         
         // Determine if user is admin or top management
         const roleLower = (user.role || '').toLowerCase();
@@ -173,47 +232,61 @@ const AddGoalModal = ({ onAddGoal, onCancel }: AddGoalModalProps) => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setGoalData((prev) => ({
+    setGoalData((prev: GoalData) => ({
       ...prev,
       [name]: value
     }));
   };
 
   const handleSelectChange = (name: string, value: string) => {
-    setGoalData((prev) => ({
+    setGoalData((prev: GoalData) => ({
       ...prev,
       [name]: value
     }));
   };
 
   const handleCheckboxChange = (field: string, value: boolean) => {
-    setGoalData({
-      ...goalData,
+    setGoalData((prev: GoalData) => ({
+      ...prev,
       [field]: value
-    });
+    }));
     console.log(`Set ${field} to ${value}`);
   };
 
   // KPI management functions
   const addKpi = () => {
-    setGoalData(prev => ({
+    setGoalData((prev: GoalData) => ({
       ...prev,
-      kpis: [...prev.kpis, { name: '', description: '', target: 0, unit: '', dueDate: '' }]
+      kpis: [
+        ...(prev.kpis || []), 
+        { 
+          name: '', 
+          description: '', 
+          target: 0, 
+          current: 0, 
+          unit: '',
+          deadline: '',
+          id: uuidv4()
+        }
+      ]
     }));
   };
 
   const removeKpi = (index: number) => {
-    setGoalData(prev => ({
+    setGoalData((prev: GoalData) => ({
       ...prev,
-      kpis: prev.kpis.filter((_, i) => i !== index)
+      kpis: (prev.kpis || []).filter((_, i: number) => i !== index)
     }));
   };
 
   const handleKpiChange = (index: number, field: keyof KpiEditor, value: string | number) => {
-    setGoalData(prev => {
-      const kpis = [...prev.kpis];
-      kpis[index] = { ...kpis[index], [field]: value };
-      return { ...prev, kpis };
+    setGoalData((prev: GoalData) => {
+      const updatedKpis = [...(prev.kpis || [])];
+      updatedKpis[index] = { 
+        ...updatedKpis[index], 
+        [field]: field === 'target' || field === 'current' ? Number(value) : value 
+      } as KpiEditor;
+      return { ...prev, kpis: updatedKpis };
     });
   };
 
@@ -270,6 +343,24 @@ const AddGoalModal = ({ onAddGoal, onCancel }: AddGoalModalProps) => {
 
     if (!goalProjects.find(p => p.projectId === projectEditor.projectId)) {
       setGoalProjects(prev => [...prev, projectEditor]);
+    }
+  };
+
+  const handleAssignExistingProject = (projectId: string) => {
+    try {
+      const project = projectsList.find(p => p.id === projectId || p._id === projectId);
+      
+      if (project) {
+        addProjectToGoal(project);
+        setShowAssignProject(false);
+        setProjectSearchTerm('');
+        toast.success('Project added to goal');
+      } else {
+        toast.error('Project not found');
+      }
+    } catch (error) {
+      console.error('Error assigning project:', error);
+      toast.error('Failed to assign project');
     }
   };
 
@@ -534,111 +625,164 @@ const AddGoalModal = ({ onAddGoal, onCancel }: AddGoalModalProps) => {
         return;
       }
 
-      // Prepare data for API
+      // Format projects data and ensure projectId is a string
+      console.log('Formatting projects for goal submission:', goalProjects);
+      const formattedProjects = (goalProjects || []).map((project: any) => {
+        // Ensure projectId is a string and handle different possible formats
+        let projectId = project.projectId || project._id || project.id;
+        
+        if (!projectId) {
+          console.error('Project missing ID:', project);
+          throw new Error('One or more projects are missing a valid ID');
+        }
+        
+        // Convert to string if it's an ObjectId
+        if (typeof projectId === 'object' && projectId) {
+          projectId = projectId._id || projectId.id || projectId.toString();
+          console.log('Converted project ID:', { original: project.projectId, converted: projectId });
+        }
+        
+        const formattedProject = {
+          projectId: projectId,
+          title: project.title || project.project_title,
+          description: project.description || project.project_description,
+          isNewProject: project.isNewProject || false,
+          assignedAt: new Date().toISOString(),
+          assignedBy: currentUser?.id || 'system'
+        };
+        
+        console.log('Formatted project:', formattedProject);
+        return formattedProject;
+      });
+      
+      console.log('Formatted projects:', formattedProjects);
+
+      // Prepare the base goal data
       const formattedData = {
-        title: goalData.title,
-        description: goalData.description,
-        department: goalData.department,
-        startDate: goalData.startDate,
-        endDate: goalData.endDate,
-        status: goalData.status,
-        priority: goalData.priority,
-        visibleToAll: goalData.visibleToAll,
+        ...goalData,
+        startDate: goalData.startDate ? new Date(goalData.startDate).toISOString() : '',
+        endDate: goalData.endDate ? new Date(goalData.endDate).toISOString() : '',
+        visibleToAll: goalData.visibleToAll || false,
         
         // Format KPIs
-        kpis: goalData.kpis.map(kpi => ({
+        kpis: (goalData.kpis || []).map((kpi: KpiEditor) => ({
           name: kpi.name,
           description: kpi.description,
-          target: Number(kpi.target),
-          unit: kpi.unit,
-          dueDate: kpi.dueDate
-        })),
-
-        // Format assigned projects
-        assignedProjects: goalProjects.map(project => ({
-          projectId: project.projectId,
-          title: project.title,
-          description: project.description,
-          isNewProject: project.isNewProject
+          target: Number(kpi.target) || 0,
+          current: Number(kpi.current) || 0,
+          unit: kpi.unit || '',
+          dueDate: kpi.dueDate || ''
         })),
         
         // Format assigned employees
-        assignedEmployees: goalData.employees.map(emp => ({
-          employeeId: emp.employeeId || emp.id,
+        assignedEmployees: (goalData.employees || []).map((emp: Employee) => ({
+          employeeId: emp.employeeId || emp.id || `manual-${emp.email}`,
           email: emp.email,
           name: emp.name,
-          role: emp.role
+          role: emp.role || ''
         })),
         
         // Format viewers
-        viewers: goalData.viewers.map(viewer => ({
-          employeeId: viewer.employeeId,
+        viewers: (goalData.viewers || []).map((viewer: Viewer) => ({
+          employeeId: viewer.employeeId || viewer.id || `manual-${viewer.email}`,
           email: viewer.email,
           name: viewer.name
+        })),
+        
+        // Add assigned projects with proper format for the API
+        assignedProjects: formattedProjects.map(project => ({
+          projectId: project.projectId,
+          assignedAt: project.assignedAt,
+          assignedBy: project.assignedBy
         }))
       };
-
-      // Check if current user is top management
-      const isTopManagement = currentUser?.role && [
-        'top_management_tier_1', 
-        'top_management_tier_2', 
-        'top_management_tier_3',
-        'admin'
-      ].includes(currentUser.role);
       
-      // Get company code from multiple possible sources
-      const companyCode = 
-        currentUser?.companyCode || 
-        currentUser?.company_code || 
-        localStorage.getItem('companyCode');
-      
-      // Create submission data with necessary metadata
-      const submissionData = {
+      console.log('Submitting goal with projects:', JSON.stringify({
         ...formattedData,
-        creatorRole: currentUser?.role,
-        creatorEmail: currentUser?.email,
-        creatorName: currentUser?.name,
-        companyCode: companyCode,
-        isManagementGoal: isTopManagement,
-        // Ensure visibleToAll is explicitly set (defaulting to true if not specified)
-        visibleToAll: goalData.visibleToAll !== false,
-      };
+        // Don't log the entire projects array to keep logs clean
+        assignedProjects: `[${formattedData.assignedProjects.length} projects]`
+      }, null, 2));
+
+      // Submit the goal with all data including projects
+      const result = await onAddGoal(formattedData);
       
-      console.log('Submitting goal data with company code:', submissionData.companyCode);
-      
-      const result = await onAddGoal(submissionData);
       if (result && result.success && result.goalId) {
-        // Update any projects created within this goal to link back to the goal
         const goalId = result.goalId;
-        for (const project of submissionData.assignedProjects || []) {
-          if (project.isNewProject) {
+        console.log(`Goal created with ID: ${goalId}`);
+        
+        // Process project linking after goal creation
+        if (formattedProjects.length > 0) {
+          const companyCode = currentUser?.companyCode || (currentUser as any)?.company_code || localStorage.getItem('companyCode');
+          if (!companyCode) {
+            console.error('Company code not found in localStorage');
+            toast.error('Company code required for project linking');
+            setSubmitting(false);
+            return;
+          }
+          
+          const queryString = `?companyCode=${encodeURIComponent(companyCode)}`;
+          let hasErrors = false;
+          
+          // Process each project
+          for (const project of formattedProjects) {
             try {
-              await fetch(`/api/projects/${project.projectId}`, {
-                method: 'PATCH',
+              // 1. Update project with goal context
+              const projectId = project.projectId;
+              const projectUpdateResponse = await fetch(`/api/projects${queryString}`, {
+                method: 'PUT',
                 headers: {
                   'Content-Type': 'application/json',
                   'Authorization': `Bearer ${localStorage.getItem('token')}`
                 },
                 body: JSON.stringify({
+                  projectId: projectId,
                   linkedToGoal: true,
                   goalContext: {
                     goalId: goalId,
-                    goalTitle: submissionData.title
-                  }
+                    goalTitle: formattedData.title
+                  },
+                  createdFromGoal: project.isNewProject ? goalId : undefined
                 })
               });
-              console.log(`Linked project ${project.projectId} to goal ${goalId}`);
+              
+              if (!projectUpdateResponse.ok) {
+                const errorData = await projectUpdateResponse.json().catch(() => ({}));
+                console.error(`Failed to update project ${projectId}:`, {
+                  status: projectUpdateResponse.status,
+                  statusText: projectUpdateResponse.statusText,
+                  error: errorData
+                });
+                hasErrors = true;
+                continue;
+              }
+              
+              console.log(`Updated project ${projectId} with goal context`);
+              
+              // Assignment of projects is handled by the createGoal API; skipping POST assignment
+              
+              console.log(`Successfully linked project ${projectId} to goal ${goalId}`);
             } catch (error) {
-              console.error('Error linking project to goal:', error);
+              console.error(`Error processing project for goal ${goalId}:`, error);
+              hasErrors = true;
+              // Continue with next project even if one fails
             }
           }
+          
+          if (hasErrors) {
+            toast('Goal created, but there were issues linking some projects', { icon: '⚠️' });
+          } else {
+            toast.success('Goal created and projects linked successfully!');
+          }
+          
+          router.push(`/dashboard/goals/${goalId}`);
+        } else {
+          // No projects to link, just redirect
+          toast.success('Goal created successfully!');
+          router.push(`/dashboard/goals/${goalId}`);
         }
-
-        toast.success('Goal created successfully!');
-        router.push(`/dashboard/goals/${result.goalId}`);
-        return;
+      } else {
+        toast.error(result?.error || 'Failed to create goal');
       }
-      toast.error(result?.error || 'Failed to create goal');
     } catch (error) {
       console.error('Error submitting goal:', error);
       toast.error('Failed to create goal');
@@ -769,7 +913,7 @@ const AddGoalModal = ({ onAddGoal, onCancel }: AddGoalModalProps) => {
           </Button>
         </div>
         
-        {goalData.kpis.map((kpi, index) => (
+        {goalData.kpis?.map((kpi, index) => (
           <div key={index} className="border rounded-lg p-4 bg-gray-50">
             <div className="flex justify-between items-center mb-3">
               <h4 className="font-medium">KPI #{index + 1}</h4>
@@ -979,7 +1123,9 @@ const AddGoalModal = ({ onAddGoal, onCancel }: AddGoalModalProps) => {
                     onClick={(e) => {
                       e.stopPropagation();
                       // Simply remove the project from the linked projects list
-                      setGoalProjects(prev => prev.filter((_, i) => i !== idx));
+                      setGoalProjects((prev: Array<{projectId: string, title: string}>) => 
+                        prev.filter((_, i) => i !== idx)
+                      );
                     }}
                     className="text-red-500 hover:text-red-700 hover:bg-red-50 h-8 w-8 p-0 flex-shrink-0"
                     aria-label="Unlink project"
@@ -993,6 +1139,121 @@ const AddGoalModal = ({ onAddGoal, onCancel }: AddGoalModalProps) => {
                 <p className="text-sm text-gray-500 italic">No linked projects selected</p>
               )}
             </div>
+          </div>
+        )}
+      </div>
+
+      {/* Projects Section */}
+      <div className="space-y-4 border-t pt-4 mt-4" data-tour="projects-section">
+        <div className="flex justify-between items-center">
+          <Label className="text-sm font-medium">Projects</Label>
+          <div className="flex space-x-2">
+            <Button 
+              type="button" 
+              variant="outline" 
+              size="sm" 
+              onClick={() => setShowAssignProject(true)}
+              className="text-xs"
+            >
+              <FaPlus className="mr-1 h-3 w-3" /> Assign Existing
+            </Button>
+          </div>
+        </div>
+
+        {/* Project Search */}
+        {showAssignProject && (
+          <div className="border rounded-md p-4 bg-white shadow-sm">
+            <div className="mb-4">
+              <Label htmlFor="project-search" className="text-sm font-medium mb-2">
+                Search Projects
+              </Label>
+              <div className="flex">
+                <Input
+                  id="project-search"
+                  value={projectSearchTerm}
+                  onChange={(e) => {
+                    setProjectSearchTerm(e.target.value);
+                    searchProjects(e.target.value);
+                  }}
+                  placeholder="Search by project name..."
+                  className="flex-1"
+                />
+              </div>
+            </div>
+
+            {isSearchingProjects ? (
+              <div className="text-center py-4">
+                <FaSpinner className="animate-spin h-5 w-5 mx-auto text-purple-600" />
+                <p className="text-sm text-gray-500 mt-2">Searching projects...</p>
+              </div>
+            ) : projectSearchResults.length > 0 ? (
+              <div className="max-h-60 overflow-y-auto border rounded-md">
+                {projectSearchResults.map((project) => (
+                  <div
+                    key={project.id || project._id}
+                    className="p-3 hover:bg-gray-50 cursor-pointer border-b last:border-b-0"
+                    onClick={() => handleAssignExistingProject(project.id || project._id)}
+                  >
+                    <div className="font-medium">{project.title || project.project_title}</div>
+                    <div className="text-sm text-gray-600 truncate">
+                      {project.description || project.project_description}
+                    </div>
+                    <div className="text-xs text-gray-500 mt-1">
+                      {project.department || project.project_department} • {project.status || project.project_status}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : projectSearchTerm ? (
+              <div className="text-center py-4 text-gray-500">
+                No projects found for "{projectSearchTerm}"
+              </div>
+            ) : (
+              <div className="text-center py-4 text-gray-500">
+                Type to search for projects
+              </div>
+            )}
+
+            <div className="flex justify-end mt-4">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setShowAssignProject(false);
+                  setProjectSearchTerm('');
+                  setProjectSearchResults([]);
+                }}
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {/* Project List */}
+        {goalProjects.length > 0 ? (
+          <div className="space-y-2">
+            {goalProjects.map((project, idx) => (
+              <div key={idx} className="flex items-center justify-between p-3 bg-white border rounded-md shadow-sm">
+                <div>
+                  <div className="font-medium">{project.title}</div>
+                  <div className="text-sm text-gray-600 truncate max-w-md">{project.description}</div>
+                </div>
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => removeProjectFromGoal(project.projectId)}
+                  className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                >
+                  <FaTrash className="h-3 w-3" />
+                </Button>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-4 border border-dashed rounded-md">
+            <p className="text-sm text-gray-500">No projects assigned to this goal yet</p>
           </div>
         )}
       </div>
@@ -1022,7 +1283,7 @@ const AddGoalModal = ({ onAddGoal, onCancel }: AddGoalModalProps) => {
                 <Label>Project Title</Label>
                 <Input
                   value={newProjectData.title || ''}
-                  onChange={(e) => setNewProjectData(prev => ({
+                  onChange={(e) => setNewProjectData((prev: ProjectFormData) => ({
                     ...prev,
                     title: e.target.value
                   }))}
@@ -1034,7 +1295,7 @@ const AddGoalModal = ({ onAddGoal, onCancel }: AddGoalModalProps) => {
                 <Input
                   type="number"
                   value={newProjectData.budget || ''}
-                  onChange={(e) => setNewProjectData(prev => ({
+                  onChange={(e) => setNewProjectData((prev: ProjectFormData) => ({
                     ...prev,
                     budget: Number(e.target.value)
                   }))}
@@ -1046,7 +1307,7 @@ const AddGoalModal = ({ onAddGoal, onCancel }: AddGoalModalProps) => {
                 <Input
                   type="date"
                   value={newProjectData.startDate || ''}
-                  onChange={(e) => setNewProjectData(prev => ({
+                  onChange={(e) => setNewProjectData((prev: ProjectFormData) => ({
                     ...prev,
                     startDate: e.target.value
                   }))}
@@ -1057,7 +1318,7 @@ const AddGoalModal = ({ onAddGoal, onCancel }: AddGoalModalProps) => {
                 <Input
                   type="date"
                   value={newProjectData.endDate || ''}
-                  onChange={(e) => setNewProjectData(prev => ({
+                  onChange={(e) => setNewProjectData((prev: ProjectFormData) => ({
                     ...prev,
                     endDate: e.target.value
                   }))}
@@ -1067,7 +1328,7 @@ const AddGoalModal = ({ onAddGoal, onCancel }: AddGoalModalProps) => {
                 <Label>Description</Label>
                 <Textarea
                   value={newProjectData.description || ''}
-                  onChange={(e) => setNewProjectData(prev => ({
+                  onChange={(e) => setNewProjectData((prev: ProjectFormData) => ({
                     ...prev,
                     description: e.target.value
                   }))}
@@ -1079,9 +1340,9 @@ const AddGoalModal = ({ onAddGoal, onCancel }: AddGoalModalProps) => {
                 <Label>Status</Label>
                 <select
                   value={newProjectData.status || 'planning'}
-                  onChange={(e) => setNewProjectData(prev => ({
+                  onChange={(e) => setNewProjectData((prev: ProjectFormData) => ({
                     ...prev,
-                    status: e.target.value
+                    status: e.target.value as ProjectFormData['status']
                   }))}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
                 >
@@ -1095,9 +1356,9 @@ const AddGoalModal = ({ onAddGoal, onCancel }: AddGoalModalProps) => {
                 <Label>Priority</Label>
                 <select
                   value={newProjectData.priority || 'medium'}
-                  onChange={(e) => setNewProjectData(prev => ({
+                  onChange={(e) => setNewProjectData((prev: ProjectFormData) => ({
                     ...prev,
-                    priority: e.target.value
+                    priority: e.target.value as ProjectFormData['priority']
                   }))}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
                 >
@@ -1126,11 +1387,11 @@ const AddGoalModal = ({ onAddGoal, onCancel }: AddGoalModalProps) => {
                           className="p-2 hover:bg-gray-50 cursor-pointer border-b last:border-b-0"
                           onClick={() => {
                             const currentMembers = newProjectData.assignedEmployees || [];
-                            if (!currentMembers.find((m: any) => m.email === employee.email)) {
-                              setNewProjectData(prev => ({
+                            if (!currentMembers.find((m: { email: string }) => m.email === employee.email)) {
+                              setNewProjectData((prev: ProjectFormData) => ({
                                 ...prev,
                                 assignedEmployees: [...currentMembers, {
-                                  employeeId: employee.id,
+                                  employeeId: employee.id || '',
                                   name: employee.name,
                                   email: employee.email
                                 }]
@@ -1157,8 +1418,8 @@ const AddGoalModal = ({ onAddGoal, onCancel }: AddGoalModalProps) => {
                           <button
                             type="button"
                             onClick={() => {
-                              const updatedMembers = newProjectData.assignedEmployees.filter((_: any, i: number) => i !== mIndex);
-                              setNewProjectData(prev => ({
+                              const updatedMembers = newProjectData.assignedEmployees.filter((_: unknown, i: number) => i !== mIndex);
+                              setNewProjectData((prev: ProjectFormData) => ({
                                 ...prev,
                                 assignedEmployees: updatedMembers
                               }));
@@ -1179,7 +1440,7 @@ const AddGoalModal = ({ onAddGoal, onCancel }: AddGoalModalProps) => {
                     type="checkbox"
                     id="visibleToAll"
                     checked={newProjectData.visibleToAll || false}
-                    onChange={(e) => setNewProjectData(prev => ({
+                    onChange={(e) => setNewProjectData((prev: ProjectFormData) => ({
                       ...prev,
                       visibleToAll: e.target.checked
                     }))}

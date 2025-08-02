@@ -10,7 +10,9 @@ export async function PATCH(
   { params }: { params: { projectId: string } }
 ) {
   try {
-    const { projectId } = params;
+    // Ensure params is properly awaited
+    const resolvedParams = await Promise.resolve(params);
+    const { projectId } = resolvedParams;
     const body = await request.json();
 
     // Get auth token

@@ -347,7 +347,11 @@ export async function POST(request: Request) {
         dueDate: new Date(kpi.dueDate),
         current: 0
       })) || [],
-      assignedProjects: [],
+      assignedProjects: body.assignedProjects?.map((p: any) => ({
+        projectId: p.projectId,
+        assignedAt: new Date(p.assignedAt || new Date()),
+        assignedBy: p.assignedBy || 'system'
+      })) || [],
       progress: 0,
       createdAt: new Date(),
       updatedAt: new Date()
@@ -434,8 +438,12 @@ export async function PUT(request: Request) {
     const collection = db.collection(goalsCollection);
     
     // Check if goal exists and user has permission
+    if (!ObjectId.isValid(goalId)) {
+      return NextResponse.json({ error: 'Invalid goal ID format' }, { status: 400 });
+    }
+    
     const existingGoal = await collection.findOne({ 
-      _id: ObjectId.isValid(goalId) ? new ObjectId(goalId) : null 
+      _id: new ObjectId(goalId)
     });
     
     if (!existingGoal) {
@@ -541,8 +549,12 @@ export async function DELETE(request: Request) {
     const collection = db.collection(goalsCollection);
     
     // Check if goal exists and user has permission
+    if (!ObjectId.isValid(goalId)) {
+      return NextResponse.json({ error: 'Invalid goal ID format' }, { status: 400 });
+    }
+    
     const existingGoal = await collection.findOne({ 
-      _id: ObjectId.isValid(goalId) ? new ObjectId(goalId) : null 
+      _id: new ObjectId(goalId)
     });
     
     if (!existingGoal) {
@@ -557,11 +569,37 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: 'Insufficient privileges to delete goal' }, { status: 403 });
     }
     
+    // Before deleting the goal, update all linked projects
+    const projectsCollection = db.collection('projects');
+    
+    // Update all projects that are linked to this goal
+    const projectUpdateResult = await projectsCollection.updateMany(
+      { 
+        linkedToGoal: true,
+        'goalContext.goalId': goalId
+      },
+      {
+        $set: {
+          linkedToGoal: false
+        },
+        $unset: {
+          goalContext: ""
+        }
+      }
+    );
+    
+    console.log(`Updated ${projectUpdateResult.modifiedCount} projects to unlink from goal ${goalId}`);
+    
+    // Now delete the goal
     const result = await collection.deleteOne({ _id: new ObjectId(goalId) });
     
     if (result.deletedCount > 0) {
       console.log(`Goal deleted successfully: ${goalId}`);
-      return NextResponse.json({ success: true, goalId });
+      return NextResponse.json({ 
+        success: true, 
+        goalId,
+        unlinkedProjects: projectUpdateResult.modifiedCount
+      });
     } else {
       throw new Error('Failed to delete goal');
     }

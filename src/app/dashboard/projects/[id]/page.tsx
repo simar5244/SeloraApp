@@ -970,7 +970,8 @@ export default function ProjectDetailPage({ params }: ProjectDetailProps) {
                     size="sm" 
                     type="button" 
                     className="bg-purple-100 hover:bg-purple-200 text-black text-sm"
-                    onClick={() => {
+                    onClick={(e) => {
+                      e.preventDefault();
                       if (selectedProjectId) {
                         const selectedProject = availableProjects.find(p => (p.id || p._id) === selectedProjectId);
                         if (selectedProject && !linkedProjects.some(lp => lp.id === selectedProjectId)) {
@@ -1068,7 +1069,11 @@ export default function ProjectDetailPage({ params }: ProjectDetailProps) {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => setShowEmployeeSearch(!showEmployeeSearch)}
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setShowEmployeeSearch(!showEmployeeSearch);
+                      }}
                       className="bg-purple-100 hover:bg-purple-200 text-black text-sm"
                     >
                       <FaSearch className="mr-1 h-3 w-3" />
@@ -1077,7 +1082,11 @@ export default function ProjectDetailPage({ params }: ProjectDetailProps) {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => setEditData(prev => ({...prev, employees: [...prev.employees, { name: '', email: '', department: '', role: '', hours: '', tasks: '', tools_used: '' }]}))}
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setEditData(prev => ({...prev, employees: [...prev.employees, { name: '', email: '', department: '', role: '', hours: '', tasks: '', tools_used: '' }]}));
+                      }}
                       className="bg-gray-100 hover:bg-gray-200 text-black text-sm"
                     >
                       <FaPlus className="mr-1 h-3 w-3" />
@@ -1159,7 +1168,10 @@ export default function ProjectDetailPage({ params }: ProjectDetailProps) {
                         variant="destructive"
                         size="sm"
                         type="button"
-                        onClick={() => setEditData(prev=>({...prev,employees:prev.employees.filter((_,j)=>j!==idx)}))}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setEditData(prev=>({...prev,employees:prev.employees.filter((_,j)=>j!==idx)}));
+                        }}
                       >
                         Remove
                       </Button>
@@ -1235,7 +1247,11 @@ export default function ProjectDetailPage({ params }: ProjectDetailProps) {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => setShowViewerSearch(!showViewerSearch)}
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setShowViewerSearch(!showViewerSearch);
+                      }}
                       className="bg-yellow-100 hover:bg-yellow-200 text-black text-sm"
                     >
                       <FaSearch className="mr-1 h-3 w-3" />
@@ -1245,7 +1261,10 @@ export default function ProjectDetailPage({ params }: ProjectDetailProps) {
                       variant="outline"
                       size="sm"
                       type="button"
-                      onClick={addViewer}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        addViewer();
+                      }}
                       className="bg-gray-100 hover:bg-gray-200 text-black text-sm"
                     >
                       <FaPlus className="mr-1 h-3 w-3" />
@@ -1329,7 +1348,10 @@ export default function ProjectDetailPage({ params }: ProjectDetailProps) {
                       disabled
                       className="bg-gray-100 text-gray-600"
                     />
-                    <Button variant="destructive" size="sm" type="button" onClick={() => removeViewer(idx)}>Remove</Button>
+                    <Button variant="destructive" size="sm" type="button" onClick={(e) => {
+                      e.preventDefault();
+                      removeViewer(idx);
+                    }}>Remove</Button>
                   </div>
                 ))}
               </div>
@@ -1354,9 +1376,14 @@ export default function ProjectDetailPage({ params }: ProjectDetailProps) {
               
               <div className="flex justify-end pt-4 border-t">
                 <div className="space-x-2">
-                  <Button 
+                  <Button
                     variant="outline"
-                    onClick={() => setIsEditing(false)} 
+                    type="button"
+                    className="border-gray-300 text-gray-700"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setIsEditing(false);
+                    }} 
                   >
                     Cancel
                   </Button>
@@ -1478,8 +1505,10 @@ export default function ProjectDetailPage({ params }: ProjectDetailProps) {
                   </DialogHeader>
                   <div className="flex justify-end pt-4">
                     <Button 
+                      type="button"
                       className="bg-red-600 hover:bg-red-700 text-white"
-                      onClick={() => {
+                      onClick={(e) => {
+                        e.preventDefault();
                         handleDeleteProject();
                         setDeleteConfirmOpen(false);
                       }}
