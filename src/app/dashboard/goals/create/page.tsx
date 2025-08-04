@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import AddGoalModal from "../AddGoalModal";
@@ -12,6 +12,38 @@ import { GoalsTourLauncher } from "@/components/tour/GoalsTourLauncher";
 export default function CreateGoalPage() {
   const router = useRouter();
   const [creatingGoal, setCreatingGoal] = useState(false);
+  const [hasPermission, setHasPermission] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // Check if user has permission to create goals
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      try {
+        const currentUser = JSON.parse(storedUser);
+        const userRole = currentUser.role || '';
+        const canCreate = ['admin', 'top_management_tier_1', 'top_management_tier_2', 'top_management_tier_3'].includes(userRole);
+        
+        if (!canCreate) {
+          toast.error('You do not have permission to create goals');
+          router.push('/dashboard/goals');
+          return;
+        }
+        
+        setHasPermission(true);
+      } catch (e) {
+        console.error('Failed to parse user data:', e);
+        toast.error('Authentication error');
+        router.push('/dashboard/goals');
+        return;
+      }
+    } else {
+      toast.error('User not found');
+      router.push('/dashboard/goals');
+      return;
+    }
+    setIsLoading(false);
+  }, [router]);
 
   const handleAddGoal = async (goalData: any): Promise<{ success: boolean; error?: string }> => {
     setCreatingGoal(true);
@@ -41,6 +73,21 @@ export default function CreateGoalPage() {
       setCreatingGoal(false);
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-purple-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Checking permissions...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!hasPermission) {
+    return null; // Will redirect in useEffect
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-800">

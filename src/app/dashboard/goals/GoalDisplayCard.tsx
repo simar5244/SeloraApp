@@ -23,6 +23,11 @@ interface GoalDisplayCardProps {
     assignedEmployees?: any[];
     assignedProjects?: any[];
     kpis?: any[];
+    permissions?: {
+      canEdit: boolean;
+      canDelete: boolean;
+      canView: boolean;
+    };
   };
   onClick?: () => void;
 }

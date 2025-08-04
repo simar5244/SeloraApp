@@ -62,6 +62,11 @@ interface Goal {
   visibleToAll: boolean;
   createdAt?: string;
   updatedAt?: string;
+  permissions?: {
+    canEdit: boolean;
+    canDelete: boolean;
+    canView: boolean;
+  };
 }
 
 interface Project {
@@ -965,30 +970,36 @@ export default function GoalDetailsPage() {
           <div className="flex space-x-2">
             {!isEditing ? (
               <>
-                <Button
-                  variant="outline"
-                  onClick={() => setIsEditing(true)}
-                  className="text-purple-600 border-purple-600 hover:bg-purple-50"
-                >
-                  <FaEdit className="w-4 h-4 mr-2" />
-                  Edit Goal
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => setShowUpdateModal(true)}
-                  className="text-purple-600 border-purple-600 hover:bg-purple-50"
-                >
-                  <FaCommentDots className="w-4 h-4 mr-2" />
-                  Update
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={handleDeleteGoal}
-                  className="text-red-600 border-red-600 hover:bg-red-50"
-                >
-                  <FaTrash className="w-4 h-4 mr-2" />
-                  Delete Goal
-                </Button>
+                {goal.permissions?.canEdit && (
+                  <Button
+                    variant="outline"
+                    onClick={() => setIsEditing(true)}
+                    className="text-purple-600 border-purple-600 hover:bg-purple-50"
+                  >
+                    <FaEdit className="w-4 h-4 mr-2" />
+                    Edit
+                  </Button>
+                )}
+                {goal.permissions?.canEdit && (
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowUpdateModal(true)}
+                    className="text-purple-600 border-purple-600 hover:bg-purple-50"
+                  >
+                    <FaCommentDots className="w-4 h-4 mr-2" />
+                    Update
+                  </Button>
+                )}
+                {goal.permissions?.canDelete && (
+                  <Button
+                    variant="outline"
+                    onClick={handleDeleteGoal}
+                    className="text-red-600 border-red-600 hover:bg-red-50"
+                  >
+                    <FaTrash className="w-4 h-4 mr-2" />
+                    Delete
+                  </Button>
+                )}
                 <Button
                   variant="outline"
                   onClick={() => router.push('/dashboard/goals')}
@@ -1161,16 +1172,17 @@ export default function GoalDetailsPage() {
                     <h2 className="text-lg font-medium text-gray-800 mb-4">Assigned Projects</h2>
                       </CardTitle>
                     <div className="flex space-x-2">
-                      <Dialog open={showAssignProject} onOpenChange={setShowAssignProject}>
-                        <DialogTrigger asChild>
-                          <Button
-                            size="sm"
-                            className="bg-gray-50 border-purple-600 hover:bg-gray-100 text-purple-600"
-                          >
-                            <FaPlus className="mr-2" />
-                            Assign Existing
-                          </Button>
-                        </DialogTrigger>
+                      {goal.permissions?.canEdit && (
+                        <Dialog open={showAssignProject} onOpenChange={setShowAssignProject}>
+                          <DialogTrigger asChild>
+                            <Button
+                              size="sm"
+                              className="bg-gray-50 border-purple-600 hover:bg-gray-100 text-purple-600"
+                            >
+                              <FaPlus className="mr-2" />
+                              Assign Existing
+                            </Button>
+                          </DialogTrigger>
                         <DialogContent className="w-full max-w-2xl p-0 overflow-hidden border border-purple-300 rounded-lg shadow-md shadow-purple-100">
                           <div className="p-6 pb-4 border-b border-purple-300 bg-white rounded-t-lg">
                             <h2 className="text-lg font-semibold">Assign Existing Project</h2>
@@ -1184,7 +1196,7 @@ export default function GoalDetailsPage() {
                                 placeholder="Search projects by name, description, or department..."
                                 value={projectSearchTerm}
                                 onChange={(e) => setProjectSearchTerm(e.target.value)}
-                                className="pl-10 pr-10 h-10 focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2 border-gray-300 focus:border-purple-500"
+                                className="pl-10 pr-10 h-12 focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2 border-gray-300 focus:border-purple-500"
                               />
                               {projectSearchTerm && (
                                 <button
@@ -1247,16 +1259,19 @@ export default function GoalDetailsPage() {
                             </div>
                           </div>
                         </DialogContent>
-                      </Dialog>
+                        </Dialog>
+                      )}
 
-                      <Button 
-                        size="sm" 
-                        onClick={() => setShowCreateProject(true)}
-                        className="bg-purple-600 hover:bg-purple-700 text-white"
-                      >
-                        <FaPlus className="w-4 h-4 mr-2" />
-                        Create New
-                      </Button>
+                      {goal.permissions?.canEdit && (
+                        <Button 
+                          size="sm" 
+                          onClick={() => setShowCreateProject(true)}
+                          className="bg-purple-600 hover:bg-purple-700 text-white"
+                        >
+                          <FaPlus className="w-4 h-4 mr-2" />
+                          Create New
+                        </Button>
+                      )}
                     </div>
                   </div>
                 </CardHeader>
@@ -1318,14 +1333,16 @@ export default function GoalDetailsPage() {
                     <CardTitle>
                     <h2 className="text-lg font-medium text-gray-800 mb-4">Assigned Key Performance Indicators</h2>
                       </CardTitle>
-                    <Button
-                      size="sm"
-                      onClick={() => setShowCreateKPI(true)}
-                      className="bg-purple-600 hover:bg-purple-700 text-white"
-                    >
-                      <FaPlus className="w-4 h-4 mr-2" />
-                      Create New
-                    </Button>
+                    {goal.permissions?.canEdit && (
+                      <Button
+                        size="sm"
+                        onClick={() => setShowCreateKPI(true)}
+                        className="bg-purple-600 hover:bg-purple-700 text-white"
+                      >
+                        <FaPlus className="w-4 h-4 mr-2" />
+                        Create New
+                      </Button>
+                    )}
                   </div>
                 </CardHeader>
                 <CardContent>
@@ -1842,7 +1859,7 @@ export default function GoalDetailsPage() {
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clipRule="evenodd" />
                   </svg>
                 </div>
-                <DialogTitle className="text-lg font-semibold text-gray-900">Delete Goal</DialogTitle>
+                <DialogTitle className="text-lg font-semibold text-gray-900">Delete</DialogTitle>
               </div>
               <DialogDescription className="mt-2 text-gray-600">
                 This will delete the goal and all its linked projects. Continue?

@@ -52,23 +52,21 @@ export default function Sidebar({ user, isOpen, toggleSidebar }: SidebarProps) {
   const allNavItems: NavItem[] = [
     { 
       name: 'Dashboard', 
-      href: user?.role?.startsWith('employee_') ? ROUTES.EMPLOYEE_DASHBOARD : ROUTES.DASHBOARD, 
+      href: (user?.role?.startsWith('employee_') || user?.role?.startsWith('top_management_tier_')) ? ROUTES.EMPLOYEE_DASHBOARD : ROUTES.DASHBOARD, 
       icon: <Home className="w-5 h-5" />, 
       order: 1 
     },
-    { name: 'Projects', href: ROUTES.PROJECTS, icon: <ClipboardList className="w-5 h-5" />, order: 2 },
-    { name: 'Feedback', href: ROUTES.FEEDBACK, icon: <MessageSquare className="w-5 h-5" />, order: 3 },
-    { name: 'Integrations', href: ROUTES.INTEGRATIONS, icon: <Plug className="w-5 h-5" />, order: 4 },
-    { name: 'Visualizations', href: ROUTES.VISUALIZATIONS, icon: <LayoutGrid className="w-5 h-5" />, order: 5 },
-    { name: 'Succession Planning', href: ROUTES.SUCCESSION_PLANNING, icon: <UserCog className="w-5 h-5" />, order: 6 },
-    { name: 'Evaluation Metrics', href: ROUTES.EVALUATION_METRICS, icon: <BarChart2 className="w-5 h-5" />, order: 7 },
-    { name: 'Org AI', href: ROUTES.WEB_QUERY, icon: <Database className="w-5 h-5" />, order: 8 },
-    { name: 'Report Generation', href: ROUTES.REPORT_GENERATION, icon: <FileText className="w-5 h-5" />, order: 9 },
-    { name: 'User Management', href: ROUTES.USER_MANAGEMENT, icon: <Users className="w-5 h-5" />, order: 10 },
+    { name: 'Objectives', href: ROUTES.GOALS, icon: <Target className="w-5 h-5" />, order: 2 },
+    { name: 'Projects', href: ROUTES.PROJECTS, icon: <ClipboardList className="w-5 h-5" />, order: 3 },
+    { name: 'Feedback', href: ROUTES.FEEDBACK, icon: <MessageSquare className="w-5 h-5" />, order: 4 },
+    { name: 'Integrations', href: ROUTES.INTEGRATIONS, icon: <Plug className="w-5 h-5" />, order: 5 },
+    { name: 'Visualizations', href: ROUTES.VISUALIZATIONS, icon: <LayoutGrid className="w-5 h-5" />, order: 6 },
+    { name: 'Succession Planning', href: ROUTES.SUCCESSION_PLANNING, icon: <UserCog className="w-5 h-5" />, order: 7 },
+    { name: 'Evaluation Metrics', href: ROUTES.EVALUATION_METRICS, icon: <BarChart2 className="w-5 h-5" />, order: 8 },
+    { name: 'Org AI', href: ROUTES.WEB_QUERY, icon: <Database className="w-5 h-5" />, order: 9 },
+    { name: 'Report Generation', href: ROUTES.REPORT_GENERATION, icon: <FileText className="w-5 h-5" />, order: 10 },
     { name: 'Department Admin', href: ROUTES.DEPARTMENT_MANAGEMENT, icon: <Building className="w-5 h-5" />, order: 11 },
-    { name: 'Goals', href: ROUTES.GOALS, icon: <Target className="w-5 h-5" />, order: 12 },
-    { name: 'User Approvals', href: ROUTES.USER_APPROVALS, icon: <Shield className="w-5 h-5" />, order: 13 },
-    { name: 'Platform Settings', href: ROUTES.PLATFORM_SETTINGS, icon: <Settings className="w-5 h-5" />, order: 14 },
+    { name: 'User Management', href: ROUTES.USER_MANAGEMENT, icon: <Users className="w-5 h-5" />, order: 12 },
   ];
 
   // Get navigation items based on user role
@@ -195,7 +193,7 @@ export default function Sidebar({ user, isOpen, toggleSidebar }: SidebarProps) {
               className={`flex items-center px-3 py-2.5 rounded-md text-sm font-medium transition-colors w-full
                 ${pathname === ROUTES.BILLING
                   ? 'bg-purple-600 text-white' 
-                  : 'text-gray-800 hover:bg-gray-200 hover:text-black'
+                  : 'text-gray-800 hover:bg-purple-200 hover:text-black'
                 } 
                 ${!isOpen ? 'justify-center' : ''}`}
               title={!isOpen ? 'Billing' : undefined}

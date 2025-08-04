@@ -108,7 +108,7 @@ export async function GET(request: Request) {
     
     console.log(`Using company-specific database: ${dbName}`);
     
-    // Check if user is top management
+    // Check if user is top management or admin
     const isTopManagement = ['top_management_tier_1', 'top_management_tier_2', 'top_management_tier_3'].includes(dbUserRole || '') || (dbUserRole || '').toLowerCase() === 'admin';
     console.log(`User is top management: ${isTopManagement}`);
     
@@ -132,20 +132,15 @@ export async function GET(request: Request) {
         return NextResponse.json({ error: 'Goal not found' }, { status: 404 });
       }
 
-      // Check if user has access to this goal
-      if (userEmail && dbUserRole) {
-        const isTopManagement = ['top_management_tier_1', 'top_management_tier_2', 'top_management_tier_3'].includes(dbUserRole) || dbUserRole.toLowerCase() === 'admin';
+      // VIEWING PERMISSION: Check if user can view this goal
+      if (dbUserRole !== 'admin') {
         const isViewer = Array.isArray(goal.viewers) && goal.viewers.some((v: any) => 
           v.email === userEmail);
         const isAssigned = Array.isArray(goal.assignedEmployees) && goal.assignedEmployees.some((e: any) => 
           e.email === userEmail);
         
-        // User can access if:
-        // 1. They are in top management (can see all goals), OR
-        // 2. The goal is marked visibleToAll, OR
-        // 3. They are assigned to the goal, OR 
-        // 4. They are listed as a viewer of the goal
-        if (!isTopManagement && !goal.visibleToAll && !isViewer && !isAssigned) {
+        // User can view if: assigned as member, listed as viewer, or goal is visibleToAll
+        if (!goal.visibleToAll && !isViewer && !isAssigned) {
           console.log(`User ${userEmail} does not have access to goal ${goalId}`);
           return NextResponse.json({ error: 'Access denied' }, { status: 403 });
         }
@@ -156,25 +151,35 @@ export async function GET(request: Request) {
         goal.id = goal._id.toString();
       }
       
-      // Ensure isManagementGoal flag is set correctly
-      if (goal.createdByRole && ['top_management_tier_1', 'top_management_tier_2', 'top_management_tier_3'].includes(goal.createdByRole)) {
-        goal.isManagementGoal = true;
-      }
+      // EDIT/DELETE PERMISSION: Only assigned members + admin
+      const isAssigned = Array.isArray(goal.assignedEmployees) && goal.assignedEmployees.some((e: any) => 
+        e.email === userEmail);
+      const canEdit = (dbUserRole === 'admin') || isAssigned;
+      const canDelete = (dbUserRole === 'admin') || isAssigned;
+      
+      goal.permissions = {
+        canEdit,
+        canDelete,
+        canView: true
+      };
+      
+
 
       console.log(`Found goal: ${goal.title}`);
       return NextResponse.json({ goal, success: true });
     } else {
-      // Multiple goals fetch with filtering
-      console.log(`Fetching goals for user: ${userEmail}, role: ${dbUserRole}, topManagement: ${isTopManagement}`);
+      // VIEWING PERMISSION: Only assigned members, viewers, or if visibleToAll is true
+      let query: any = {};
       
-      let filter: any = {};
-      
-      if (!isTopManagement) {
-        // Regular users can only see:
-        // 1. Goals that are visibleToAll
-        // 2. Goals they are assigned to
-        // 3. Goals they are viewers of
-        filter = {
+      if (dbUserRole === 'admin') {
+        // Only admin can see all goals
+        query = {};
+      } else {
+        // All other users (including top management) can only see:
+        // 1. Goals where they are assigned as members
+        // 2. Goals where they are listed as viewers  
+        // 3. Goals that are marked as visibleToAll
+        query = {
           $or: [
             { visibleToAll: true },
             { 'assignedEmployees.email': userEmail },
@@ -182,47 +187,37 @@ export async function GET(request: Request) {
           ]
         };
       }
-      // Top management can see all goals (no filter)
       
-      console.log('Goals filter:', JSON.stringify(filter, null, 2));
+      const allGoals = await collection.find(query).toArray();
       
-      const goals = await collection.find(filter).toArray();
+      console.log(`Found ${allGoals.length} goals for user ${userEmail} with role ${dbUserRole}`);
       
-      console.log(`Found ${goals.length} goals for user ${userEmail}`);
-      
-      // Format goals for client
-      const formattedGoals = goals.map((goal: any) => {
-        // Ensure isManagementGoal flag is set correctly
-        if (goal.createdByRole && ['top_management_tier_1', 'top_management_tier_2', 'top_management_tier_3'].includes(goal.createdByRole)) {
-          goal.isManagementGoal = true;
+      // Format goal IDs and add permission flags
+      const formattedGoals = allGoals.map((goal: any) => {
+        if (!goal.id && goal._id) {
+          goal.id = goal._id.toString();
         }
         
-        return {
-          id: goal._id.toString(),
-          goalId: goal.goalId || goal._id.toString(),
-          title: goal.title || goal.goal_title || '',
-          description: goal.description || goal.goal_description || '',
-          status: goal.status || 'planning',
-          priority: goal.priority || 'medium',
-          startDate: goal.startDate || goal.start_date || '',
-          endDate: goal.endDate || goal.end_date || '',
-          department: goal.department || '',
-          progress: goal.progress || 0,
-          assignedEmployees: goal.assignedEmployees || [],
-          assignedProjects: goal.assignedProjects || [],
-          kpis: goal.kpis || [],
-          viewers: goal.viewers || [],
-          visibleToAll: goal.visibleToAll || false,
-          createdByRole: goal.createdByRole || '',
-          isManagementGoal: goal.isManagementGoal || false,
-          createdAt: goal.createdAt,
-          updatedAt: goal.updatedAt,
-          hasAccess: true // Already filtered for access
+        // EDIT PERMISSION: Only assigned members + admin
+        const isAssigned = Array.isArray(goal.assignedEmployees) && goal.assignedEmployees.some((e: any) => 
+          e.email === userEmail);
+        const canEdit = (dbUserRole === 'admin') || isAssigned;
+        
+        // DELETE PERMISSION: Only assigned members + admin  
+        const canDelete = (dbUserRole === 'admin') || isAssigned;
+        
+        goal.permissions = {
+          canEdit,
+          canDelete,
+          canView: true // If they can see it, they can view it
         };
-      });
+        
 
-      console.log(`Formatted ${formattedGoals.length} goals for response`);
-      return NextResponse.json({ goals: formattedGoals, success: true });
+        
+        return goal;
+      });
+      
+      return NextResponse.json({ goals: formattedGoals });
     }
   } catch (error) {
     console.error('Error in goals GET:', error);
@@ -243,6 +238,7 @@ export async function POST(request: Request) {
     console.log('POST /api/goals request received');
     await client.connect();
     
+    const body = await request.json();
     const url = new URL(request.url);
     const userEmail = url.searchParams.get('userEmail') || '';
     const userRole = url.searchParams.get('userRole') || '';
@@ -257,7 +253,6 @@ export async function POST(request: Request) {
       const token = authHeader.split(' ')[1];
       const payload = await verifyAuth(token);
       if (payload) {
-        console.log(`User authenticated via token: ${payload.email}`);
         // Refresh user data from central auth DB
         try {
           const authDb = client.db('auth_db');
@@ -266,43 +261,27 @@ export async function POST(request: Request) {
           if (authUser) {
             companyCode = authUser.companyCode || companyCode;
             dbUserRole = authUser.role || dbUserRole;
-            console.log(`Loaded fresh role/company from auth_db: ${dbUserRole}/${companyCode}`);
-          } else {
-            dbUserRole = payload.role || '';
-            companyCode = payload.companyCode || companyCode;
           }
         } catch (err) {
           console.error('Error loading user from auth_db:', err);
-          dbUserRole = payload.role || '';
-          companyCode = payload.companyCode || companyCode;
         }
       }
     }
-
-    // If no company code yet, try to get from user record
-    if (!companyCode && userEmail) {
-      const defaultDb = client.db(defaultDbName);
-      const usersCol = defaultDb.collection('users');
-      const userDoc = await usersCol.findOne({ email: userEmail });
-      if (userDoc) {
-        companyCode = (userDoc as any).companyCode || '';
-        dbUserRole = (userDoc as any).role || '';
-      }
-    }
-
+    
     if (!companyCode) {
-      console.error('Company code missing for goal creation');
       return NextResponse.json({ error: 'Company code required for goal creation' }, { status: 400 });
     }
     
-    // Check if user has permission to create goals (admin or top management)
-    const canCreateGoals = ['admin', 'top_management_tier_1', 'top_management_tier_2', 'top_management_tier_3'].includes(dbUserRole);
-    if (!canCreateGoals) {
-      console.log(`User ${userEmail} with role ${dbUserRole} cannot create goals`);
-      return NextResponse.json({ error: 'Insufficient privileges to create goals' }, { status: 403 });
+    // CREATION PERMISSION: Only admin and top management can create goals
+    const canCreate = ['admin', 'top_management_tier_1', 'top_management_tier_2', 'top_management_tier_3'].includes(dbUserRole || '');
+    
+    if (!canCreate) {
+      console.log(`User ${userEmail} with role ${dbUserRole} attempted to create goal but lacks permission`);
+      return NextResponse.json({ 
+        error: 'Insufficient privileges to create goals. Only administrators and top management can create goals.' 
+      }, { status: 403 });
     }
     
-    const body = await request.json();
     console.log('Goal creation data:', body);
     
     // Validate request body
@@ -339,7 +318,6 @@ export async function POST(request: Request) {
       companyCode,
       createdBy: userEmail,
       createdByRole: dbUserRole,
-      isManagementGoal: ['top_management_tier_1', 'top_management_tier_2', 'top_management_tier_3'].includes(dbUserRole),
       assignedEmployees: goalData.assignedEmployees || [],
       viewers: goalData.viewers || [],
       kpis: goalData.kpis?.map(kpi => ({
@@ -450,12 +428,17 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: 'Goal not found' }, { status: 404 });
     }
     
-    // Check permission - only admin, top management, or goal creator can update
-    const canUpdate = ['admin', 'top_management_tier_1', 'top_management_tier_2', 'top_management_tier_3'].includes(dbUserRole) ||
-                     existingGoal.createdBy === userEmail;
+    // EDIT PERMISSION: Only assigned members + admin can edit
+    const isAssigned = Array.isArray(existingGoal.assignedEmployees) && existingGoal.assignedEmployees.some((e: any) => 
+      e.email === userEmail);
     
-    if (!canUpdate) {
-      return NextResponse.json({ error: 'Insufficient privileges to update goal' }, { status: 403 });
+    const canEdit = (dbUserRole === 'admin') || isAssigned;
+    
+    if (!canEdit) {
+      console.log(`User ${userEmail} with role ${dbUserRole} attempted to edit goal ${goalId} but lacks permission`);
+      return NextResponse.json({ 
+        error: 'Insufficient privileges to edit this goal. Only administrators and assigned members can edit goals.' 
+      }, { status: 403 });
     }
     
     // Prepare update data
@@ -561,12 +544,17 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: 'Goal not found' }, { status: 404 });
     }
     
-    // Check permission - only admin, top management, or goal creator can delete
-    const canDelete = ['admin', 'top_management_tier_1', 'top_management_tier_2', 'top_management_tier_3'].includes(dbUserRole) ||
-                     existingGoal.createdBy === userEmail;
+    // DELETE PERMISSION: Only assigned members + admin can delete
+    const isAssigned = Array.isArray(existingGoal.assignedEmployees) && existingGoal.assignedEmployees.some((e: any) => 
+      e.email === userEmail);
+    
+    const canDelete = (dbUserRole === 'admin') || isAssigned;
     
     if (!canDelete) {
-      return NextResponse.json({ error: 'Insufficient privileges to delete goal' }, { status: 403 });
+      console.log(`User ${userEmail} with role ${dbUserRole} attempted to delete goal ${goalId} but lacks permission`);
+      return NextResponse.json({ 
+        error: 'Insufficient privileges to delete goals. Only administrators and assigned members can delete goals.' 
+      }, { status: 403 });
     }
     
     // Before deleting the goal, update all linked projects

@@ -135,17 +135,42 @@ const VisualizationTour = ({ open, onClose }: { open: boolean; onClose: () => vo
   }, [open, onClose]);
 
   const steps: TourProps['steps'] = [
+    
     {
-      title: 'Standard Org Chart',
-      description: 'Interactive hierarchical view of your organizational structure with reporting lines, departments, and workload indicators. Perfect for understanding traditional organizational hierarchy and management chains.',
+      title: 'Organization Chart',
+      description: (
+        <div className="space-y-3">
+          <p>The <strong>Standard Org Chart</strong> shows your company's reporting structure in a traditional hierarchical layout.</p>
+          <p>See who reports to whom, department groupings, and workload distribution at a glance.</p>
+        </div>
+      ),
       target: () => document.querySelector('[data-tour="org-chart-card"]') as HTMLElement,
-      placement: 'left',
+      nextButtonProps: { children: 'Next' },
+      mask: { style: { borderRadius: 4 } },
     },
     {
       title: '3D Galaxy View',
-      description: 'Immersive network visualization that explores organizational connections and data relationships in a 3D space. Ideal for discovering collaboration patterns and network effects within your organization.',
+      description: (
+        <div className="space-y-3">
+          <p>The <strong>3D Galaxy View</strong> provides an immersive visualization of your organization's connections.</p>
+          <p>Explore relationships between teams, projects, and individuals in an interactive 3D space.</p>
+        </div>
+      ),
       target: () => document.querySelector('[data-tour="galaxy-view-card"]') as HTMLElement,
-      placement: 'left',
+      nextButtonProps: { children: 'Next' },
+      mask: { style: { borderRadius: 4 } },
+    },
+    {
+      title: 'Strategic Objectives',
+      description: (
+        <div className="space-y-3">
+          <p>The <strong>Strategic Objectives</strong> visualization shows how company goals connect to projects and employees.</p>
+          <p>Track KPIs, visualize project contributions, and see which employees are contributing to strategic objectives.</p>
+        </div>
+      ),
+      target: () => document.querySelector('[data-tour="objective-visualization-card"]') as HTMLElement,
+      nextButtonProps: { children: 'Finish' },
+      mask: { style: { borderRadius: 4 } },
     },
   ];
 

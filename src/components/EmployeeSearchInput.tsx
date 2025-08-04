@@ -111,7 +111,7 @@ export default function EmployeeSearchInput({
               placeholder={placeholder}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
+              className="pl-10 h-12"
               onFocus={() => {
                 if (searchResults.length > 0) {
                   setShowResults(true);

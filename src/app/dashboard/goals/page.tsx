@@ -57,6 +57,11 @@ interface Goal {
   viewers: Array<string | { email?: string; }>;
   visibleToAll: boolean;
   hasAccess: boolean;
+  permissions?: {
+    canEdit: boolean;
+    canDelete: boolean;
+    canView: boolean;
+  };
 }
 
 
@@ -69,6 +74,7 @@ export default function GoalsPage() {
   const [departmentFilter, setDepartmentFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [loadingGoals, setLoadingGoals] = useState<boolean>(true);
+  const [canCreateGoals, setCanCreateGoals] = useState<boolean>(false);
 
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -97,6 +103,24 @@ export default function GoalsPage() {
       }
 
       if (result?.goals && Array.isArray(result.goals)) {
+        // Check user permissions for creating goals based on first goal's permissions
+        // (all goals will have same user permissions since they're based on user role)
+        if (result.goals.length > 0 && result.goals[0].permissions) {
+          // User can create goals if they are admin or top management
+          const storedUser = localStorage.getItem('user');
+          if (storedUser) {
+            try {
+              const currentUser = JSON.parse(storedUser);
+              const userRole = currentUser.role || '';
+              const canCreate = ['admin', 'top_management_tier_1', 'top_management_tier_2', 'top_management_tier_3'].includes(userRole);
+              setCanCreateGoals(canCreate);
+            } catch (e) {
+              console.error('Failed to parse user data:', e);
+              setCanCreateGoals(false);
+            }
+          }
+        }
+
         // Optimized goal formatting for better performance
         const formattedGoals = result.goals.map((g: any) => ({
           id: g.id || g._id?.toString() || "",
@@ -115,7 +139,8 @@ export default function GoalsPage() {
           isManagementGoal: g.isManagementGoal || false,
           viewers: g.viewers || [],
           visibleToAll: g.visibleToAll || false,
-          hasAccess: true
+          hasAccess: true,
+          permissions: g.permissions || { canEdit: false, canDelete: false, canView: true }
         }));
         setGoals(formattedGoals);
         setFilteredGoals(formattedGoals);
@@ -260,13 +285,15 @@ export default function GoalsPage() {
           </Select>
         </div>
 
-        <Button
-          onClick={() => router.push('/dashboard/goals/create')}
-          className="bg-purple-600 hover:bg-purple-700 text-white"
-          data-tour="create-goal-button"
-        >
-          Add Goal
-        </Button>
+        {canCreateGoals && (
+          <Button
+            onClick={() => router.push('/dashboard/goals/create')}
+            className="bg-purple-600 hover:bg-purple-700 text-white"
+            data-tour="create-goal-button"
+          >
+            Add Goal
+          </Button>
+        )}
       </div>
 
 

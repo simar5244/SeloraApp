@@ -43,16 +43,16 @@ export default function DashboardLayout({
         const userData = localStorage.getItem('user');
         if (userData) {
           const parsedUser = JSON.parse(userData);
-          const isEmployee = parsedUser.role?.startsWith('employee_');
+          const isEmployeeDashboardUser = parsedUser.role?.startsWith('employee_') || parsedUser.role?.startsWith('top_management_tier_');
           
-          // If user is an employee and on admin dashboard, redirect to employee dashboard
-          if (isEmployee && pathname === ROUTES.DASHBOARD) {
+          // If user should use employee dashboard and is on admin dashboard, redirect to employee dashboard
+          if (isEmployeeDashboardUser && pathname === ROUTES.DASHBOARD) {
             router.push(ROUTES.EMPLOYEE_DASHBOARD);
             return;
           }
           
-          // If user is an admin and on employee dashboard, redirect to admin dashboard
-          if (!isEmployee && pathname === ROUTES.EMPLOYEE_DASHBOARD) {
+          // If user should use admin dashboard and is on employee dashboard, redirect to admin dashboard
+          if (!isEmployeeDashboardUser && pathname === ROUTES.EMPLOYEE_DASHBOARD) {
             router.push(ROUTES.DASHBOARD);
             return;
           }
