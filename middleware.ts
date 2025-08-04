@@ -548,6 +548,58 @@ export async function middleware(request: NextRequest) {
         isExactlySuperAdmin: userRole === 'superadmin'
       });
 
+      // ===== ONBOARDING CHECK =====
+      // Check if user needs to complete onboarding (except for onboarding page itself and logout)
+      if (path !== '/onboarding' && path !== '/api/auth/logout' && !path.startsWith('/api/auth/')) {
+        console.log('[EXTREME_DEBUG NEW] 🎯 Checking onboarding status for user:', userId);
+        
+        try {
+          // Fetch user's onboarding status from the database
+          const host = request.headers.get('host') || '';
+          const protocol = host.includes('localhost') ? 'http' : 'https';
+          const baseUrl = `${protocol}://${host}`;
+          const userUrl = new URL(`/api/users/profile`, baseUrl);
+          
+          console.log('[EXTREME_DEBUG NEW] 🎯 Fetching user profile for onboarding check:', userUrl.toString());
+          
+          const userRes = await fetch(userUrl, {
+            headers: {
+              Authorization: `Bearer ${finalToken}`,
+              'Content-Type': 'application/json',
+              'x-middleware-request': 'true'
+            },
+            next: { revalidate: 0 }
+          });
+          
+          if (userRes.ok) {
+            const userData = await userRes.json();
+            console.log('[EXTREME_DEBUG] 🎯 User profile data:', {
+              hasOnboardingField: 'onboarding' in userData,
+              onboardingValue: userData.onboarding,
+              hasDepartment: !!userData.department,
+              hasReportsTo: 'reportsTo' in userData
+            });
+            
+            // If onboarding field is missing, assume completed (for old entries)
+            // If onboarding field exists and is false, redirect to onboarding
+            const needsOnboarding = userData.onboarding === false;
+            
+            if (needsOnboarding) {
+              console.log('[EXTREME_DEBUG NEW] 🎯 ❌ User needs onboarding, redirecting to /onboarding');
+              return NextResponse.redirect(new URL('/onboarding', request.url));
+            } else {
+              console.log('[EXTREME_DEBUG NEW] 🎯 ✅ User has completed onboarding or is legacy user');
+            }
+          } else {
+            console.warn('[EXTREME_DEBUG NEW] 🎯 ⚠️ Failed to fetch user profile for onboarding check:', userRes.status);
+            // Don't block access if we can't check onboarding status
+          }
+        } catch (onboardingError) {
+          console.error('[EXTREME_DEBUG NEW] 🎯 ❌ Error checking onboarding status:', onboardingError);
+          // Don't block access if there's an error checking onboarding
+        }
+      }
+      
       // Redirect non-admin users trying to access the main dashboard to employee dashboard
       if (path === '/dashboard' && !isAdmin) {
         console.log('[EXTREME_DEBUG] 🔄 Non-admin user trying to access main dashboard, redirecting to employee dashboard');

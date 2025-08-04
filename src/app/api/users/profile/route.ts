@@ -43,6 +43,7 @@ export async function PUT(request: NextRequest) {
     const updatedProfile = await request.json();
     
     // Remove fields that users shouldn't be able to update directly
+    // Allow onboarding, department, reportsTo and other profile fields
     const { password, role, ...allowedUpdates } = updatedProfile;
 
     // Get the user from database
