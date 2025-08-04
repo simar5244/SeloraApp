@@ -28,7 +28,8 @@ import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { FaSearch, FaFilter, FaTimes, FaCamera, FaSyncAlt, FaUndo, FaExpandAlt, FaSpinner } from 'react-icons/fa';
-import { Target, Users, Briefcase, Calendar, AlertCircle, CheckCircle, Clock, Pause } from 'lucide-react';
+import { Target, Users, Briefcase, Calendar, AlertCircle, CheckCircle, Clock, Pause, ChevronRight } from 'lucide-react';
+import Link from 'next/link';
 import { toast } from "react-hot-toast";
 import html2canvas from 'html2canvas';
 
@@ -45,6 +46,7 @@ interface Goal {
   progress: number;
   assignedProjects: Array<{
     projectId: string;
+    title?: string;
     assignedAt?: string;
   }>;
   assignedEmployees: Array<{
@@ -148,7 +150,7 @@ const GoalNode = ({ data }: { data: ObjectiveNode['data'] }) => {
   const priorityColors = {
     low: 'border-green-400 bg-green-50 hover:bg-green-100',
     medium: 'border-yellow-400 bg-yellow-50 hover:bg-yellow-100',
-    high: 'border-orange-400 bg-orange-50 hover:bg-orange-100',
+    high: 'border-amber-100 bg-amber-50 hover:bg-amber-100',
     critical: 'border-red-400 bg-red-50 hover:bg-red-100'
   };
 
@@ -170,7 +172,7 @@ const GoalNode = ({ data }: { data: ObjectiveNode['data'] }) => {
         style={{ background: '#8B5CF6', border: '2px solid #ffffff' }}
       />
       
-      <Card className={`w-80 cursor-pointer hover:shadow-xl transition-all duration-200 transform hover:scale-105 ${priorityColors[goal.priority]} border-2 shadow-md`}>
+      <Card className={`w-80 cursor-pointer hover:shadow-xl transition-all duration-200 transform hover:scale-105 ${priorityColors[goal.priority]} border-2 shadow-md flex flex-col h-full`}>
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center space-x-2">
@@ -190,43 +192,31 @@ const GoalNode = ({ data }: { data: ObjectiveNode['data'] }) => {
             {goal.description}
           </CardDescription>
         </CardHeader>
-        <CardContent className="pt-0">
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                {statusIcons[goal.status]}
-                <span className="text-sm font-medium text-gray-700 capitalize">
-                  {goal.status.replace('-', ' ')}
-                </span>
-              </div>
-              <Badge variant="outline" className="text-xs bg-gray-100 text-gray-700">
-                {goal.department}
-              </Badge>
-            </div>
-
+        <CardContent className="pt-0 mt-auto">
+          <div className="space-y-3 mt-3">
             <div className="grid grid-cols-2 gap-2 text-xs text-gray-600">
               <div className="flex items-center space-x-1">
-                <Calendar className="w-3 h-3" />
-                <span>{new Date(goal.startDate).toLocaleDateString()}</span>
+                <Calendar className="w-3 h-3 text-gray-400" />
+                <span>Start: {new Date(goal.startDate).toLocaleDateString()}</span>
               </div>
-              <div className="flex items-center space-x-1">
-                <Users className="w-3 h-3" />
-                <span>{goal.assignedProjects.length} projects</span>
+              <div className="flex items-center space-x-1 justify-end">
+                <span>End: {new Date(goal.endDate).toLocaleDateString()}</span>
+                <Calendar className="w-3 h-3 text-gray-400" />
               </div>
             </div>
 
             <div className="flex items-center justify-between pt-1">
               <Badge variant="outline" className={`text-xs font-medium ${
-                goal.priority === 'critical' ? 'border-red-400 text-red-700' :
-                goal.priority === 'high' ? 'border-orange-400 text-orange-700' :
-                goal.priority === 'medium' ? 'border-yellow-400 text-yellow-700' :
-                'border-green-400 text-green-700'
+                goal.priority === 'critical' ? 'border-red-400 bg-red-100 text-red-700' :
+                goal.priority === 'high' ? 'border-amber-400 bg-amber-100 text-amber-700' :
+                goal.priority === 'medium' ? 'border-yellow-400 bg-yellow-100 text-yellow-700' :
+                'border-green-400 bg-green-100 text-green-700'
               }`}>
                 {goal.priority.toUpperCase()} PRIORITY
               </Badge>
-              {goal.kpis && goal.kpis.length > 0 && (
-                <span className="text-xs text-gray-500">{goal.kpis.length} KPIs</span>
-              )}
+              <Badge variant="outline" className="text-xs bg-gray-100 text-gray-700">
+                {goal.department}
+              </Badge>
             </div>
           </div>
         </CardContent>
@@ -242,7 +232,7 @@ const ProjectNode = ({ data }: { data: ObjectiveNode['data'] }) => {
   const priorityColors = {
     low: 'border-green-400 bg-green-50 hover:bg-green-100',
     medium: 'border-yellow-400 bg-yellow-50 hover:bg-yellow-100',
-    high: 'border-orange-400 bg-orange-50 hover:bg-orange-100',
+    high: 'border-amber-400 bg-amber-50 text-amber-700 hover:bg-amber-100',
     critical: 'border-red-400 bg-red-50 hover:bg-red-100'
   };
 
@@ -275,9 +265,13 @@ const ProjectNode = ({ data }: { data: ObjectiveNode['data'] }) => {
         style={{ background: '#3B82F6', border: '2px solid #ffffff' }}
       />
       
-      <Card className={`${isMainProject ? 'w-72' : 'w-64'} cursor-pointer hover:shadow-xl transition-all duration-200 transform hover:scale-105 border-2 shadow-md ${priorityColors[project.priority as keyof typeof priorityColors] || 'border-gray-400 bg-gray-50 hover:bg-gray-100'}`}>
+      <Card className={`w-96 cursor-pointer hover:shadow-xl transition-all duration-200 transform hover:scale-105 border-2 shadow-md ${priorityColors[project.priority as keyof typeof priorityColors] || 'border-gray-400 bg-gray-50 hover:bg-gray-100'} flex flex-col h-full`} style={{
+        backgroundColor: project.priority === 'high' ? '#FFEDD5' : undefined,
+        borderLeft: project.priority === 'high' ? '2px solid #EA580C' : undefined,
+        borderColor: project.priority === 'high' ? '#EA580C' : undefined
+      }}>
         <CardHeader className="pb-3">
-          <div className="flex items-center justify-between mb-2">
+          <div className="flex items-start justify-between">
             <div className="flex items-center space-x-2">
               <Briefcase className={`${isMainProject ? 'w-5 h-5' : 'w-4 h-4'} text-blue-600`} />
               <Badge variant={isMainProject ? "default" : "outline"} className={`text-xs font-semibold ${
@@ -286,55 +280,48 @@ const ProjectNode = ({ data }: { data: ObjectiveNode['data'] }) => {
                 {isMainProject ? 'MAIN PROJECT' : 'LINKED PROJECT'}
               </Badge>
             </div>
+            <Badge className={`text-xs font-medium capitalize ${statusColors[project.status as keyof typeof statusColors] || 'bg-gray-100 text-gray-800'}`}>
+              {project.status.replace('-', ' ')}
+            </Badge>
           </div>
-          <CardTitle className={`${isMainProject ? 'text-base' : 'text-sm'} font-bold text-gray-900 line-clamp-2 leading-tight`}>
-            {project.project_title}
-          </CardTitle>
-          <CardDescription className="text-xs text-gray-600 line-clamp-2 mt-1">
-            {project.project_description}
-          </CardDescription>
+          <div className="mt-2">
+            <CardTitle className={`${isMainProject ? 'text-base' : 'text-sm'} font-bold text-gray-900 line-clamp-2 leading-tight`}>
+              {project.project_title}
+            </CardTitle>
+            <CardDescription className="text-xs text-gray-600 line-clamp-2 mt-1">
+              {project.project_description}
+            </CardDescription>
+          </div>
         </CardHeader>
-        <CardContent className="pt-0">
+        <CardContent className="pt-0 mt-auto">
           <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <Badge className={`text-xs font-medium capitalize ${statusColors[project.status as keyof typeof statusColors] || 'bg-gray-100 text-gray-800'}`}>
-                {project.status.replace('-', ' ')}
-              </Badge>
-              <Badge variant="outline" className="text-xs bg-gray-100 text-gray-700">
-                {project.department}
-              </Badge>
-            </div>
-
-            <div className="grid grid-cols-2 gap-2 text-xs text-gray-600">
+            <div className="grid grid-cols-2 gap-3 text-xs text-gray-600 mb-2">
               <div className="flex items-center space-x-1">
-                <Calendar className="w-3 h-3" />
-                <span>{project.start_date ? new Date(project.start_date).toLocaleDateString() : 'No date'}</span>
+                <Calendar className="w-3 h-3 text-gray-400" />
+                <span>Start: {new Date(project.start_date).toLocaleDateString()}</span>
               </div>
-              <div className="flex items-center space-x-1">
-                <Users className="w-3 h-3" />
-                <span>{teamSize} {teamSize === 1 ? 'member' : 'members'}</span>
+              <div className="flex items-center space-x-1 justify-end">
+                <Calendar className="w-3 h-3 text-gray-400" />
+                <span>End: {new Date(project.end_date).toLocaleDateString()}</span>
               </div>
             </div>
+            
+            <div className="text-xs font-medium mb-2">
+              Budget: <span className="text-green-600">${project.total_budget > 0 ? project.total_budget.toLocaleString() : 'N/A'}</span>
+            </div>
 
-            {project.total_budget > 0 && (
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-gray-600">Budget:</span>
-                <span className="font-medium text-gray-800">${project.total_budget.toLocaleString()}</span>
-              </div>
-            )}
-
-            <div className="flex items-center justify-between pt-1">
+            <div className="flex items-center justify-between pt-2">
               <Badge variant="outline" className={`text-xs font-medium ${
-                project.priority === 'critical' ? 'border-red-400 text-red-700' :
-                project.priority === 'high' ? 'border-orange-400 text-orange-700' :
-                project.priority === 'medium' ? 'border-yellow-400 text-yellow-700' :
-                'border-green-400 text-green-700'
+                project.priority === 'critical' ? 'border-red-400 bg-red-50 text-red-700' :
+                project.priority === 'high' ? 'border-amber-400 bg-amber-50 text-amber-700' :
+                project.priority === 'medium' ? 'border-yellow-400 bg-yellow-50 text-yellow-700' :
+                'border-green-400 bg-green-50 text-green-700'
               }`}>
                 {project.priority?.toUpperCase() || 'MEDIUM'} PRIORITY
               </Badge>
-              {project.linkedProjects && project.linkedProjects.length > 0 && (
-                <span className="text-xs text-gray-500">{project.linkedProjects.length} linked</span>
-              )}
+              <Badge variant="outline" className="text-xs bg-gray-100 text-gray-700">
+                {project.department || 'Unknown'}
+              </Badge>
             </div>
           </div>
         </CardContent>
@@ -373,7 +360,7 @@ const EmployeeNode = ({ data }: { data: ObjectiveNode['data'] }) => {
         style={{ background: '#10B981', border: '2px solid #ffffff' }}
       />
       
-      <Card className={`${isHighLevel ? 'w-56' : 'w-52'} cursor-pointer hover:shadow-xl transition-all duration-200 transform hover:scale-105 border-2 shadow-md ${levelColors[data.level as keyof typeof levelColors] || 'border-gray-300 bg-gray-50 hover:bg-gray-100'}`}>
+      <Card className={`${isHighLevel ? 'w-64' : 'w-60'} cursor-pointer hover:shadow-xl transition-all duration-200 transform hover:scale-105 border-2 shadow-md ${levelColors[data.level as keyof typeof levelColors] || 'border-gray-300 bg-gray-50 hover:bg-gray-100'}`}>
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center space-x-2">
@@ -383,12 +370,14 @@ const EmployeeNode = ({ data }: { data: ObjectiveNode['data'] }) => {
               </Badge>
             </div>
           </div>
-        <CardTitle className={`${isHighLevel ? 'text-sm' : 'text-xs'} font-bold text-gray-900 line-clamp-1 leading-tight`}>
-          {name || 'Unknown Employee'}
-        </CardTitle>
-        <CardDescription className="text-xs text-gray-600 line-clamp-1 mt-1">
-          {role}
-        </CardDescription>
+        <div className="mb-3">
+          <CardTitle className={`${isHighLevel ? 'text-sm' : 'text-xs'} font-bold text-gray-900 line-clamp-1 leading-tight`}>
+            {name || 'Unknown Employee'}
+          </CardTitle>
+          <CardDescription className="text-xs text-gray-600 line-clamp-1 mt-1">
+            {role}
+          </CardDescription>
+        </div>
       </CardHeader>
       <CardContent className="pt-0">
         <div className="space-y-2">
@@ -402,31 +391,6 @@ const EmployeeNode = ({ data }: { data: ObjectiveNode['data'] }) => {
               </span>
             )}
           </div>
-
-          {employee.email && (
-            <div className="text-xs text-gray-500 truncate bg-gray-50 px-2 py-1 rounded">
-              {employee.email}
-            </div>
-          )}
-
-          {employee.tasks && employee.tasks.length > 0 && (
-            <div className="text-xs text-gray-600">
-              <span className="font-medium">{employee.tasks.length}</span> tasks assigned
-            </div>
-          )}
-
-          {employee.tools_used && employee.tools_used.length > 0 && (
-            <div className="flex flex-wrap gap-1 mt-2">
-              {employee.tools_used.slice(0, 2).map((tool: string, index: number) => (
-                <Badge key={index} variant="outline" className="text-xs px-1 py-0">
-                  {tool}
-                </Badge>
-              ))}
-              {employee.tools_used.length > 2 && (
-                <span className="text-xs text-gray-500">+{employee.tools_used.length - 2}</span>
-              )}
-            </div>
-          )}
         </div>
       </CardContent>
     </Card>
@@ -438,6 +402,13 @@ const EmployeeNode = ({ data }: { data: ObjectiveNode['data'] }) => {
 const CustomObjectiveEdge: React.FC<EdgeProps> = (props) => {
   const { sourceX, sourceY, targetX, targetY, id, style } = props;
   
+  // Force solid line by creating a new style object that overrides any dash patterns
+  const edgeStyle = {
+    ...style,
+    strokeDasharray: '0',
+    strokeDashoffset: '0',
+  };
+  
   // Calculate path with only horizontal and vertical lines - improved version
   // Use source and target handle positions for better alignment
   const midY = sourceY + Math.abs(targetY - sourceY) / 2;
@@ -446,17 +417,22 @@ const CustomObjectiveEdge: React.FC<EdgeProps> = (props) => {
   // This ensures proper horizontal and vertical only connections
   const path = `M ${sourceX},${sourceY} L ${sourceX},${midY} L ${targetX},${midY} L ${targetX},${targetY}`;
   
+  // Debug: Log the style to check for any overrides
+  console.log('Edge styles:', { id, style, edgeStyle });
+  
   return (
     <g>
       <path
         id={id}
         className="react-flow__edge-path"
         d={path}
-        stroke={style?.stroke || '#374151'}
-        strokeWidth={style?.strokeWidth || 2}
+        stroke={edgeStyle.stroke || '#374151'}
+        strokeWidth={edgeStyle.strokeWidth || 2}
         fill="none"
         strokeLinecap="round"
         strokeLinejoin="round"
+        strokeDasharray="0"
+        strokeDashoffset="0"
         markerEnd={props.markerEnd}
       />
       {/* Add connection points for better visual clarity */}
@@ -665,19 +641,21 @@ const applySymmetricalLayout = (nodes: ObjectiveNode[], edges: Edge[]): Objectiv
       const nodeA = nodeMap[a];
       const nodeB = nodeMap[b];
       
-      // Sort by priority, then by type, then by title
-      const priorityOrder = { critical: 0, high: 1, medium: 2, low: 3 };
+      // Sort by type (projects before employees), then by priority, then by title
+      const priorityOrder = { critical: 0, high: 1, medium: 2, low: 3 }; // unchanged
       const typeOrder = { goal: 0, project: 1, employee: 2 };
       
       const aPriority = priorityOrder[nodeA?.data?.priority as keyof typeof priorityOrder] ?? 2;
       const bPriority = priorityOrder[nodeB?.data?.priority as keyof typeof priorityOrder] ?? 2;
       
-      if (aPriority !== bPriority) return aPriority - bPriority;
-      
+      // Compare by type first to group projects together
       const aType = typeOrder[nodeA?.data?.type as keyof typeof typeOrder] ?? 2;
       const bType = typeOrder[nodeB?.data?.type as keyof typeof typeOrder] ?? 2;
-      
       if (aType !== bType) return aType - bType;
+      // Then compare by priority
+      if (aPriority !== bPriority) return aPriority - bPriority;
+      
+      
       
       return (nodeA?.data?.title || '').localeCompare(nodeB?.data?.title || '');
     });
@@ -777,7 +755,7 @@ const ObjectiveVisualizationPage = () => {
   // Force relayout function similar to org-chart
   const forceRelayout = useCallback(() => {
     if (nodes.length > 0 && edges.length > 0) {
-      const relayoutedNodes = applySymmetricalLayout(nodes as ObjectiveNode[], edges).map(node => ({
+      const relayoutedNodes = applySymmetricalLayout(nodes as unknown as ObjectiveNode[], edges).map(node => ({
         ...node,
         draggable: true,
         focusable: true,
@@ -1191,13 +1169,15 @@ const ObjectiveVisualizationPage = () => {
     const PROJECT_HORIZONTAL_SPACING = NODE_WIDTH + HORIZONTAL_GAP * 2; // Spacing for projects
     const EMPLOYEE_HORIZONTAL_SPACING = NODE_WIDTH + HORIZONTAL_GAP; // Consistent spacing for employees
     
-    // Helper function to create marker end configuration
-    const createMarkerEnd = (color: string) => ({
-      type: MarkerType.ArrowClosed,
-      color,
-      width: 20,
-      height: 20
-    });
+    // Helper function to create marker end for edges
+    const createMarkerEnd = (color: string | undefined) => {
+      return {
+        type: MarkerType.ArrowClosed,
+        width: 20,
+        height: 20,
+        color: color || '#888888' // Default color if undefined
+      };
+    };
 
     // Calculate total width needed and center the tree
     const totalGoals = filteredGoals.length;
@@ -1274,7 +1254,7 @@ const ObjectiveVisualizationPage = () => {
       const effectiveWidth = Math.max(availableWidth, mainProjects.length * PROJECT_HORIZONTAL_SPACING);
       
       mainProjects.forEach((project, projectIndex) => {
-        const projectNodeId = `project-main-${project._id}`;
+        const projectNodeId = `project-main-${goal.id}-${project._id}`;
         
         // Center projects symmetrically under the goal
         let projectX;
@@ -1315,6 +1295,15 @@ const ObjectiveVisualizationPage = () => {
         });
 
         // Connect goal to main project with custom edge type
+        // Get goal priority to determine edge color
+        const goalPriority = goal.priority || 'medium';
+        const goalEdgeColor = {
+          low: '#10B981',      // green
+          medium: '#F59E0B',   // yellow
+          high: '#10B981',     // orange
+          critical: '#EF4444'  // red
+        }[goalPriority];
+        
         const goalToProjectEdge: Edge = {
           id: `goal-${goal.id}-project-${project._id}`,
           source: goalNodeId,
@@ -1322,16 +1311,16 @@ const ObjectiveVisualizationPage = () => {
           type: 'customObjective',
           style: { 
             strokeWidth: 3, 
-            stroke: '#8B5CF6'
+            stroke: goalEdgeColor
           },
-          animated: true,
-          markerEnd: createMarkerEnd('#8B5CF6')
+          animated: false,
+          markerEnd: createMarkerEnd(goalEdgeColor)
         };
         newEdges.push(goalToProjectEdge);
         console.log('Added goal-to-project edge:', goalToProjectEdge);
 
-        // Level 3: Employees from main projects + Linked projects
-        let level3Items: Array<{type: 'employee' | 'project', data: any, id: string}> = [];
+        // Level 3: Employees from main projects + Goal-assigned employees + Linked projects
+        let level3Items: Array<{type: 'employee' | 'project', data: any, id: string, isGoalEmployee?: boolean}> = [];
 
         // Add employees from main project (direct employees)
         let projectEmployees = project.employee_contributions || project.employees || [];
@@ -1357,13 +1346,48 @@ const ObjectiveVisualizationPage = () => {
           }));
         }
 
+        // Add project employees to level 3 items
         projectEmployees.forEach((emp, empIndex) => {
           level3Items.push({
             type: 'employee',
             data: emp,
-            id: `emp-direct-${project._id}-${empIndex}`
+            id: `emp-direct-${goal.id}-${project._id}-${empIndex}`,
+            isGoalEmployee: false
           });
         });
+
+        // Add employees directly assigned to the goal (but only once per goal, not per project)
+        if (projectIndex === 0) { // Only add goal employees once per goal
+          const goalEmployees = goal.assignedEmployees || [];
+          
+          goalEmployees.forEach((emp, empIndex) => {
+            // Only add if not already in project employees (avoid duplicates)
+            const email = emp.email || emp.employeeId || '';
+            const isDuplicate = level3Items.some(item => 
+              item.type === 'employee' && 
+              (item.data.email === email || item.data.employee_id === email)
+            );
+            
+            if (!isDuplicate && email) {
+              level3Items.push({
+                type: 'employee',
+                data: {
+                  ...emp,
+                  employee_id: email,
+                  name: emp.name || email,
+                  email: email,
+                  role: emp.role || 'Team Member',
+                  department: selectedDepartment || goal.department,
+                  hours_per_week: 40,
+                  tasks: ['Goal-specific tasks'],
+                  tools_used: ['Various tools']
+                },
+                id: `emp-goal-${goal.id}-${empIndex}`,
+                isGoalEmployee: true
+              });
+            }
+          });
+        }
 
         // Add linked projects (projects linked to this main project)
         let linkedProjects = projects.filter(p => {
@@ -1388,27 +1412,51 @@ const ObjectiveVisualizationPage = () => {
           level3Items.push({
             type: 'project',
             data: linkedProject,
-            id: `project-linked-${linkedProject._id}`
+            id: `project-linked-${goal.id}-${linkedProject._id}`
           });
         });
 
         console.log(`Project "${project.project_title}" has ${projectEmployees.length} direct employees and ${linkedProjects.length} linked projects`);
 
-        // Position level 3 items (direct employees and linked projects) symmetrically
-        if (level3Items.length > 0) {
-          level3Items.forEach((item, itemIndex) => {
+        // Ensure projects are grouped together before employees
+        const sortedLevel3 = [...level3Items].sort((a, b) => {
+          if (a.type === b.type) {
+            const titleA = (a.type === 'project' ? a.data.project_title : (a.data.name || '')).toLowerCase();
+            const titleB = (b.type === 'project' ? b.data.project_title : (b.data.name || '')).toLowerCase();
+            return titleA.localeCompare(titleB);
+          }
+          return a.type === 'project' ? -1 : 1; // projects first (left)
+        });
+
+        // Calculate grouped positioning: projects to the left, employees to the right
+        const projectsOnly = sortedLevel3.filter(it => it.type === 'project');
+        const employeesOnly = sortedLevel3.filter(it => it.type === 'employee');
+
+        const itemSpacing = EMPLOYEE_HORIZONTAL_SPACING;
+        const groupGap = itemSpacing * 2; // extra gap between project and employee groups
+
+        const projectsWidth = Math.max(0, (projectsOnly.length - 1) * itemSpacing);
+        const employeesWidth = Math.max(0, (employeesOnly.length - 1) * itemSpacing);
+        const totalWidth = projectsWidth + groupGap + employeesWidth;
+
+        const startXBase = projectX - totalWidth / 2;
+
+        const itemPosMap: Record<string, number> = {};
+        // Place project group (left)
+        projectsOnly.forEach((it, idx) => {
+          itemPosMap[it.id] = startXBase + idx * itemSpacing;
+        });
+        // Place employee group (right)
+        const employeesStart = startXBase + projectsWidth + groupGap;
+        employeesOnly.forEach((it, idx) => {
+          itemPosMap[it.id] = employeesStart + idx * itemSpacing;
+        });
+
+        // Position level 3 items now using computed map
+        if (sortedLevel3.length > 0) {
+          sortedLevel3.forEach((item, itemIndex) => {
             // Center items symmetrically under the project
-            let itemX;
-            if (level3Items.length === 1) {
-              // Single item: center it under the project
-              itemX = projectX;
-            } else {
-              // Multiple items: distribute them symmetrically with consistent spacing
-              const itemSpacing = EMPLOYEE_HORIZONTAL_SPACING; // Use consistent spacing
-              const totalItemsWidth = (level3Items.length - 1) * itemSpacing;
-              const startX = projectX - (totalItemsWidth / 2);
-              itemX = startX + (itemIndex * itemSpacing);
-            }
+            const itemX = itemPosMap[item.id] ?? projectX;
             const itemY = LEVEL_HEIGHT * 2; // Level 3
 
             if (item.type === 'employee') {
@@ -1477,19 +1525,54 @@ const ObjectiveVisualizationPage = () => {
                 }
               });
 
-              const projectToEmpEdge: Edge = {
-                id: `${projectNodeId}-${empNodeId}`,
-                source: projectNodeId,
-                target: empNodeId,
-                type: 'straight',
-                style: { 
-                  strokeWidth: 2, 
-                  stroke: '#10B981'
-                },
-                markerEnd: createMarkerEnd('#10B981')
+              // Connect to project or goal based on employee type
+              let sourceId = projectNodeId;
+              
+              // Get project priority to determine edge color
+              const projectPriority = project.priority || 'medium';
+              const projectEdgeColor = {
+                low: '#10B981',      // green
+                medium: '#F59E0B',   // yellow
+                high: '#10B981',     // orange
+                critical: '#EF4444'  // red
+              }[projectPriority];
+              
+              let edgeStyle = { 
+                strokeWidth: 2, 
+                stroke: projectEdgeColor,
+                strokeDasharray: undefined // Ensure solid line
               };
-              newEdges.push(projectToEmpEdge);
-              console.log('Added project-to-employee edge:', projectToEmpEdge);
+              
+              // If this is a goal employee, connect directly to the goal
+              if (item.isGoalEmployee) {
+                sourceId = goalNodeId;
+                // Get goal priority to determine edge color
+                const goalPriority = goal.priority || 'medium';
+                const goalEdgeColor = {
+                  low: '#10B981',      // green
+                  medium: '#F59E0B',   // yellow
+                  high: '#10B981',     // orange
+                  critical: '#EF4444'  // red
+                }[goalPriority];
+                
+                edgeStyle = {
+                  ...edgeStyle,
+                  stroke: goalEdgeColor,
+                  strokeDasharray: undefined // Make solid line
+                };
+              }
+              
+              const projectToItemEdge: Edge = {
+                id: `${sourceId}-${empNodeId}`,
+                source: sourceId,
+                target: empNodeId,
+                type: 'customObjective',
+                style: edgeStyle,
+                animated: false,
+                markerEnd: createMarkerEnd(edgeStyle.stroke)
+              };
+              newEdges.push(projectToItemEdge);
+              console.log('Added project-to-employee edge:', projectToItemEdge);
             } else if (item.type === 'project') {
               // Linked project (Level 3)
               const linkedProjectNodeId = item.id;
@@ -1520,6 +1603,15 @@ const ObjectiveVisualizationPage = () => {
               });
               
               // Connect project to linked project with smooth edge and arrow
+              // Use project priority to determine edge color
+              const projectPriority = project.priority || 'medium';
+              const projectEdgeColor = {
+                low: '#10B981',      // green
+                medium: '#F59E0B',   // yellow
+                high: '#10B981',     // orange
+                critical: '#EF4444'  // red
+              }[projectPriority];
+              
               const projectToLinkedEdge: Edge = {
                 id: `${projectNodeId}-${linkedProjectNodeId}`,
                 source: projectNodeId,
@@ -1527,10 +1619,10 @@ const ObjectiveVisualizationPage = () => {
                 type: 'straight',
                 style: { 
                   strokeWidth: 2, 
-                  stroke: '#F59E0B'
+                  stroke: projectEdgeColor
                   // Solid line for linked projects (removed strokeDasharray)
                 },
-                markerEnd: createMarkerEnd('#F59E0B')
+                markerEnd: createMarkerEnd(projectEdgeColor)
               };
               newEdges.push(projectToLinkedEdge);
               console.log('Added project-to-linked-project edge:', projectToLinkedEdge);
@@ -1658,6 +1750,73 @@ const ObjectiveVisualizationPage = () => {
           });
         }
       });
+
+      // Level 2.5: Employees directly assigned to goal
+      // Treated as direct employees under the goal node
+      const goalEmployees = goal.assignedEmployees || [];
+      if (goalEmployees.length > 0) {
+        goalEmployees.forEach((emp, empIndex) => {
+          const empX = goalX + (empIndex - (goalEmployees.length - 1) / 2) * EMPLOYEE_HORIZONTAL_SPACING;
+          const empY = LEVEL_HEIGHT * 2; // same level as projects
+          const empNodeId = `emp-goal-${goal.id}-${empIndex}`;
+          // Add goal employee node
+          // Normalize employee data to match Employee type requirements
+          // Create a safe copy of employee data with proper type checking
+          const empData = {
+            employeeId: emp.employeeId as string | undefined,
+            email: emp.email as string | undefined,
+            name: emp.name as string | undefined,
+            role: emp.role as string | undefined,
+            department: (emp as any).department as string | undefined
+          };
+          
+          const normalizedEmp: Employee = {
+            _id: empData.employeeId || empData.email || empNodeId,
+            email: empData.email || `employee-${empIndex}@example.com`,
+            firstName: empData.name || 'Team',
+            lastName: 'Member',
+            jobTitle: empData.role || 'Team Member',
+            department: empData.department || goal.department || 'General'
+          };
+          
+          newNodes.push({
+            id: empNodeId,
+            type: 'employeeNode',
+            position: { x: empX, y: empY },
+            data: {
+              id: normalizedEmp._id,
+              type: 'employee',
+              level: 3,
+              title: normalizedEmp.firstName + (normalizedEmp.lastName ? ` ${normalizedEmp.lastName}` : ''),
+              role: normalizedEmp.jobTitle,
+              email: normalizedEmp.email,
+              department: normalizedEmp.department,
+              details: normalizedEmp
+            }
+          });
+          // Track node in level 3
+          levelNodes[3].push({ id: empNodeId, width: NODE_WIDTH, position: { x: empX, y: empY } });
+          // Connect goal to goal-assigned employee
+          // Use the same color as goal-to-project edges based on goal priority
+          const goalPriority = goal.priority || 'medium';
+          const goalEdgeColor = {
+            low: '#10B981',      // green
+            medium: '#F59E0B',   // yellow
+            high: '#10B981',     // orange
+            critical: '#EF4444'  // red
+          }[goalPriority];
+          
+          newEdges.push({
+            id: `goal-${goal.id}-emp-goal-${empIndex}`,
+            source: goalNodeId,
+            target: empNodeId,
+            type: 'customObjective',
+            style: { strokeWidth: 2, stroke: goalEdgeColor, strokeDasharray: undefined }, // Make solid line
+            animated: false,
+            markerEnd: createMarkerEnd(goalEdgeColor)
+          });
+        });
+      }
 
       // If no main projects, still show the goal
       if (mainProjects.length === 0) {
@@ -1795,10 +1954,9 @@ const ObjectiveVisualizationPage = () => {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-screen bg-gray-50">
-        <div className="text-center">
-          <FaSpinner className="animate-spin text-4xl text-purple-600 mx-auto mb-4" />
-          <span className="ml-3 text-lg text-gray-700">Loading objective visualization...</span>
+      <div className="flex h-screen items-center justify-center">
+        <div className="mb-4">
+          <FaSpinner className="h-10 w-10 text-purple-600 animate-spin" />
         </div>
       </div>
     );
@@ -1826,7 +1984,6 @@ const ObjectiveVisualizationPage = () => {
     <div className="w-full h-full flex flex-col overflow-hidden">
       <div className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white p-3 flex items-center justify-between shadow-md z-10">
         <div className="flex-1">
-          <h1 className="text-xl font-semibold">Objective Visualization</h1>
         </div>
         
         <div className="flex items-center space-x-3">
@@ -2135,7 +2292,7 @@ const ObjectiveVisualizationPage = () => {
 
 // Detail Modal Component
 const DetailModal = ({ data, onClose }: { data: any; onClose: () => void }): JSX.Element => {
-  const [activeTab, setActiveTab] = useState<'overview' | 'details' | 'team' | 'tasks'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'details' | 'team' | 'projects'>('overview');
 
   const renderGoalContent = (goal: Goal) => {
     const statusColors = {
@@ -2145,11 +2302,11 @@ const DetailModal = ({ data, onClose }: { data: any; onClose: () => void }): JSX
       'on-hold': 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200',
       canceled: 'bg-red-100 text-red-800 hover:bg-red-200'
     };
-
+    //this is useless, no impact on anything
     const priorityColors = {
       low: 'bg-green-100 text-green-800 hover:bg-green-200',
       medium: 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200',
-      high: 'bg-orange-100 text-orange-800 hover:bg-orange-200',
+      high: 'bg-amber-100 text-amber-800 hover:bg-amber-200 border-l-4 border-amber-500',
       critical: 'bg-red-100 text-red-800 hover:bg-red-200'
     };
 
@@ -2179,7 +2336,7 @@ const DetailModal = ({ data, onClose }: { data: any; onClose: () => void }): JSX
         linkedProjectIds.add(projectId);
         
         // Find employees in these projects
-        const project = projects.find((p) => {
+        const project = projects.find((p: any) => {
           const pId = getId(p);
           return pId === projectId;
         });
@@ -2187,7 +2344,7 @@ const DetailModal = ({ data, onClose }: { data: any; onClose: () => void }): JSX
         if (project) {
           // Add employees from the project's employee_contributions
           if (project.employee_contributions && Array.isArray(project.employee_contributions)) {
-            project.employee_contributions.forEach((emp) => {
+            project.employee_contributions.forEach((emp: any) => {
               const empId = getId(emp, ['id', '_id', 'employeeId']);
               if (empId) linkedEmployeeIds.add(empId);
             });
@@ -2195,7 +2352,7 @@ const DetailModal = ({ data, onClose }: { data: any; onClose: () => void }): JSX
           
           // Add employees from the project's employees array
           if (project.employees && Array.isArray(project.employees)) {
-            project.employees.forEach((emp) => {
+            project.employees.forEach((emp: any) => {
               const empId = getId(emp, ['id', '_id', 'employeeId']);
               if (empId) linkedEmployeeIds.add(empId);
             });
@@ -2230,7 +2387,12 @@ const DetailModal = ({ data, onClose }: { data: any; onClose: () => void }): JSX
               <Badge className={`${statusColors[goal.status]} font-medium`}>
                 {goal.status.replace('-', ' ').toUpperCase()}
               </Badge>
-              <Badge className={`${priorityColors[goal.priority]} font-medium`}>
+              <Badge variant="outline" className={`text-xs font-medium ${
+                goal.priority === 'critical' ? 'border-red-400 bg-red-100 text-red-700' :
+                goal.priority === 'high' ? 'border-amber-400 bg-amber-100 text-amber-700' :
+                goal.priority === 'medium' ? 'border-yellow-400 bg-yellow-100 text-yellow-700' :
+                'border-green-400 bg-green-100 text-green-700'
+              }`}>
                 {goal.priority.toUpperCase()} PRIORITY
               </Badge>
               <Badge variant="outline" className="text-gray-700">
@@ -2243,7 +2405,7 @@ const DetailModal = ({ data, onClose }: { data: any; onClose: () => void }): JSX
         {/* Tabs */}
         <div className="border-b border-gray-200">
           <nav className="-mb-px flex space-x-8">
-            {['overview', 'details', 'team'].map((tab) => (
+            {['overview', 'details'].map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab as any)}
@@ -2371,29 +2533,6 @@ const DetailModal = ({ data, onClose }: { data: any; onClose: () => void }): JSX
                   </div>
                 </div>
               )}
-
-              {goal.assignedProjects.length > 0 && (
-                <div>
-                  <h4 className="font-semibold text-gray-900 mb-4">Assigned Projects</h4>
-                  <div className="space-y-2">
-                    {goal.assignedProjects.map((project, index) => (
-                      <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                        <div className="flex items-center space-x-3">
-                          <Briefcase className="w-4 h-4 text-gray-400" />
-                          <div>
-                            <p className="font-medium text-gray-900">Project ID: {project.projectId}</p>
-                            {project.assignedAt && (
-                              <p className="text-sm text-gray-600">
-                                Assigned: {new Date(project.assignedAt).toLocaleDateString()}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
             </div>
           )}
         </div>
@@ -2415,7 +2554,7 @@ const DetailModal = ({ data, onClose }: { data: any; onClose: () => void }): JSX
     const priorityColors = {
       low: 'bg-green-100 text-green-800 hover:bg-green-200',
       medium: 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200',
-      high: 'bg-orange-100 text-orange-800 hover:bg-orange-200',
+      high: 'bg-amber-100 text-amber-800 hover:bg-amber-200',
       critical: 'bg-red-100 text-red-800 hover:bg-red-200'
     };
 
@@ -2436,7 +2575,12 @@ const DetailModal = ({ data, onClose }: { data: any; onClose: () => void }): JSX
               <Badge className={`${statusColors[project.status as keyof typeof statusColors] || 'bg-gray-100 text-gray-800'} font-medium`}>
                 {project.status.replace('-', ' ').toUpperCase()}
               </Badge>
-              <Badge className={`${priorityColors[project.priority as keyof typeof priorityColors]} font-medium`}>
+              <Badge variant="outline" className={`text-xs font-medium ${
+                project.priority === 'critical' ? 'border-red-400 bg-red-50 text-red-700' :
+                project.priority === 'high' ? 'border-amber-400 bg-amber-50 text-amber-700' :
+                project.priority === 'medium' ? 'border-yellow-400 bg-yellow-50 text-yellow-700' :
+                'border-green-400 bg-green-50 text-green-700'
+              }`}>
                 {project.priority.toUpperCase()} PRIORITY
               </Badge>
               <Badge variant="outline" className="text-gray-700">
@@ -2479,14 +2623,14 @@ const DetailModal = ({ data, onClose }: { data: any; onClose: () => void }): JSX
                     <Calendar className="w-4 h-4 text-gray-400 mr-2" />
                     <span className="text-gray-600">Start:</span>
                     <span className="ml-2 font-medium">
-                      {project.start_date ? new Date(project.start_date).toLocaleDateString() : 'Not set'}
+                      {project.start_date ? new Date(project.start_date).toLocaleDateString() : 'No date'}
                     </span>
                   </div>
                   <div className="flex items-center text-sm">
                     <Calendar className="w-4 h-4 text-gray-400 mr-2" />
                     <span className="text-gray-600">End:</span>
                     <span className="ml-2 font-medium">
-                      {project.end_date ? new Date(project.end_date).toLocaleDateString() : 'Not set'}
+                      {project.end_date ? new Date(project.end_date).toLocaleDateString() : 'No date'}
                     </span>
                   </div>
                 </div>
@@ -2502,10 +2646,6 @@ const DetailModal = ({ data, onClose }: { data: any; onClose: () => void }): JSX
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-gray-600">Team Size:</span>
                     <span className="font-medium">{teamMembers.length}</span>
-                  </div>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-600">Linked Projects:</span>
-                    <span className="font-medium">{project.linkedProjects?.length || 0}</span>
                   </div>
                 </div>
               </Card>
@@ -2536,18 +2676,7 @@ const DetailModal = ({ data, onClose }: { data: any; onClose: () => void }): JSX
                 </div>
               </div>
 
-              {project.linkedProjects && project.linkedProjects.length > 0 && (
-                <div>
-                  <h4 className="font-semibold text-gray-900 mb-4">Linked Projects</h4>
-                  <div className="space-y-2">
-                    {project.linkedProjects.map((linkedId, index) => (
-                      <div key={index} className="p-3 bg-gray-50 rounded-lg">
-                        <p className="font-mono text-sm text-gray-700">{linkedId}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
+
             </div>
           )}
 
@@ -2610,6 +2739,7 @@ const DetailModal = ({ data, onClose }: { data: any; onClose: () => void }): JSX
   const renderEmployeeContent = (employee: any) => {
     const name = employee.name || `${employee.firstName || ''} ${employee.lastName || ''}`.trim() || 'Unknown Employee';
     const isDirectEmployee = data.level === 3;
+    const isLinkedEmployee = data.level === 4;
 
     return (
       <div className="space-y-6">
@@ -2626,7 +2756,7 @@ const DetailModal = ({ data, onClose }: { data: any; onClose: () => void }): JSX
                 {employee.department || 'Unknown Dept'}
               </Badge>
               <Badge variant={isDirectEmployee ? "default" : "outline"} className="text-xs">
-                {isDirectEmployee ? 'DIRECT EMPLOYEE' : 'INDIRECT EMPLOYEE'}
+                {isDirectEmployee ? 'DIRECT EMPLOYEE' : isLinkedEmployee ? 'LINKED EMPLOYEE' : 'INDIRECT EMPLOYEE'}
               </Badge>
               {employee.hours_per_week && (
                 <Badge variant="outline" className="text-xs">

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { FiUser, FiEdit, FiSearch, FiCheck, FiX, FiInfo, FiUsers, FiEye, FiCheckCircle, FiXCircle, FiStar } from 'react-icons/fi';
 import { FaSpinner } from 'react-icons/fa';
 import { toast } from 'react-hot-toast';
@@ -268,9 +268,16 @@ export default function DepartmentManagementPage() {
   // Change page
   const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
 
+  // Optimized department fetching with caching
   const fetchCurrentUserDepartment = async (token: string): Promise<string | null> => {
     try {
-      // First get user info from auth
+      // Check if we have a cached department in sessionStorage
+      const cachedDepartment = sessionStorage.getItem('userDepartment');
+      if (cachedDepartment) {
+        return cachedDepartment;
+      }
+      
+      // First try to get from auth endpoint which is fastest
       const authResponse = await fetch('/api/auth/me', {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -279,67 +286,58 @@ export default function DepartmentManagementPage() {
         credentials: 'include'
       });
 
-      if (!authResponse.ok) {
-        console.error('Failed to fetch current user profile');
-        return null;
+      if (authResponse.ok) {
+        const userData = await authResponse.json();
+        if (userData.department && userData.department !== 'Unknown') {
+          // Cache the result
+          sessionStorage.setItem('userDepartment', userData.department);
+          return userData.department;
+        }
       }
 
-      const userData = await authResponse.json();
-      console.log('Current user profile:', userData);
-
-      // If department is already available, return it
-      if (userData.department && userData.department !== 'Unknown') {
-        console.log('Department from auth/me:', userData.department);
-        return userData.department;
-      }
-
-      // If not available, try to fetch from organization hierarchy (like org-chart does)
-      try {
-        console.log('Department not found in auth/me, trying organization hierarchy...');
-        const orgResponse = await fetch('/api/organization/hierarchy');
-
-        if (orgResponse.ok) {
-          const orgData = await orgResponse.json();
-          console.log('Organization hierarchy data:', orgData);
-
-          // Find current user in org data
+      // If we get here, we need to try the organization hierarchy as a fallback
+      // We'll use Promise.race to get the fastest response between org hierarchy and profile API
+      // Get user data outside the promise chain to avoid await in .then()
+      const userData = authResponse.ok ? await authResponse.json() : null;
+      const userEmail = userData?.email?.toLowerCase();
+      
+      const orgPromise = fetch('/api/organization/hierarchy')
+        .then(res => res.ok ? res.json() : null)
+        .then(orgData => {
+          if (!orgData || !userEmail) return null;
+          
           const currentUserInOrg = orgData.find((emp: any) =>
-            emp.email?.toLowerCase() === userData.email?.toLowerCase()
+            emp.email?.toLowerCase() === userEmail
           );
-
+          
           if (currentUserInOrg?.department) {
-            console.log('Department from organization hierarchy:', currentUserInOrg.department);
+            sessionStorage.setItem('userDepartment', currentUserInOrg.department);
             return currentUserInOrg.department;
           }
-        }
-      } catch (orgError) {
-        console.warn('Failed to fetch from organization hierarchy:', orgError);
-      }
+          return null;
+        })
+        .catch(() => null);
 
-      // Fallback: try to get from profile API
-      try {
-        console.log('Trying profile API as fallback...');
-        const profileResponse = await fetch('/api/profile', {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
-
-        if (profileResponse.ok) {
-          const profileData = await profileResponse.json();
-          console.log('Profile data:', profileData);
-
-          if (profileData.department && profileData.department !== 'Unknown') {
-            console.log('Department from profile API:', profileData.department);
+      const profilePromise = fetch('/api/profile', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
+        .then(res => res.ok ? res.json() : null)
+        .then(profileData => {
+          if (profileData?.department && profileData.department !== 'Unknown') {
+            sessionStorage.setItem('userDepartment', profileData.department);
             return profileData.department;
           }
-        }
-      } catch (profileError) {
-        console.warn('Failed to fetch from profile API:', profileError);
-      }
+          return null;
+        })
+        .catch(() => null);
 
-      console.log('No department found from any source');
-      return null;
+      // Use the first response that returns a valid department
+      const department = await Promise.race([
+        orgPromise,
+        profilePromise
+      ]);
+      
+      return department;
     } catch (error) {
       console.error('Error fetching current user department:', error);
       return null;
@@ -348,131 +346,148 @@ export default function DepartmentManagementPage() {
 
   const fetchUsers = useCallback(async () => {
     try {
-      console.log('Starting to fetch users...');
       setIsLoading(true);
       const token = localStorage.getItem('token');
       
       if (!token) {
-        console.error('No authentication token found');
         toast.error('Authentication required. Please log in again.');
         return;
       }
       
-      const url = new URL('/api/department-management/users', window.location.origin);
+      // Use cached users data if available and search term hasn't changed
+      const cachedData = sessionStorage.getItem('departmentUsers');
+      const cachedSearchTerm = sessionStorage.getItem('departmentSearchTerm');
       
-      if (searchTerm) {
-        console.log('Adding search term to query:', searchTerm);
-        url.searchParams.set('search', searchTerm);
+      if (cachedData && (!searchTerm || searchTerm === cachedSearchTerm)) {
+        try {
+          const parsedData = JSON.parse(cachedData);
+          setUsers(parsedData);
+          
+          // Still fetch department in background if needed
+          if (!currentUserDepartment) {
+            const userDepartment = await fetchCurrentUserDepartment(token);
+            if (userDepartment) {
+              const formattedDept = userDepartment
+                .split(' ')
+                .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1))
+                .join(' ');
+              setCurrentUserDepartment(formattedDept);
+            }
+          }
+          
+          // Return early with cached data
+          setIsLoading(false);
+          return;
+        } catch (e) {
+          // If parsing fails, continue with API call
+          console.warn('Failed to parse cached data');
+        }
       }
       
-      console.log('Fetching users from:', url.toString());
+      // Construct API URL
+      const url = new URL('/api/department-management/users', window.location.origin);
+      if (searchTerm) {
+        url.searchParams.set('search', searchTerm);
+        sessionStorage.setItem('departmentSearchTerm', searchTerm);
+      } else {
+        sessionStorage.removeItem('departmentSearchTerm');
+      }
+      
+      // Fetch data with AbortController for timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
       
       const response = await fetch(url.toString(), {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
-        credentials: 'include'
+        credentials: 'include',
+        signal: controller.signal
       });
+      
+      clearTimeout(timeoutId);
       
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        console.error('API Error Response:', {
-          status: response.status,
-          statusText: response.statusText,
-          errorData
-        });
         throw new Error(errorData.message || `Failed to fetch users: ${response.statusText}`);
       }
       
       const data = await response.json();
-      console.log('API Response Data:', data);
       
       if (!data.users) {
-        console.error('No users array in response:', data);
         throw new Error('Invalid response format: users array is missing');
       }
       
-      console.log('Current user department from API:', data.currentUserDepartment);
-      console.log('Total users received:', data.users.length);
-      
+      // Process department information
       let userDepartment = data.currentUserDepartment;
       
-      // If department is not provided in the initial response, try to fetch it from the user's profile
       if (!userDepartment) {
-        console.log('Department not found in initial response, fetching from user profile...');
         userDepartment = await fetchCurrentUserDepartment(token);
-        console.log('Department from user profile:', userDepartment);
       }
       
-      // Normalize the department name for consistency
+      // Format department name once and store it
       if (userDepartment) {
-        // Helper function to normalize department names
-        const normalizeDepartment = (word: string): string => {
-          return word
-            .toLowerCase()
-            .replace(/[^a-z0-9 ]/g, '')
-            .replace(/\s+/g, ' ')
-            .trim();
-        };
         const formattedDept = userDepartment
           .split(' ')
           .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1))
           .join(' ');
         setCurrentUserDepartment(formattedDept);
-        userDepartment = formattedDept; // Update the local variable for filtering
+        userDepartment = formattedDept;
       }
       
-      // Filter users by department if we have it, otherwise show all users
+      // Simplified department filtering with memoization
+      const deptLookup = new Map();
       const filteredUsers = userDepartment
         ? data.users.filter((user: User) => {
-            // Normalize both department names for comparison
-            const normalize = (dept: string | undefined) => 
-              dept ? dept.toString().toLowerCase().trim() : '';
+            // Use memoized normalization
+            const getUserDept = (dept: string | undefined): string => {
+              if (!dept) return '';
+              if (!deptLookup.has(dept)) {
+                deptLookup.set(dept, dept.toString().toLowerCase().trim());
+              }
+              return deptLookup.get(dept);
+            };
             
-            const userDept = normalize(user.department);
-            const targetDept = normalize(userDepartment);
+            const userDept = getUserDept(user.department);
+            const targetDept = getUserDept(userDepartment);
             
-            // If either is empty, don't filter
-            if (!userDept || !targetDept) {
-              console.log(`No department to compare for ${user.email} - showing all`);
-              return true;
-            }
+            if (!userDept || !targetDept) return true;
             
-            // Check for partial match (in case of different formats)
-            const matches = userDept.includes(targetDept) || targetDept.includes(userDept);
-            
-            if (!matches) {
-              console.log(`User ${user.email} filtered out - department: '${user.department || 'none'}', expected: '${userDepartment}'`);
-            } else {
-              console.log(`User ${user.email} included - department: '${user.department}'`);
-            }
-            return matches;
+            return userDept.includes(targetDept) || targetDept.includes(userDept);
           })
-        : data.users; // If we still don't have a department, show all users
+        : data.users;
       
-      console.log('Filtered users count:', filteredUsers.length);
+      // Cache the filtered results
+      sessionStorage.setItem('departmentUsers', JSON.stringify(
+        filteredUsers.length > 0 ? filteredUsers : data.users
+      ));
       
-      if (filteredUsers.length === 0) {
-        console.warn('No users matched the department filter. Showing all users for debugging.');
-        setUsers(data.users);
+      // Set state with results
+      setUsers(filteredUsers.length > 0 ? filteredUsers : data.users);
+      
+    } catch (err: unknown) {
+      if (err instanceof Error && err.name === 'AbortError') {
+        toast.error('Request timed out. Please try again.');
       } else {
-        setUsers(filteredUsers);
+        toast.error(err instanceof Error ? err.message : 'An error occurred while fetching users');
       }
-      
-    } catch (err) {
-      console.error('Error in fetchUsers:', err);
-      toast.error(err instanceof Error ? err.message : 'An error occurred while fetching users');
     } finally {
       setIsLoading(false);
     }
-  }, [searchTerm]);
+  }, [searchTerm, currentUserDepartment]);
 
-  // Fetch users when component mounts, search changes, or department changes
+  // Fetch users only when component mounts or search changes
+  // Using a ref to track initial load to avoid dependency on currentUserDepartment
+  const initialLoadRef = useRef(true);
+  
   useEffect(() => {
     fetchUsers();
     setCurrentPage(1);
-  }, [searchTerm, currentUserDepartment, fetchUsers]);
+    
+    // Mark initial load as complete
+    initialLoadRef.current = false;
+  }, [fetchUsers]); // fetchUsers already depends on searchTerm
 
   const handleApproveProfile = async (user: User, approve: boolean) => {
     const token = localStorage.getItem('token');
@@ -806,6 +821,16 @@ export default function DepartmentManagementPage() {
       )}
     </div>
   );
+
+  if (isLoading) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <div className="mb-4">
+          <FaSpinner className="h-10 w-10 text-purple-600 animate-spin" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto py-8 px-4 bg-gray-50 min-h-screen">

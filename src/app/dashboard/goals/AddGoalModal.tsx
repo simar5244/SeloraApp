@@ -97,7 +97,7 @@ const AddGoalModal = ({ onAddGoal, onCancel }: AddGoalModalProps) => {
     title: '',
     description: '',
     department: '',
-    status: 'not_started',
+    status: 'planning',
     priority: 'medium',
     startDate: '',
     endDate: '',
@@ -848,7 +848,7 @@ const AddGoalModal = ({ onAddGoal, onCancel }: AddGoalModalProps) => {
           <Label htmlFor="status">Status</Label>
           <Select name="status" value={goalData.status} onValueChange={(v) => handleSelectChange('status', v)}>
             <SelectTrigger id="status" className="text-gray-900 bg-white">
-              <SelectValue placeholder="Select status" className="text-gray-900" />
+              <SelectValue />
             </SelectTrigger>
             <SelectContent className="bg-white">
               <SelectItem value="planning" className="text-gray-900">Planning</SelectItem>
@@ -903,12 +903,11 @@ const AddGoalModal = ({ onAddGoal, onCancel }: AddGoalModalProps) => {
       {/* KPIs Section */}
       <div className="space-y-4 border-t pt-4" data-tour="kpi-section">
         <div className="flex items-center justify-between">
-          <Label className="text-sm font-medium flex items-center">
-            <Target className="mr-2 h-4 w-4" />
+          <Label className="text-sm font-medium">
             Key Performance Indicators (KPIs)
           </Label>
           <Button type="button" onClick={addKpi} size="sm" variant="outline">
-            <FaPlus className="mr-2" />
+            <div className="mr-2" />
             Add KPI
           </Button>
         </div>
@@ -976,186 +975,28 @@ const AddGoalModal = ({ onAddGoal, onCancel }: AddGoalModalProps) => {
         ))}
       </div>
 
-      {/* Linked Projects Selection */}
-      <div className="space-y-2 border-t pt-4" data-tour="linked-projects">
-        <div className="flex items-center space-x-2">
-          <Checkbox
-            id="showLink"
-            checked={showLink}
-            onCheckedChange={(checked) => setShowLink(!!checked)}
-          />
-          <Label htmlFor="showLink" className="text-sm font-medium leading-none">
-            Link this goal to projects
-          </Label>
-        </div>
-
-        {showLink && (
-          <div className="mt-2">
-            <div className="flex justify-between items-center mb-2">
-              <Label className="text-sm text-black">Linked Projects</Label>
-              <Button
-                variant="outline"
-                size="sm"
-                type="button"
-                onClick={() => {
-                  if (selectedProjectId) {
-                    const selectedProject = projectsList.find(p => p.id === selectedProjectId);
-                    if (selectedProject && !goalProjects.some(gp => gp.projectId === selectedProjectId)) {
-                      const projectEditor: ProjectEditor = {
-                        projectId: selectedProjectId,
-                        title: selectedProject.project_title || selectedProject.name || 'Unnamed Project',
-                        description: selectedProject.description || selectedProject.project_description,
-                        isNewProject: false
-                      };
-                      setGoalProjects(prev => [...prev, projectEditor]);
-                      setSelectedProjectId('');
-                    }
-                  }
-                }}
-                className="bg-purple-100 hover:bg-purple-200 text-black text-sm"
-              >
-                Add Project
-              </Button>
-            </div>
-
-            <div className="flex items-center gap-2 mb-3">
-              <Select
-                value={selectedProjectId}
-                onValueChange={setSelectedProjectId}
-              >
-                <SelectTrigger className="flex-1 bg-white text-black border-gray-300">
-                  <SelectValue placeholder="Select a project to link" className="text-black" />
-                </SelectTrigger>
-                <SelectContent className="bg-white text-black">
-                  {/* Search Input in Dropdown */}
-                  <div className="p-2 border-b">
-                    <Input
-                      placeholder="Search projects..."
-                      value={projectSearchTerm}
-                      onChange={(e) => {
-                        setProjectSearchTerm(e.target.value);
-                        searchProjects(e.target.value);
-                      }}
-                      className="text-black"
-                      onClick={(e) => e.stopPropagation()}
-                    />
-                  </div>
-
-                  {/* Recent Projects (when no search) */}
-                  {!projectSearchTerm && (
-                    <>
-                      <div className="px-2 py-1 text-xs text-gray-500 font-medium">Recent Projects</div>
-                      {projectsList
-                        .filter(p => {
-                          // Skip if no ID or title
-                          if (!p.id || !(p.project_title || p.name)) return false;
-
-                          // Only show if not already linked
-                          return !goalProjects.some(gp => gp.projectId === p.id);
-                        })
-                        .map(p => (
-                          <SelectItem
-                            key={p.id}
-                            value={p.id}
-                            className="text-black hover:bg-gray-100"
-                          >
-                            {p.project_title || p.name || 'Unnamed Project'}
-                          </SelectItem>
-                        ))}
-                    </>
-                  )}
-
-                  {/* Search Results */}
-                  {projectSearchTerm && projectSearchResults.length > 0 && (
-                    <>
-                      <div className="px-2 py-1 text-xs text-gray-500 font-medium">Search Results</div>
-                      {projectSearchResults
-                        .filter(p => !goalProjects.some(gp => gp.projectId === p.id))
-                        .map(p => (
-                          <SelectItem
-                            key={p.id}
-                            value={p.id}
-                            className="text-black hover:bg-gray-100"
-                          >
-                            {p.project_title || p.title || 'Unnamed Project'}
-                          </SelectItem>
-                        ))}
-                    </>
-                  )}
-
-                  {/* No results */}
-                  {projectSearchTerm && projectSearchResults.length === 0 && !isSearchingProjects && (
-                    <div className="px-2 py-2 text-sm text-gray-500 text-center">
-                      No projects found
-                    </div>
-                  )}
-
-                  {/* Loading */}
-                  {isSearchingProjects && (
-                    <div className="px-2 py-2 text-sm text-gray-500 text-center">
-                      Searching...
-                    </div>
-                  )}
-
-                  {/* No projects available when not searching */}
-                  {!projectSearchTerm && projectsList.filter(p =>
-                    p.id &&
-                    (p.project_title || p.name) &&
-                    !goalProjects.some(gp => gp.projectId === p.id)
-                  ).length === 0 && (
-                    <div className="px-2 py-2 text-sm text-gray-500 text-center">
-                      No projects available to link
-                    </div>
-                  )}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Display selected linked projects */}
-            <div className="space-y-2">
-              {goalProjects.map((linkedProject, idx) => (
-                <div key={idx} className="flex items-center justify-between bg-white border border-gray-200 p-2 rounded-md">
-                  <span className="text-sm text-black flex-1">{linkedProject.title}</span>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      // Simply remove the project from the linked projects list
-                      setGoalProjects((prev: Array<{projectId: string, title: string}>) => 
-                        prev.filter((_, i) => i !== idx)
-                      );
-                    }}
-                    className="text-red-500 hover:text-red-700 hover:bg-red-50 h-8 w-8 p-0 flex-shrink-0"
-                    aria-label="Unlink project"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                  </Button>
-                </div>
-              ))}
-
-              {goalProjects.length === 0 && (
-                <p className="text-sm text-gray-500 italic">No linked projects selected</p>
-              )}
-            </div>
-          </div>
-        )}
-      </div>
-
       {/* Projects Section */}
       <div className="space-y-4 border-t pt-4 mt-4" data-tour="projects-section">
         <div className="flex justify-between items-center">
           <Label className="text-sm font-medium">Projects</Label>
-          <div className="flex space-x-2">
-            <Button 
-              type="button" 
-              variant="outline" 
-              size="sm" 
-              onClick={() => setShowAssignProject(true)}
-              className="text-xs"
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              type="button"
+              onClick={() => setShowAssignProject(!showAssignProject)}
+              className="text-black text-sm"
             >
-              <FaPlus className="mr-1 h-3 w-3" /> Assign Existing
+              Assign Existing
+            </Button>
+            <Button
+              variant="default"
+              size="sm"
+              type="button"
+              onClick={() => setShowCreateProject(!showCreateProject)}
+              className="bg-purple-100 hover:bg-purple-200 text-black text-sm"
+            >
+              Create New
             </Button>
           </div>
         </div>
@@ -1208,12 +1049,7 @@ const AddGoalModal = ({ onAddGoal, onCancel }: AddGoalModalProps) => {
               <div className="text-center py-4 text-gray-500">
                 No projects found for "{projectSearchTerm}"
               </div>
-            ) : (
-              <div className="text-center py-4 text-gray-500">
-                Type to search for projects
-              </div>
-            )}
-
+            ) : null}
             <div className="flex justify-end mt-4">
               <Button
                 type="button"
@@ -1230,54 +1066,11 @@ const AddGoalModal = ({ onAddGoal, onCancel }: AddGoalModalProps) => {
             </div>
           </div>
         )}
-
-        {/* Project List */}
-        {goalProjects.length > 0 ? (
-          <div className="space-y-2">
-            {goalProjects.map((project, idx) => (
-              <div key={idx} className="flex items-center justify-between p-3 bg-white border rounded-md shadow-sm">
-                <div>
-                  <div className="font-medium">{project.title}</div>
-                  <div className="text-sm text-gray-600 truncate max-w-md">{project.description}</div>
-                </div>
-                <Button 
-                  variant="ghost" 
-                  size="sm"
-                  onClick={() => removeProjectFromGoal(project.projectId)}
-                  className="text-red-500 hover:text-red-700 hover:bg-red-50"
-                >
-                  <FaTrash className="h-3 w-3" />
-                </Button>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-4 border border-dashed rounded-md">
-            <p className="text-sm text-gray-500">No projects assigned to this goal yet</p>
-          </div>
-        )}
-      </div>
-
-      {/* Create New Project Section */}
-      <div className="space-y-2 border-t pt-4">
-        <div className="flex items-center justify-between">
-          <Label className="text-sm font-medium">Need to create a new project?</Label>
-          <Button
-            type="button"
-            onClick={() => setShowCreateProject(!showCreateProject)}
-            size="sm"
-            variant="outline"
-            className="bg-purple-100 hover:bg-purple-200 text-black text-sm"
-          >
-            <FaPlus className="mr-2" />
-            Create Project
-          </Button>
-        </div>
-
+        
         {/* Create New Project Form */}
         {showCreateProject && (
-          <div className="mt-4 p-4 border rounded-lg bg-blue-50">
-            <h5 className="font-medium mb-3">Create New Project</h5>
+          <div className="mt-4 p-4 border rounded-lg bg-purple-50">
+            <h5 className="text-sm font-medium mb-3">Create New Project</h5>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>
                 <Label>Project Title</Label>
@@ -1344,7 +1137,7 @@ const AddGoalModal = ({ onAddGoal, onCancel }: AddGoalModalProps) => {
                     ...prev,
                     status: e.target.value as ProjectFormData['status']
                   }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm"
                 >
                   <option value="planning">Planning</option>
                   <option value="active">Active</option>
@@ -1360,7 +1153,7 @@ const AddGoalModal = ({ onAddGoal, onCancel }: AddGoalModalProps) => {
                     ...prev,
                     priority: e.target.value as ProjectFormData['priority']
                   }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm"
                 >
                   <option value="low">Low</option>
                   <option value="medium">Medium</option>
@@ -1369,7 +1162,7 @@ const AddGoalModal = ({ onAddGoal, onCancel }: AddGoalModalProps) => {
                 </select>
               </div>
               <div className="md:col-span-2">
-                <Label>Team Members (searchable or enter email)</Label>
+                <Label>Team Members</Label>
                 <div className="space-y-2">
                   <Input
                     placeholder="Search team members or enter email directly..."
@@ -1446,7 +1239,7 @@ const AddGoalModal = ({ onAddGoal, onCancel }: AddGoalModalProps) => {
                     }))}
                     className="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
                   />
-                  <Label htmlFor="visibleToAll">Allow all to view this project</Label>
+                  <Label htmlFor="visibleToAll">Allow all employees to view this project</Label>
                 </div>
               </div>
             </div>
@@ -1470,6 +1263,28 @@ const AddGoalModal = ({ onAddGoal, onCancel }: AddGoalModalProps) => {
             </div>
           </div>
         )}
+
+        {/* Project List */}
+        {goalProjects.length > 0 ? (
+          <div className="space-y-2">
+            {goalProjects.map((project, idx) => (
+              <div key={idx} className="flex items-center justify-between p-3 bg-white border rounded-md shadow-sm">
+                <div>
+                  <div className="font-medium">{project.title}</div>
+                  <div className="text-sm text-gray-600 truncate max-w-md">{project.description}</div>
+                </div>
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => removeProjectFromGoal(project.projectId)}
+                  className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                >
+                  <FaTrash className="h-3 w-3" />
+                </Button>
+              </div>
+            ))}
+          </div>
+        ) : null}
       </div>
 
       {/* Employees Section */}

@@ -30,28 +30,31 @@ DialogOverlay.displayName = DialogPrimitive.Overlay.displayName;
 
 const DialogContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>
->(({ className, children, ...props }, ref) => (
+  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content> & { hideCloseButton?: boolean }
+>(({ className, children, hideCloseButton = false, ...props }, ref) => (
   <DialogPortal>
     <DialogOverlay className="fixed inset-0 z-50" />
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <DialogPrimitive.Content
         ref={ref}
         className={cn(
-          "relative w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-lg",
-          "bg-white p-6 shadow-lg dark:bg-gray-800",
-          "sm:max-w-[90vw] sm:rounded-lg",
+          "relative w-full max-w-lg rounded-lg flex flex-col",
+          "bg-white shadow-lg dark:bg-gray-800",
+          "sm:max-w-[90vw] sm:rounded-lg h-[90vh] max-h-[90vh]",
           className
         )}
+        style={{ maxHeight: '90vh' }}
         {...props}
         aria-describedby={props['aria-describedby'] || 'dialog-description'}
       >
       {children}
-        <DialogPrimitive.Close asChild>
-          <button className="absolute right-4 top-4 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300">
-            <X className="h-4 w-4" />
-          </button>
-        </DialogPrimitive.Close>
+        {!hideCloseButton && (
+          <DialogPrimitive.Close asChild>
+            <button className="absolute right-4 top-4 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300">
+              <X className="h-4 w-4" />
+            </button>
+          </DialogPrimitive.Close>
+        )}
       </DialogPrimitive.Content>
     </div>
   </DialogPortal>

@@ -335,14 +335,29 @@ export default function LoginPage() {
           localStorage.setItem('user', JSON.stringify(statusData.user));
         }
         
-        // Redirect based on status
-        if (statusData?.status === 'active') {
-          window.location.href = '/dashboard';
-        } else if (statusData?.status === 'pending') {
+        // Check if user needs onboarding (first-time login)
+        const userData = statusData?.user;
+        const needsOnboarding = userData && (!userData.firstName || !userData.jobTitle);
+        
+        console.log('User data:', userData);
+        console.log('Needs onboarding:', needsOnboarding);
+        
+        // Redirect based on status and onboarding needs
+        if (statusData?.status === 'pending') {
           window.location.href = '/pending-approval';
+        } else if (statusData?.status === 'active') {
+          if (needsOnboarding) {
+            window.location.href = '/onboarding';
+          } else {
+            window.location.href = '/dashboard';
+          }
         } else {
           // Default fallback
-          window.location.href = '/dashboard';
+          if (needsOnboarding) {
+            window.location.href = '/onboarding';
+          } else {
+            window.location.href = '/dashboard';
+          }
         }
       })
       .catch(err => {
@@ -356,7 +371,25 @@ export default function LoginPage() {
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {
-      router.push('/dashboard');
+      // Check if user needs onboarding before redirecting
+      const userStr = localStorage.getItem('user');
+      if (userStr) {
+        try {
+          const userData = JSON.parse(userStr);
+          const needsOnboarding = !userData.firstName || !userData.jobTitle;
+          if (needsOnboarding) {
+            router.push('/onboarding');
+          } else {
+            router.push('/dashboard');
+          }
+        } catch (e) {
+          // If user data is corrupted, fetch fresh data
+          checkStatusAndRedirect(token);
+        }
+      } else {
+        // No user data, check status
+        checkStatusAndRedirect(token);
+      }
     }
     // Check if we have saved credentials
     const savedEmail = localStorage.getItem('rememberedEmail');

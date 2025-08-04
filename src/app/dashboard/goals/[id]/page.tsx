@@ -16,7 +16,7 @@ import { toast } from "react-hot-toast";
 import {
   FaArrowLeft, FaEdit, FaProjectDiagram, FaPlus,
   FaTrash, FaEye, FaCalendarAlt, FaChartLine,
-  FaSearch, FaTimes, FaSave, FaSpinner, FaCommentDots
+  FaSearch, FaTimes, FaSave, FaSpinner, FaComment, FaBuilding, FaRocket, FaCommentDots
 } from 'react-icons/fa';
 import { fetchGoals, updateGoal, deleteGoal, fetchGoalProjects, createProjectInGoal, assignProjectToGoal, removeProjectFromGoal, searchUsers } from '../api';
 import { fetchProjects } from '../../projects/api';
@@ -96,6 +96,7 @@ export default function GoalDetailsPage() {
     console.log('GoalDetailsPage projects state:', projects);
   }, [projects]);
   const [allProjects, setAllProjects] = useState<Project[]>([]);
+  const [isLoadingProjects, setIsLoadingProjects] = useState(true);
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -116,6 +117,11 @@ export default function GoalDetailsPage() {
   const [showCreateProject, setShowCreateProject] = useState(false);
   const [showAssignProject, setShowAssignProject] = useState(false);
   const [projectSearchTerm, setProjectSearchTerm] = useState('');
+  const [deletingProjectId, setDeletingProjectId] = useState<string | null>(null);
+
+  // Delete goal confirmation dialog state
+  const [showDeleteGoalConfirm, setShowDeleteGoalConfirm] = useState(false);
+  const [isDeletingGoal, setIsDeletingGoal] = useState(false);
   const [createProjectData, setCreateProjectData] = useState({
     title: '',
     description: '',
@@ -147,6 +153,23 @@ export default function GoalDetailsPage() {
   });
 
 
+
+  // Format update content to show sections with titles
+  const formatUpdateContent = (content: string) => {
+    const sections = content.split('\n\n');
+    return sections.map((section, index) => {
+      const [title, ...contentParts] = section.split(':');
+      const content = contentParts.join(':').trim();
+      
+      if (!content) return null;
+      
+      return (
+        <div key={index} className="mb-2">
+          {content}
+        </div>
+      );
+    });
+  };
 
   // Load goal updates
   useEffect(() => {
@@ -283,12 +306,15 @@ export default function GoalDetailsPage() {
 
   const loadAllProjects = async () => {
     try {
+      setIsLoadingProjects(true);
       const result = await fetchProjects();
       if (result.projects) {
         setAllProjects(result.projects);
       }
     } catch (error) {
       console.error('Error loading all projects:', error);
+    } finally {
+      setIsLoadingProjects(false);
     }
   };
 
@@ -375,7 +401,7 @@ export default function GoalDetailsPage() {
   };
   
   // Add employee to goal
-  const addEmployeeToGoal = (employee: any) => {
+  const addEmployeeToGoal = async (employee: any) => {
     // Check if already added
     if (goal.assignedEmployees?.some(emp => emp.email === employee.email)) {
       toast.error('User already added as team member');
@@ -391,8 +417,38 @@ export default function GoalDetailsPage() {
     
     // Update goal state and edit data
     const updatedEmployees = [...(goal.assignedEmployees || []), newEmployee];
-    setGoal({...goal, assignedEmployees: updatedEmployees});
-    setEditData({...editData, assignedEmployees: updatedEmployees});
+    const updatedGoal = {...goal, assignedEmployees: updatedEmployees};
+    
+    try {
+      // Save to backend immediately
+      const token = localStorage.getItem('token');
+      const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+      
+      const response = await fetch(`/api/goals?goalId=${goalId}&userEmail=${currentUser.email}&companyCode=${currentUser.companyCode}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          assignedEmployees: updatedEmployees
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to update goal');
+      }
+      
+      // Update local state only after successful API call
+      setGoal(updatedGoal);
+      setEditData({...editData, assignedEmployees: updatedEmployees});
+      
+      toast.success('Team member added successfully');
+    } catch (error) {
+      console.error('Error adding team member:', error);
+      toast.error('Failed to add team member');
+      return;
+    }
     
     // Reset search
     setEmployeeSearchTerm('');
@@ -401,7 +457,7 @@ export default function GoalDetailsPage() {
   };
   
   // Add viewer to goal
-  const addViewerToGoal = (viewer: any) => {
+  const addViewerToGoal = async (viewer: any) => {
     // Check if already added
     if (goal.viewers?.some(v => v.email === viewer.email)) {
       toast.error('User already added as viewer');
@@ -416,8 +472,38 @@ export default function GoalDetailsPage() {
     
     // Update goal state and edit data
     const updatedViewers = [...(goal.viewers || []), newViewer];
-    setGoal({...goal, viewers: updatedViewers});
-    setEditData({...editData, viewers: updatedViewers});
+    const updatedGoal = {...goal, viewers: updatedViewers};
+    
+    try {
+      // Save to backend immediately
+      const token = localStorage.getItem('token');
+      const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+      
+      const response = await fetch(`/api/goals?goalId=${goalId}&userEmail=${currentUser.email}&companyCode=${currentUser.companyCode}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          viewers: updatedViewers
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to update goal');
+      }
+      
+      // Update local state only after successful API call
+      setGoal(updatedGoal);
+      setEditData({...editData, viewers: updatedViewers});
+      
+      toast.success('Viewer added successfully');
+    } catch (error) {
+      console.error('Error adding viewer:', error);
+      toast.error('Failed to add viewer');
+      return;
+    }
     
     // Reset search
     setViewerSearchTerm('');
@@ -426,19 +512,77 @@ export default function GoalDetailsPage() {
   };
   
   // Remove employee from goal
-  const handleRemoveEmployee = (index: number) => {
+  const handleRemoveEmployee = async (index: number) => {
     const updatedEmployees = [...goal.assignedEmployees];
+    const removedEmployee = updatedEmployees[index];
     updatedEmployees.splice(index, 1);
-    setGoal({...goal, assignedEmployees: updatedEmployees});
-    setEditData({...editData, assignedEmployees: updatedEmployees});
+    
+    try {
+      // Save to backend immediately
+      const token = localStorage.getItem('token');
+      const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+      
+      const response = await fetch(`/api/goals?goalId=${goalId}&userEmail=${currentUser.email}&companyCode=${currentUser.companyCode}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          assignedEmployees: updatedEmployees
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to update goal');
+      }
+      
+      // Update local state only after successful API call
+      setGoal({...goal, assignedEmployees: updatedEmployees});
+      setEditData({...editData, assignedEmployees: updatedEmployees});
+      
+      toast.success('Team member removed successfully');
+    } catch (error) {
+      console.error('Error removing team member:', error);
+      toast.error('Failed to remove team member');
+    }
   };
   
   // Remove viewer from goal
-  const handleRemoveViewer = (index: number) => {
+  const handleRemoveViewer = async (index: number) => {
     const updatedViewers = [...goal.viewers];
+    const removedViewer = updatedViewers[index];
     updatedViewers.splice(index, 1);
-    setGoal({...goal, viewers: updatedViewers});
-    setEditData({...editData, viewers: updatedViewers});
+    
+    try {
+      // Save to backend immediately
+      const token = localStorage.getItem('token');
+      const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+      
+      const response = await fetch(`/api/goals?goalId=${goalId}&userEmail=${currentUser.email}&companyCode=${currentUser.companyCode}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          viewers: updatedViewers
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to update goal');
+      }
+      
+      // Update local state only after successful API call
+      setGoal({...goal, viewers: updatedViewers});
+      setEditData({...editData, viewers: updatedViewers});
+      
+      toast.success('Viewer removed successfully');
+    } catch (error) {
+      console.error('Error removing viewer:', error);
+      toast.error('Failed to remove viewer');
+    }
   };
   
   useEffect(() => {
@@ -474,23 +618,29 @@ export default function GoalDetailsPage() {
     }
   };
 
-  const handleDeleteGoal = async () => {
-    if (!goal) return;
-    
-    const confirmDelete = window.confirm(`Are you sure you want to delete the goal "${goal.title}"? This action cannot be undone.`);
-    if (!confirmDelete) return;
+  const handleDeleteGoal = () => {
+    setShowDeleteGoalConfirm(true);
+  };
 
+  // Confirm delete goal handler
+  const confirmDeleteGoal = async () => {
+    if (!goal) return;
+    setIsDeletingGoal(true);
     try {
       const result = await deleteGoal(goal.id);
       if (result.success) {
         toast.success('Goal deleted successfully');
+        setShowDeleteGoalConfirm(false);
         router.push('/dashboard/goals');
       } else {
         toast.error(String(result.error) || 'Failed to delete goal');
+        throw new Error(String(result.error));
       }
     } catch (error) {
       console.error('Error deleting goal:', error);
       toast.error('Failed to delete goal');
+    } finally {
+      setIsDeletingGoal(false);
     }
   };
 
@@ -572,13 +722,6 @@ export default function GoalDetailsPage() {
 
   // Handle goal update submission
   const handleSubmitUpdate = async () => {
-    // Check if at least one required field is filled
-    if (!updateFields.progress.trim() && !updateFields.achievements.trim() && 
-        !updateFields.challenges.trim() && !updateFields.nextSteps.trim()) {
-      toast.error('Please fill at least one of the required fields');
-      return;
-    }
-
     setIsSubmittingUpdate(true);
     try {
       const token = localStorage.getItem('token');
@@ -586,11 +729,11 @@ export default function GoalDetailsPage() {
       
       // Format the message from the structured fields
       const formattedMessage = [
-        updateFields.progress ? `**Progress:** ${updateFields.progress}` : '',
-        updateFields.achievements ? `**Achievements:** ${updateFields.achievements}` : '',
-        updateFields.challenges ? `**Challenges:** ${updateFields.challenges}` : '',
-        updateFields.nextSteps ? `**Next Steps:** ${updateFields.nextSteps}` : '',
-        updateFields.comments ? `**Additional Comments:** ${updateFields.comments}` : ''
+        updateFields.progress ? `Progress: ${updateFields.progress}` : '',
+        updateFields.achievements ? `Achievements: ${updateFields.achievements}` : '',
+        updateFields.challenges ? `Challenges: ${updateFields.challenges}` : '',
+        updateFields.nextSteps ? `Next Steps: ${updateFields.nextSteps}` : '',
+        updateFields.comments ? `Additional Comments: ${updateFields.comments}` : ''
       ].filter(Boolean).join('\n\n');
 
       const response = await fetch(`/api/goals/${goalId}/updates`, {
@@ -674,12 +817,14 @@ export default function GoalDetailsPage() {
       const result = await assignProjectToGoal(goalId, projectId);
       if (result.success) {
         toast.success('Project assigned to goal');
-        // Force a complete refresh of all data
+        // Close the dialog before refreshing to prevent visual glitch
+        setShowAssignProject(false);
+        
+        // Refresh data in the background
         await Promise.all([
           loadGoalData(true),  // Force refresh with cache busting
           loadAllProjects()    // Refresh the projects list
         ]);
-        setShowAssignProject(false);
       } else {
         toast.error(String(result.error) || 'Failed to assign project');
       }
@@ -690,24 +835,32 @@ export default function GoalDetailsPage() {
   };
 
   const handleRemoveProject = async (projectId: string) => {
-      console.log('handleRemoveProject called for goal:', goalId, 'project:', projectId);
-    if (!confirm('Are you sure you want to remove this project from the goal?')) return;
-    
+    setDeletingProjectId(projectId);
     try {
       const result = await removeProjectFromGoal(goalId, projectId);
       if (result.success) {
         toast.success('Project removed from goal');
-        // Force a complete refresh of all data
+        
+        // Update local state immediately for better UX
+        setProjects(prevProjects => 
+          prevProjects.filter(p => p.id !== projectId)
+        );
+        
+        // Then refresh data from server
         await Promise.all([
-          loadGoalData(true),  // Force refresh with cache busting
-          loadAllProjects()    // Refresh the projects list
+          loadGoalData(true),
+          loadAllProjects()
         ]);
       } else {
-        toast.error(typeof result.error === 'string' ? result.error : 'Failed to remove project from goal');
+        const errorMessage = typeof result.error === 'string' ? result.error : 'Failed to remove project from goal';
+        toast.error(errorMessage);
+        throw new Error(errorMessage);
       }
     } catch (error) {
       console.error('Error removing project from goal:', error);
       toast.error('Failed to remove project from goal');
+    } finally {
+      setDeletingProjectId(null);
     }
   };
 
@@ -903,14 +1056,14 @@ export default function GoalDetailsPage() {
               </div>
 
               <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label>Status</Label>
+                <div className="flex items-center space-x-2">
+                  <Label className="whitespace-nowrap">Status:</Label>
                   {isEditing ? (
                     <Select 
                       value={editData.status} 
                       onValueChange={(value) => setEditData({...editData, status: value as any})}
                     >
-                      <SelectTrigger>
+                      <SelectTrigger className="w-full">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -922,19 +1075,19 @@ export default function GoalDetailsPage() {
                       </SelectContent>
                     </Select>
                   ) : (
-                    <Badge className={StatusColors[goal.status] + ' inline-block mt-1'}>
+                    <Badge className={StatusColors[goal.status]}>
                       {goal.status.replace('-', ' ').toUpperCase()}
                     </Badge>
                   )}
                 </div>
-                <div>
-                  <Label>Priority</Label>
+                <div className="flex items-center space-x-2">
+                  <Label className="whitespace-nowrap">Priority:</Label>
                   {isEditing ? (
                     <Select 
                       value={editData.priority} 
                       onValueChange={(value) => setEditData({...editData, priority: value as any})}
                     >
-                      <SelectTrigger>
+                      <SelectTrigger className="w-full">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -945,7 +1098,7 @@ export default function GoalDetailsPage() {
                       </SelectContent>
                     </Select>
                   ) : (
-                    <Badge className={PriorityColors[goal.priority] + ' inline-block mt-1'}>
+                    <Badge className={PriorityColors[goal.priority]}>
                       {goal.priority.toUpperCase()}
                     </Badge>
                   )}
@@ -1018,19 +1171,20 @@ export default function GoalDetailsPage() {
                             Assign Existing
                           </Button>
                         </DialogTrigger>
-                        <DialogContent className="max-w-2xl border border-purple-300 shadow-md shadow-purple-100">
-                          <DialogHeader>
-                            <DialogTitle>Assign Existing Project</DialogTitle>
-                          </DialogHeader>
-                          <div className="space-y-4">
+                        <DialogContent className="w-full max-w-2xl p-0 overflow-hidden border border-purple-300 rounded-lg shadow-md shadow-purple-100">
+                          <div className="p-6 pb-4 border-b border-purple-300 bg-white rounded-t-lg">
+                            <h2 className="text-lg font-semibold">Assign Existing Project</h2>
+                            <p className="text-sm text-gray-500 mt-1">Search and select a project to assign to this goal</p>
+                          </div>
+                          <div className="p-6 space-y-6 overflow-y-auto flex-1">
                             {/* Search Input */}
                             <div className="relative">
                               <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                               <Input
-                                placeholder="Search projects..."
+                                placeholder="Search projects by name, description, or department..."
                                 value={projectSearchTerm}
                                 onChange={(e) => setProjectSearchTerm(e.target.value)}
-                                className="pl-10 pr-10"
+                                className="pl-10 pr-10 h-10 focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2 border-gray-300 focus:border-purple-500"
                               />
                               {projectSearchTerm && (
                                 <button
@@ -1042,42 +1196,55 @@ export default function GoalDetailsPage() {
                               )}
                             </div>
 
-                            {unassignedProjects.filter(project =>
-                              project.name.toLowerCase().includes(projectSearchTerm.toLowerCase()) ||
-                              project.description?.toLowerCase().includes(projectSearchTerm.toLowerCase()) ||
-                              project.department?.toLowerCase().includes(projectSearchTerm.toLowerCase())
-                            ).length === 0 ? (
-                              <p className="text-gray-500 text-center py-8">
-                                {projectSearchTerm ? 'No projects match your search' : 'No unassigned projects available'}
-                              </p>
-                            ) : (
-                              <div className="space-y-3 max-h-96 overflow-y-auto pr-2">
-                                {unassignedProjects.filter(project =>
-                                  project.name.toLowerCase().includes(projectSearchTerm.toLowerCase()) ||
-                                  project.description?.toLowerCase().includes(projectSearchTerm.toLowerCase()) ||
-                                  project.department?.toLowerCase().includes(projectSearchTerm.toLowerCase())
-                                ).map(project => (
-                                  <div key={project.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50">
-                                    <div className="flex-1">
-                                      <h4 className="font-medium text-gray-900">{project.name}</h4>
-                                      {project.description && (
-                                        <p className="text-sm text-gray-600 mt-1">{project.description}</p>
-                                      )}
-                                      {project.department && (
-                                        <p className="text-xs text-gray-500 mt-1">{project.department}</p>
-                                      )}
+                            <div className="border border-gray-200 rounded-lg overflow-hidden shadow-sm">
+                              {isLoadingProjects ? (
+                                <div className="flex justify-center items-center p-8">
+                                  <FaSpinner className="animate-spin h-6 w-6 text-purple-600" />
+                                  <span className="ml-2 text-gray-600">Loading projects...</span>
+                                </div>
+                              ) : unassignedProjects.filter(project =>
+                                project.name.toLowerCase().includes(projectSearchTerm.toLowerCase()) ||
+                                project.description?.toLowerCase().includes(projectSearchTerm.toLowerCase()) ||
+                                project.department?.toLowerCase().includes(projectSearchTerm.toLowerCase())
+                              ).length === 0 ? (
+                                <div className="text-center p-8 text-gray-500">
+                                  <FaSearch className="mx-auto h-12 w-12 text-gray-300 mb-2" />
+                                  <p className="text-sm">
+                                    {projectSearchTerm ? 'No projects match your search' : 'No unassigned projects available'}
+                                  </p>
+                                </div>
+                              ) : (
+                                <div className="max-h-[400px] overflow-y-auto divide-y divide-gray-200">
+                                  {unassignedProjects.filter(project =>
+                                    project.name.toLowerCase().includes(projectSearchTerm.toLowerCase()) ||
+                                    project.description?.toLowerCase().includes(projectSearchTerm.toLowerCase()) ||
+                                    project.department?.toLowerCase().includes(projectSearchTerm.toLowerCase())
+                                  ).map(project => (
+                                    <div key={project.id} className="flex items-center justify-between p-4 hover:bg-gray-50 transition-colors">
+                                      <div className="flex-1 min-w-0">
+                                        <h4 className="font-medium text-gray-900 truncate">{project.name}</h4>
+                                        {project.description && (
+                                          <p className="text-sm text-gray-600 mt-1 line-clamp-2 break-words">{project.description}</p>
+                                        )}
+                                        {project.department && (
+                                          <div className="mt-2 flex items-center text-xs text-gray-500">
+                                            <FaBuilding className="mr-1.5 h-3.5 w-3.5 flex-shrink-0" />
+                                            <span>{project.department}</span>
+                                          </div>
+                                        )}
+                                      </div>
+                                      <Button
+                                        size="sm"
+                                        onClick={() => handleAssignExistingProject(project.id)}
+                                        className="bg-purple-600 hover:bg-purple-700 text-white ml-4 whitespace-nowrap"
+                                      >
+                                        Assign
+                                      </Button>
                                     </div>
-                                    <Button
-                                      size="sm"
-                                      onClick={() => handleAssignExistingProject(project.id)}
-                                      className="bg-purple-600 hover:bg-purple-700 text-white ml-4"
-                                    >
-                                      Assign
-                                    </Button>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
+                                  ))}
+                                </div>
+                              )}
+                            </div>
                           </div>
                         </DialogContent>
                       </Dialog>
@@ -1087,7 +1254,7 @@ export default function GoalDetailsPage() {
                         onClick={() => setShowCreateProject(true)}
                         className="bg-purple-600 hover:bg-purple-700 text-white"
                       >
-                        <FaPlus className="mr-2" />
+                        <FaPlus className="w-4 h-4 mr-2" />
                         Create New
                       </Button>
                     </div>
@@ -1125,12 +1292,14 @@ export default function GoalDetailsPage() {
                               <Button 
                                 size="sm" 
                                 variant="destructive"
-                                onClick={() => {
-                                        console.log('Remove button click project:', project);
-                                        handleRemoveProject(project._id || project.id);
-                                      }}
+                                onClick={() => handleRemoveProject(project._id || project.id)}
+                                disabled={deletingProjectId === (project._id || project.id)}
                               >
-                                <FaTrash />
+                                {deletingProjectId === (project._id || project.id) ? (
+                                  <FaSpinner className="animate-spin h-4 w-4" />
+                                ) : (
+                                  <FaTrash />
+                                )}
                               </Button>
                             </div>
                           </div>
@@ -1155,7 +1324,7 @@ export default function GoalDetailsPage() {
                       className="bg-purple-600 hover:bg-purple-700 text-white"
                     >
                       <FaPlus className="w-4 h-4 mr-2" />
-                      Create KPI
+                      Create New
                     </Button>
                   </div>
                 </CardHeader>
@@ -1169,26 +1338,33 @@ export default function GoalDetailsPage() {
                     <div className="space-y-4">
                       {goal.kpis.map((kpi, index) => (
                         <div key={index} className="border rounded-lg p-4">
-                          <div className="flex items-center justify-between mb-2">
-                            <h4 className="font-medium">{kpi.name}</h4>
-                            <div className="flex items-center space-x-2">
-                              <Badge variant="outline">
-                                {kpi.current}/{kpi.target} {kpi.unit}
-                              </Badge>
-                              <Button
-                                size="sm"
-                                variant="outline"
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <h4 className="font-medium text-lg">{kpi.name}</h4>
+                              {kpi.description && (
+                                <p className="text-gray-600 text-sm mt-1">{kpi.description}</p>
+                              )}
+                              <div className="flex items-center space-x-4 mt-2 text-xs text-gray-500">
+                                <div className="flex items-center">
+                                  <FaChartLine className="mr-1 w-3 h-3" />
+                                  <span>{kpi.current}/{kpi.target} {kpi.unit}</span>
+                                </div>
+                                <div className="flex items-center">
+                                  <FaCalendarAlt className="mr-1 w-3 h-3" />
+                                  <span>Due: {new Date(kpi.dueDate).toLocaleDateString()}</span>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex space-x-2">
+                              <Button 
+                                size="sm" 
+                                variant="destructive"
                                 onClick={() => handleRemoveKPI(index)}
-                                className="text-red-600 border-red-300 hover:bg-red-50"
                               >
-                                <FaTimes className="w-3 h-3" />
+                                <FaTrash className="w-3 h-3" />
                               </Button>
                             </div>
                           </div>
-                          <p className="text-gray-600 text-sm mb-3">{kpi.description}</p>
-                            <p className="text-xs text-gray-500">
-                              Due: {new Date(kpi.dueDate).toLocaleDateString()}
-                            </p>
                         </div>
                       ))}
                     </div>
@@ -1276,10 +1452,7 @@ export default function GoalDetailsPage() {
                             {employee.name?.charAt(0).toUpperCase()}
                           </span>
                         </div>
-                        <div>
-                          <p className="text-sm text-gray-900">{employee.name}</p>
-                          <p className="text-xs text-gray-500">{employee.role || 'Member'}</p>
-                        </div>
+                        <p className="text-sm text-gray-900">{employee.name}</p>
                       </div>
                       {isEditing && (
                         <Button
@@ -1298,16 +1471,16 @@ export default function GoalDetailsPage() {
               
               {/* Employee Search Dialog */}
               <Dialog open={showEmployeeSearch} onOpenChange={setShowEmployeeSearch}>
-                <DialogContent className="sm:max-w-md border border-purple-300 shadow-md shadow-purple-100">
-                  <DialogHeader>
-                    <DialogTitle>Add Team Member</DialogTitle>
-                    <DialogDescription>
+                <DialogContent className="sm:max-w-md border border-purple-300 shadow-md shadow-purple-100 rounded-lg overflow-hidden">
+                  <DialogHeader className="px-6 py-4 border-b border-gray-200 bg-gray-50">
+                    <DialogTitle className="text-lg font-semibold text-gray-900">Add Team Member</DialogTitle>
+                    <DialogDescription className="text-sm text-gray-600">
                       Search for employees by name or email
                     </DialogDescription>
                   </DialogHeader>
                   
-                  <div className="space-y-4 py-4">
-                    <div className="flex items-center space-x-2">
+                  <div className="p-6 space-y-4 overflow-y-auto flex-1">
+                    <div className="relative">
                       <Input
                         placeholder="Search by name or email"
                         value={employeeSearchTerm}
@@ -1315,33 +1488,36 @@ export default function GoalDetailsPage() {
                           setEmployeeSearchTerm(e.target.value);
                           searchEmployees(e.target.value);
                         }}
-                        className="flex-1"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-0 focus:ring-offset-0 focus:border-gray-400"
                       />
+                      <FaSearch className="absolute right-3 top-3 h-4 w-4 text-gray-400" />
                     </div>
                     
-                    <div className="max-h-72 overflow-y-auto space-y-2">
+                    <div className="border rounded-md divide-y divide-gray-200 max-h-[300px] overflow-y-auto">
                       {employeeSearchResults.length === 0 ? (
-                        <p className="text-center text-gray-500 py-4">
-                          {employeeSearchTerm ? 'No results found' : 'Type to search'}
-                        </p>
+                        <div className="py-8 text-center">
+                          <p className="text-sm text-gray-500">
+                            {employeeSearchTerm ? 'No employees found' : 'Start typing to search for employees'}
+                          </p>
+                        </div>
                       ) : (
                         employeeSearchResults.map((employee) => (
                           <div
                             key={employee.id || employee.email}
-                            className="flex items-center justify-between p-3 border rounded-md hover:bg-gray-50 cursor-pointer"
+                            className="flex items-center justify-between p-3 hover:bg-gray-50 cursor-pointer transition-colors"
                             onClick={() => addEmployeeToGoal(employee)}
                           >
-                            <div className="flex items-center space-x-3">
-                              <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
-                                <span className="text-gray-600 text-sm font-medium">
+                            <div className="flex items-center space-x-3 min-w-0">
+                              <div className="flex-shrink-0 w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+                                <span className="text-purple-700 font-medium">
                                   {employee.name?.charAt(0).toUpperCase()}
                                 </span>
                               </div>
-                              <div>
-                                <p className="text-sm font-medium">{employee.name}</p>
-                                <p className="text-xs text-gray-500">{employee.email}</p>
+                              <div className="min-w-0">
+                                <p className="text-sm font-medium text-gray-900 truncate">{employee.name}</p>
+                                <p className="text-xs text-gray-500 truncate">{employee.email}</p>
                                 {employee.isManualEntry && (
-                                  <Badge variant="outline" className="mt-1 text-xs">
+                                  <Badge variant="outline" className="mt-1 text-xs bg-yellow-50 text-yellow-700 border-yellow-200">
                                     Manual Entry
                                   </Badge>
                                 )}
@@ -1390,10 +1566,7 @@ export default function GoalDetailsPage() {
                             {viewer.name?.charAt(0).toUpperCase()}
                           </span>
                         </div>
-                        <div>
-                          <p className="text-sm text-gray-900">{viewer.name}</p>
-                          <p className="text-xs text-gray-500">View Only</p>
-                        </div>
+                        <p className="text-sm text-gray-900">{viewer.name}</p>
                       </div>
                       {isEditing && (
                         <Button
@@ -1412,16 +1585,16 @@ export default function GoalDetailsPage() {
               
               {/* Viewer Search Dialog */}
               <Dialog open={showViewerSearch} onOpenChange={setShowViewerSearch}>
-                <DialogContent className="sm:max-w-md border border-purple-300 shadow-md shadow-purple-100">
-                  <DialogHeader>
-                    <DialogTitle>Add Viewer</DialogTitle>
-                    <DialogDescription>
+                <DialogContent className="sm:max-w-md border border-purple-300 shadow-md shadow-purple-100 rounded-lg overflow-hidden">
+                  <DialogHeader className="px-6 py-4 border-b border-gray-200 bg-gray-50">
+                    <DialogTitle className="text-lg font-semibold text-gray-900">Add Viewer</DialogTitle>
+                    <DialogDescription className="text-sm text-gray-600">
                       Search for employees to add as viewers
                     </DialogDescription>
                   </DialogHeader>
                   
-                  <div className="space-y-4 py-4">
-                    <div className="flex items-center space-x-2">
+                  <div className="p-6 space-y-4 overflow-y-auto flex-1">
+                    <div className="relative">
                       <Input
                         placeholder="Search by name or email"
                         value={viewerSearchTerm}
@@ -1429,39 +1602,49 @@ export default function GoalDetailsPage() {
                           setViewerSearchTerm(e.target.value);
                           searchEmployees(e.target.value);
                         }}
-                        className="flex-1"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-0 focus:ring-offset-0 focus:border-gray-400"
                       />
+                      <FaSearch className="absolute right-3 top-3 h-4 w-4 text-gray-400" />
                     </div>
                     
-                    <div className="max-h-72 overflow-y-auto space-y-2">
+                    <div className="border rounded-md divide-y divide-gray-200 max-h-[300px] overflow-y-auto">
                       {employeeSearchResults.length === 0 ? (
-                        <p className="text-center text-gray-500 py-4">
-                          {viewerSearchTerm ? 'No results found' : 'Type to search'}
-                        </p>
+                        <div className="py-8 text-center">
+                          <p className="text-sm text-gray-500">
+                            {viewerSearchTerm ? 'No employees found' : 'Start typing to search for employees'}
+                          </p>
+                        </div>
                       ) : (
                         employeeSearchResults.map((viewer) => (
                           <div
                             key={viewer.id || viewer.email}
-                            className="flex items-center justify-between p-3 border rounded-md hover:bg-gray-50 cursor-pointer"
+                            className="flex items-center justify-between p-3 hover:bg-gray-50 cursor-pointer transition-colors"
                             onClick={() => addViewerToGoal(viewer)}
                           >
-                            <div className="flex items-center space-x-3">
-                              <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
-                                <span className="text-gray-600 text-sm font-medium">
+                            <div className="flex items-center space-x-3 min-w-0">
+                              <div className="flex-shrink-0 w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+                                <span className="text-purple-700 font-medium">
                                   {viewer.name?.charAt(0).toUpperCase()}
                                 </span>
                               </div>
-                              <div>
-                                <p className="text-sm font-medium">{viewer.name}</p>
-                                <p className="text-xs text-gray-500">{viewer.email}</p>
+                              <div className="min-w-0">
+                                <p className="text-sm font-medium text-gray-900 truncate">{viewer.name}</p>
+                                <p className="text-xs text-gray-500 truncate">{viewer.email}</p>
                                 {viewer.isManualEntry && (
-                                  <Badge variant="outline" className="mt-1 text-xs">
+                                  <Badge variant="outline" className="mt-1 text-xs bg-yellow-50 text-yellow-700 border-yellow-200">
                                     Manual Entry
                                   </Badge>
                                 )}
                               </div>
                             </div>
-                            <Button size="sm" className="bg-purple-600 hover:bg-purple-700 text-white">
+                            <Button 
+                              size="sm" 
+                              className="bg-purple-600 hover:bg-purple-700 text-white rounded-full w-8 h-8 p-0 flex items-center justify-center"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                addViewerToGoal(viewer);
+                              }}
+                            >
                               <FaPlus className="w-3 h-3" />
                             </Button>
                           </div>
@@ -1480,10 +1663,11 @@ export default function GoalDetailsPage() {
       {/* Create Project Modal */}
       {showCreateProject && (
         <Dialog open={showCreateProject} onOpenChange={setShowCreateProject}>
-          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto border border-purple-300 shadow-md shadow-purple-100">
-            <DialogHeader>
-            </DialogHeader>
-            <div className="space-y-4">
+          <DialogContent className="w-full max-w-4xl p-0 overflow-hidden border border-purple-300 rounded-lg shadow-md shadow-purple-100">
+            <div className="p-6 pb-4 border-b border-purple-300 bg-white rounded-t-lg">
+              <h2 className="text-lg font-semibold">Create New Project</h2>
+            </div>
+            <div className="p-6 space-y-4 overflow-y-auto flex-1">
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label>Project Title *</Label>
@@ -1634,127 +1818,167 @@ export default function GoalDetailsPage() {
                 )}
               </div>
 
-              <div className="flex justify-end pt-6 border-t">
-                <Button
-                  onClick={handleCreateProject}
-                  className="bg-purple-600 hover:bg-purple-700 text-white"
-                >
-                  Create Project
-                </Button>
-              </div>
             </div>
+            <div className="p-4 border-t border-purple-300 bg-white flex justify-end rounded-b-lg">
+              <Button
+                onClick={handleCreateProject}
+                className="bg-purple-600 hover:bg-purple-700 text-white"
+              >
+                Create Project
+              </Button>
+            </div> 
           </DialogContent>
         </Dialog>
       )}
 
+      {/* Delete Goal Confirmation Dialog */}
+      <Dialog open={showDeleteGoalConfirm} onOpenChange={setShowDeleteGoalConfirm}>
+        <DialogContent hideCloseButton className="sm:max-w-md p-0 overflow-hidden border border-red-300 shadow-lg">
+          <div className="p-6">
+            <DialogHeader>
+              <div className="flex items-center space-x-3">
+                <div className="flex-shrink-0 h-6 w-6 text-red-500">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <DialogTitle className="text-lg font-semibold text-gray-900">Delete Goal</DialogTitle>
+              </div>
+              <DialogDescription className="mt-2 text-gray-600">
+                This will delete the goal and all its linked projects. Continue?
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter className="mt-6 flex justify-end space-x-3">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setShowDeleteGoalConfirm(false)}
+                disabled={isDeletingGoal}
+                className="px-4 py-2 text-sm font-medium"
+              >
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                onClick={confirmDeleteGoal}
+                disabled={isDeletingGoal}
+                className="px-6 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-0 shadow-sm"
+              >
+                {isDeletingGoal ? (
+                  <span className="flex items-center">
+                    <FaSpinner className="animate-spin mr-2 h-3 w-3" />
+                    Deleting...
+                  </span>
+                ) : (
+                  <span>Delete</span>
+                )}
+              </Button>
+            </DialogFooter>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* Update Modal */}
       <Dialog open={showUpdateModal} onOpenChange={setShowUpdateModal}>
-        <DialogContent className="bg-white max-w-4xl max-h-[90vh] overflow-y-auto border border-purple-300 shadow-md shadow-purple-100">
-          <DialogHeader>
-            <DialogTitle className="text-xl font-bold text-gray-900">Post Goal Update</DialogTitle>
-            <DialogDescription className="text-gray-600 text-base">
-              Write a comprehensive update about this goal's progress in one detailed paragraph.
-            </DialogDescription>
-          </DialogHeader>
+        <DialogContent className="w-full max-w-4xl p-0 overflow-hidden border border-purple-300 rounded-lg shadow-md shadow-purple-100">
+          <div className="p-6 pb-4 border-b border-purple-300 bg-white rounded-t-lg">
+            <h2 className="text-lg font-semibold">Post Goal Update</h2>
+            <p className="text-sm text-gray-500 mt-1">Share a comprehensive update about this goal's progress</p>
+          </div>
 
-          <div className="space-y-6">
-            <div>
-              <Label htmlFor="update-progress" className="text-base font-semibold text-gray-800 mb-3 block">
-                Goal Update
-              </Label>
-              <div className="text-sm text-gray-600 mb-3">
-                <p>Please provide updates on the following aspects of this goal:</p>
+          <div className="p-6 space-y-6 max-h-[60vh] overflow-y-auto">
+            <div className="space-y-2">
+              <p className="text-sm text-gray-600">
+                Please provide updates on the following aspects of this goal:
+              </p>
+            </div>
+            
+            <div className="space-y-6">
+              {/* Progress Field */}
+              <div className="space-y-2">
+                <Label htmlFor="update-progress" className="text-sm font-medium text-gray-700">
+                  Current Progress
+                </Label>
+                <Textarea
+                  id="update-progress"
+                  placeholder="Describe the current progress toward goal completion..."
+                  value={updateFields.progress}
+                  onChange={(e) => setUpdateFields({...updateFields, progress: e.target.value})}
+                  className="min-h-[100px] text-sm focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2"
+                  disabled={isSubmittingUpdate}
+                />
               </div>
               
-              <div className="space-y-4">
-                {/* Progress Field */}
-                <div>
-                  <Label htmlFor="update-progress" className="text-sm font-medium text-gray-700">
-                    Current Progress <span className="text-purple-600">*</span>
-                  </Label>
-                  <Textarea
-                    id="update-progress"
-                    placeholder="Describe the current progress toward goal completion (e.g., 50% complete, on track, behind schedule)..."
-                    value={updateFields.progress}
-                    onChange={(e) => setUpdateFields({...updateFields, progress: e.target.value})}
-                    className="mt-1 h-20 text-sm"
-                    disabled={isSubmittingUpdate}
-                  />
-                </div>
-                
-                {/* Achievements Field */}
-                <div>
-                  <Label htmlFor="update-achievements" className="text-sm font-medium text-gray-700">
-                    Recent Achievements <span className="text-purple-600">*</span>
-                  </Label>
-                  <Textarea
-                    id="update-achievements"
-                    placeholder="List key milestones reached, KPI achievements, or other successes since the last update..."
-                    value={updateFields.achievements}
-                    onChange={(e) => setUpdateFields({...updateFields, achievements: e.target.value})}
-                    className="mt-1 h-20 text-sm"
-                    disabled={isSubmittingUpdate}
-                  />
-                </div>
-                
-                {/* Challenges Field */}
-                <div>
-                  <Label htmlFor="update-challenges" className="text-sm font-medium text-gray-700">
-                    Challenges & Blockers <span className="text-purple-600">*</span>
-                  </Label>
-                  <Textarea
-                    id="update-challenges"
-                    placeholder="Describe any challenges encountered and how they're being addressed..."
-                    value={updateFields.challenges}
-                    onChange={(e) => setUpdateFields({...updateFields, challenges: e.target.value})}
-                    className="mt-1 h-20 text-sm"
-                    disabled={isSubmittingUpdate}
-                  />
-                </div>
-                
-                {/* Next Steps Field */}
-                <div>
-                  <Label htmlFor="update-next-steps" className="text-sm font-medium text-gray-700">
-                    Next Steps <span className="text-purple-600">*</span>
-                  </Label>
-                  <Textarea
-                    id="update-next-steps"
-                    placeholder="Outline upcoming priorities and actions planned for the next period..."
-                    value={updateFields.nextSteps}
-                    onChange={(e) => setUpdateFields({...updateFields, nextSteps: e.target.value})}
-                    className="mt-1 h-20 text-sm"
-                    disabled={isSubmittingUpdate}
-                  />
-                </div>
-                
-                {/* Optional Comments Field */}
-                <div>
-                  <Label htmlFor="update-comments" className="text-sm font-medium text-gray-700">
-                    Additional Comments <span className="text-gray-400">(Optional)</span>
-                  </Label>
-                  <Textarea
-                    id="update-comments"
-                    placeholder="Any other information you'd like to share about this goal..."
-                    value={updateFields.comments}
-                    onChange={(e) => setUpdateFields({...updateFields, comments: e.target.value})}
-                    className="mt-1 h-20 text-sm"
-                    disabled={isSubmittingUpdate}
-                  />
-                </div>
+              {/* Achievements Field */}
+              <div className="space-y-2">
+                <Label htmlFor="update-achievements" className="text-sm font-medium text-gray-700">
+                  Recent Achievements
+                </Label>
+                <Textarea
+                  id="update-achievements"
+                  placeholder="List key milestones reached, KPI achievements, or other successes since the last update..."
+                  value={updateFields.achievements}
+                  onChange={(e) => setUpdateFields({...updateFields, achievements: e.target.value})}
+                  className="min-h-[100px] text-sm focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2"
+                  disabled={isSubmittingUpdate}
+                />
               </div>
               
-              <div className="mt-4 text-sm text-gray-500">
-                <span className="text-purple-600">*</span> Required fields - please fill at least one
+              {/* Challenges Field */}
+              <div className="space-y-2">
+                <Label htmlFor="update-challenges" className="text-sm font-medium text-gray-700">
+                  Challenges & Blockers
+                </Label>
+                <Textarea
+                  id="update-challenges"
+                  placeholder="Describe any challenges encountered and how they're being addressed..."
+                  value={updateFields.challenges}
+                  onChange={(e) => setUpdateFields({...updateFields, challenges: e.target.value})}
+                  className="min-h-[100px] text-sm focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2"
+                  disabled={isSubmittingUpdate}
+                />
+              </div>
+              
+              {/* Next Steps Field */}
+              <div className="space-y-2">
+                <Label htmlFor="update-next-steps" className="text-sm font-medium text-gray-700">
+                  Next Steps
+                </Label>
+                <Textarea
+                  id="update-next-steps"
+                  placeholder="Outline upcoming priorities and actions planned for the next period..."
+                  value={updateFields.nextSteps}
+                  onChange={(e) => setUpdateFields({...updateFields, nextSteps: e.target.value})}
+                  className="min-h-[100px] text-sm focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2"
+                  disabled={isSubmittingUpdate}
+                />
+              </div>
+              
+              {/* Optional Comments Field */}
+              <div className="space-y-2">
+                <Label htmlFor="update-comments" className="text-sm font-medium text-gray-700">
+                  Additional Comments <span className="text-gray-400"></span>
+                </Label>
+                <Textarea
+                  id="update-comments"
+                  placeholder="Any other information you'd like to share about this goal..."
+                  value={updateFields.comments}
+                  onChange={(e) => setUpdateFields({...updateFields, comments: e.target.value})}
+                  className="min-h-[80px] text-sm focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2"
+                  disabled={isSubmittingUpdate}
+                />
               </div>
             </div>
+            
+            
 
             {/* Recent Updates */}
             {goalUpdates.length > 0 && (
-              <div className="border-t pt-4">
+              <div className="border-t border-gray-200 pt-4 mt-6">
                 <h4 className="text-sm font-medium text-gray-700 mb-3">Recent Updates</h4>
-                <div className="space-y-3 max-h-48 overflow-y-auto">
+                <div className="space-y-3 max-h-[200px] overflow-y-auto pr-2">
                   {goalUpdates.slice(0, 3).map((update, index) => (
-                    <div key={index} className="bg-gray-50 p-3 rounded-lg">
+                    <div key={index} className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                       <div className="flex justify-between items-start mb-2">
                         <span className="text-sm font-medium text-gray-900">
                           {update.author_name || 'Unknown User'}
@@ -1771,127 +1995,122 @@ export default function GoalDetailsPage() {
             )}
           </div>
 
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => {
-                setShowUpdateModal(false);
-                setUpdateFields({
-                  progress: '',
-                  achievements: '',
-                  challenges: '',
-                  nextSteps: '',
-                  comments: ''
-                });
-              }}
-              disabled={isSubmittingUpdate}
-            >
-              Cancel
-            </Button>
+          <div className="flex justify-end px-6 py-4 border-t border-gray-200 bg-gray-50 rounded-b-lg">
             <Button
               onClick={handleSubmitUpdate}
-              disabled={(!updateFields.progress.trim() && !updateFields.achievements.trim() && !updateFields.challenges.trim() && !updateFields.nextSteps.trim()) || isSubmittingUpdate}
-              className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2"
+              disabled={isSubmittingUpdate}
+              className="px-6 py-2 text-sm font-medium text-white bg-purple-600 border border-transparent rounded-md shadow-sm hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isSubmittingUpdate ? (
-                <>
-                  <FaSpinner className="animate-spin mr-2 h-4 w-4 text-purple-600" />
+                <span className="flex items-center">
+                  <FaSpinner className="animate-spin h-4 w-4 mr-2" />
                   Posting Update...
-                </>
+                </span>
               ) : (
-                'Post Goal Update'
+                'Post Update'
               )}
             </Button>
-          </DialogFooter>
+          </div>
         </DialogContent>
       </Dialog>
 
       {/* Create KPI Modal */}
       <Dialog open={showCreateKPI} onOpenChange={setShowCreateKPI}>
-        <DialogContent className="max-w-2xl border border-purple-300 shadow-md shadow-purple-100">
-          <DialogHeader>
-            <DialogTitle>Create New KPI</DialogTitle>
-            <DialogDescription>
-              Define a key performance indicator to track progress toward this goal.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="kpi-name">KPI Name *</Label>
-                <Input
-                  id="kpi-name"
-                  value={createKPIData.name}
-                  onChange={(e) => setCreateKPIData({...createKPIData, name: e.target.value})}
-                  placeholder="e.g., Monthly Revenue"
-                />
+        <DialogContent className="w-full max-w-2xl p-0 overflow-hidden border border-purple-300 rounded-lg shadow-md shadow-purple-100">
+          <div className="p-6 pb-4 border-b border-purple-300 bg-white rounded-t-lg">
+            <h2 className="text-lg font-semibold">Create New KPI</h2>
+            <p className="text-sm text-gray-500 mt-1">Add a new key performance indicator for this goal</p>
+          </div>
+          
+          <div className="p-6 space-y-6">
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <Label htmlFor="kpi-name" className="text-sm font-medium text-gray-700">KPI Name *</Label>
+                  <Input
+                    id="kpi-name"
+                    value={createKPIData.name}
+                    onChange={(e) => setCreateKPIData({...createKPIData, name: e.target.value})}
+                    placeholder="e.g., Monthly Revenue"
+                    className="w-full"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="kpi-unit" className="text-sm font-medium text-gray-700">Unit</Label>
+                  <Input
+                    id="kpi-unit"
+                    value={createKPIData.unit}
+                    onChange={(e) => setCreateKPIData({...createKPIData, unit: e.target.value})}
+                    placeholder="e.g., USD, %, units"
+                    className="w-full"
+                  />
+                </div>
               </div>
-              <div>
-                <Label htmlFor="kpi-unit">Unit</Label>
-                <Input
-                  id="kpi-unit"
-                  value={createKPIData.unit}
-                  onChange={(e) => setCreateKPIData({...createKPIData, unit: e.target.value})}
-                  placeholder="e.g., USD, %, units"
-                />
-              </div>
-            </div>
 
-            <div>
-              <Label htmlFor="kpi-description">Description</Label>
-              <Textarea
-                id="kpi-description"
-                value={createKPIData.description}
-                onChange={(e) => setCreateKPIData({...createKPIData, description: e.target.value})}
-                placeholder="Describe what this KPI measures..."
-                rows={3}
-              />
-            </div>
+              <div className="space-y-2">
+                <Label htmlFor="kpi-description" className="text-sm font-medium text-gray-700">Description</Label>
+                <Textarea
+                  id="kpi-description"
+                  value={createKPIData.description}
+                  onChange={(e) => setCreateKPIData({...createKPIData, description: e.target.value})}
+                  placeholder="Describe what this KPI measures..."
+                  rows={3}
+                  className="resize-none"
+                />
+              </div>
 
-            <div className="grid grid-cols-3 gap-4">
-              <div>
-                <Label htmlFor="kpi-target">Target Value *</Label>
-                <Input
-                  id="kpi-target"
-                  type="number"
-                  value={createKPIData.target}
-                  onChange={(e) => setCreateKPIData({...createKPIData, target: e.target.value})}
-                  placeholder="100"
-                />
-              </div>
-              <div>
-                <Label htmlFor="kpi-current">Current Value</Label>
-                <Input
-                  id="kpi-current"
-                  type="number"
-                  value={createKPIData.current}
-                  onChange={(e) => setCreateKPIData({...createKPIData, current: e.target.value})}
-                  placeholder="0"
-                />
-              </div>
-              <div>
-                <Label htmlFor="kpi-due">Due Date *</Label>
-                <Input
-                  id="kpi-due"
-                  type="date"
-                  value={createKPIData.dueDate}
-                  onChange={(e) => setCreateKPIData({...createKPIData, dueDate: e.target.value})}
-                />
+              <div className="grid grid-cols-3 gap-6">
+                <div className="space-y-2">
+                  <Label htmlFor="kpi-target" className="text-sm font-medium text-gray-700">Target Value *</Label>
+                  <Input
+                    id="kpi-target"
+                    type="number"
+                    value={createKPIData.target}
+                    onChange={(e) => setCreateKPIData({...createKPIData, target: e.target.value})}
+                    placeholder="100"
+                    className="w-full"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="kpi-current" className="text-sm font-medium text-gray-700">Current Value</Label>
+                  <Input
+                    id="kpi-current"
+                    type="number"
+                    value={createKPIData.current}
+                    onChange={(e) => setCreateKPIData({...createKPIData, current: e.target.value})}
+                    placeholder="0"
+                    className="w-full"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="kpi-due" className="text-sm font-medium text-gray-700">Due Date *</Label>
+                  <Input
+                    id="kpi-due"
+                    type="date"
+                    value={createKPIData.dueDate}
+                    onChange={(e) => setCreateKPIData({...createKPIData, dueDate: e.target.value})}
+                    className="w-full"
+                  />
+                </div>
               </div>
             </div>
           </div>
 
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowCreateKPI(false)}>
+          <div className="flex justify-end space-x-3 px-6 py-4 border-t border-gray-200 bg-gray-50 rounded-b-lg">
+            <Button 
+              variant="outline" 
+              onClick={() => setShowCreateKPI(false)}
+              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border-gray-300 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+            >
               Cancel
             </Button>
             <Button
               onClick={handleCreateKPI}
-              className="bg-purple-600 hover:bg-purple-700 text-white"
+              className="px-4 py-2 text-sm font-medium text-white bg-purple-600 border border-transparent rounded-md shadow-sm hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
             >
               Create KPI
             </Button>
-          </DialogFooter>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

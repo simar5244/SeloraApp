@@ -1,0 +1,94 @@
+/* Onboarding Page Styles */
+
+/* Ensure smooth transitions */
+.fade-enter {
+  opacity: 0;
+  transform: scale(0.95);
+}
+
+.fade-enter-active {
+  opacity: 1;
+  transform: scale(1);
+  transition: opacity 300ms, transform 300ms;
+}
+
+.fade-exit {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.fade-exit-active {
+  opacity: 0;
+  transform: scale(0.95);
+  transition: opacity 300ms, transform 300ms;
+}
+
+/* Animation for the Jarvis-like UI */
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(139, 92, 246, 0.6);
+  }
+}
+
+.pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* Smooth scroll behavior */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Custom gradient text */
+.gradient-text {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Card hover effects */
+.onboarding-card {
+  transition: all 0.3s ease;
+}
+
+.onboarding-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* Input focus styles */
+.onboarding-input:focus {
+  border-color: #8b5cf6;
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+}
+
+/* Button animations */
+.onboarding-button {
+  transition: all 0.2s ease;
+}
+
+.onboarding-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+}
+
+/* Wavy background animation enhancements */
+@keyframes wave-flow {
+  0% {
+    transform: translateX(-100px) translateY(0px);
+  }
+  50% {
+    transform: translateX(0px) translateY(-20px);
+  }
+  100% {
+    transform: translateX(100px) translateY(0px);
+  }
+}
+
+.wave-element {
+  animation: wave-flow 20s ease-in-out infinite;
+}

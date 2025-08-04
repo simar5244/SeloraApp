@@ -19,7 +19,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { FaSearch, FaPlus, FaFilter, FaExpandAlt, FaUserPlus, FaTrash, FaEdit, FaSyncAlt, FaCamera, FaTimes, FaUndo, FaRobot } from 'react-icons/fa';
+import { FaSearch, FaSpinner ,FaPlus, FaFilter, FaExpandAlt, FaUserPlus, FaTrash, FaEdit, FaSyncAlt, FaCamera, FaTimes, FaUndo, FaRobot } from 'react-icons/fa';
 import { useRouter } from 'next/navigation';
 import { toast } from "@/components/ui/use-toast";
 import { OrgChartTourLauncher } from '@/components/tour/OrgChartTourLauncher';
@@ -2518,9 +2518,10 @@ const OrganizationChartPage = () => {
       {/* Chart area */}
       <div className="flex-grow relative" ref={orgChartRef}>
         {isLoading ? (
-          <div className="flex items-center justify-center h-full">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
-            <span className="ml-3 text-lg">Loading...</span>
+          <div className="flex h-full items-center justify-center">
+            <div className="mb-4">
+              <FaSpinner className="h-10 w-10 text-purple-600 animate-spin" />
+            </div>
           </div>
         ) : error ? (
           <Alert variant="destructive" className="m-4">

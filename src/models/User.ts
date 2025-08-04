@@ -71,6 +71,7 @@ export interface IUser extends Document {
   };
   position?: string;
   responsibilities?: string[];
+  onboarding?: boolean; // Whether user has completed onboarding
 }
 
 const UserSchema: Schema = new Schema({
@@ -283,6 +284,10 @@ const UserSchema: Schema = new Schema({
     type: String,
     enum: ['pending', 'approved', 'rejected'],
     default: 'pending'
+  },
+  onboarding: {
+    type: Boolean,
+    default: false
   },
 }, {
   timestamps: true

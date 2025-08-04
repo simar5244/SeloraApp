@@ -1,0 +1,3 @@
+[2025-08-04T00:00:30.194Z] [DEBUG] [2025-08-04T00:00:30.194Z] Daemon is running...
+[2025-08-04T00:00:30.198Z] [INFO] [RESOURCE] Memory: 3.99MB used, 5.06MB total, 31.25MB RSS | Load: 1.81, 1.77, 2.12
+[2025-08-04T00:00:30.200Z] [WARN] [WARNING] High memory usage: 78.9% of heap used

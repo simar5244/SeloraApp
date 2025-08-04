@@ -263,7 +263,7 @@ export async function PATCH(request: NextRequest): Promise<NextResponse> {
     // 4. Prepare User Update Object (Only fields relevant to User model)
     console.log('[API Profile PATCH] Fields to consider for update:', updateData);
     const userUpdate: any = {};
-    const allowedFields = ['username', 'email', 'firstName', 'lastName', 'company', 'phone']; 
+    const allowedFields = ['username', 'email', 'firstName', 'lastName', 'company', 'phone', 'onboarding']; 
     
     for (const field of allowedFields) {
       if (updateData[field] !== undefined) {

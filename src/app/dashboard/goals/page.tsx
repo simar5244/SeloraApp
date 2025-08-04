@@ -201,11 +201,8 @@ export default function GoalsPage() {
 
   if (loadingGoals) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex flex-col justify-center items-center h-64">
-          <FaSpinner className="animate-spin h-8 w-8 text-purple-600 mb-4" />
-          <p className="text-gray-600">Loading goals...</p>
-        </div>
+      <div className="flex h-screen items-center justify-center bg-gray-50">
+        <FaSpinner className="h-10 w-10 text-purple-600 animate-spin" />
       </div>
     );
   }
@@ -302,10 +299,7 @@ export default function GoalsPage() {
               ? 'Try adjusting your search or filters'
               : 'Get started by creating your first goal'}
           </p>
-          <Button onClick={() => router.push('/dashboard/goals/create')} className="bg-purple-600 hover:bg-purple-700">
-            <Plus className="h-4 w-4 mr-2" />
-            Create Goal
-          </Button>
+          
         </div>
       )}
 
