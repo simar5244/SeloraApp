@@ -235,7 +235,8 @@ export async function POST(req: NextRequest) {
           emailVerified: false, // This is key - not verified until MFA passes
           emailVerificationToken,
           createdAt: new Date(),
-          isActive: false // Not active until both email verified and admin approved
+          isActive: false, // Not active until both email verified and admin approved
+          onboarding: false, // New users need to complete onboarding
         });
 
         const savedUser = await newUser.save();

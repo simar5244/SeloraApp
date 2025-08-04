@@ -19,8 +19,11 @@ const extractToken = (request: NextRequest): string | null => {
   return authHeader.split(' ')[1];
 };
 
-export async function PATCH(request: NextRequest) {
-  noStore();
+export async function PATCH(request: NextRequest): Promise<NextResponse> {
+  console.log('🔧 [API Profile Job PATCH] ===== STARTING JOB PROFILE UPDATE =====');
+  console.log('🔧 [API Profile Job PATCH] Request URL:', request.url);
+  console.log('🔧 [API Profile Job PATCH] Request method:', request.method);
+  
   let client: MongoClient | null = null;
   
   try {
@@ -52,6 +55,9 @@ export async function PATCH(request: NextRequest) {
     
     // Get update data from request
     const updateData = await request.json();
+    console.log('💼 [API Profile Job PATCH] Request body received:', JSON.stringify(updateData, null, 2));
+    console.log('💼 [API Profile Job PATCH] Department in request:', updateData.department);
+    console.log('💼 [API Profile Job PATCH] ReportsTo in request:', updateData.reportsTo);
     console.log('Updating job profile with data:', JSON.stringify(updateData));
     
     // Connect to database
@@ -123,6 +129,15 @@ export async function PATCH(request: NextRequest) {
       profileUpdate.totalduration = updateData.totalduration;
     }
     
+    console.log(' [API Profile Job PATCH] Processing department field...');
+    if (updateData.department !== undefined) {
+      console.log(' [API Profile Job PATCH] Department value received:', updateData.department);
+      profileUpdate.department = updateData.department;
+      console.log(' [API Profile Job PATCH] Department added to profileUpdate');
+    } else {
+      console.log(' [API Profile Job PATCH] No department field in updateData');
+    }
+    
     if (updateData.currentroleduration !== undefined) {
       profileUpdate.currentroleduration = updateData.currentroleduration;
     }
@@ -139,23 +154,38 @@ export async function PATCH(request: NextRequest) {
       profileUpdate.industry = updateData.industry;
     }
 
+    console.log(' [API Profile Job PATCH] Processing reportsTo field...');
     if (updateData.reportsTo !== undefined) {
-      // Store in both places for backward compatibility
+      console.log(' [API Profile Job PATCH] ReportsTo value received:', updateData.reportsTo);
+      // Only use the correct schema field
       profileUpdate.reportsTo = updateData.reportsTo;
-      profileUpdate['reports.To'] = updateData.reportsTo;
+      console.log(' [API Profile Job PATCH] ReportsTo added to profileUpdate');
+    } else {
+      console.log(' [API Profile Job PATCH] No reportsTo field in updateData');
     }
     
     // Update directly in the user document
     console.log(`Updating job profile for user ${user._id.toString()}:`, JSON.stringify(profileUpdate));
     
     // Update the user document directly
+    console.log('💾 [API Profile Job PATCH] About to update user with ID:', user._id);
+    console.log('💾 [API Profile Job PATCH] Update object:', JSON.stringify(profileUpdate, null, 2));
+    
     const updatedUser = await UserModel.findByIdAndUpdate(
       user._id,
       { $set: profileUpdate },
-      { new: true, runValidators: true }
+      { new: true, runValidators: true, strict: false }
     ).select('-password -__v');
     
+    console.log('💾 [API Profile Job PATCH] Update result - updatedUser exists:', !!updatedUser);
+    if (updatedUser) {
+      console.log('💾 [API Profile Job PATCH] Updated user department:', updatedUser.department);
+      console.log('💾 [API Profile Job PATCH] Updated user reportsTo:', updatedUser.reportsTo);
+      console.log('💾 [API Profile Job PATCH] Updated user keys:', Object.keys(updatedUser.toObject ? updatedUser.toObject() : updatedUser));
+    }
+    
     if (!updatedUser) {
+      console.log('❌ [API Profile Job PATCH] Update failed - user not found');
       return NextResponse.json(
         { error: 'User not found or update failed' },
         { status: 404 }

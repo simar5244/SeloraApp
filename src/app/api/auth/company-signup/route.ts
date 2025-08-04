@@ -94,6 +94,7 @@ export async function POST(req: NextRequest) {
       status: 'active',
       isActive: true,
       stripeCustomerId: '', // Will be set after Stripe customer creation
+      onboarding: false, // New users need to complete onboarding
     }) as any; // Using any to bypass TypeScript checks for now
 
     // Save the user to get the _id

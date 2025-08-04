@@ -157,7 +157,7 @@ export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState("basic-info");
   const [saveSuccess, setSaveSuccess] = useState("");
   const [saveError, setSaveError] = useState("");
-  const [tutorialsEnabled, setTutorialsEnabled] = useState(true);
+  const [tutorialsEnabled, setTutorialsEnabled] = useState(false);
 
   // Show toast notifications when saveSuccess or saveError state changes
   useEffect(() => {
@@ -232,26 +232,30 @@ export default function ProfilePage() {
 
   // Define fetchUserData function to be reusable
   const fetchUserData = async () => {
+    console.log('📥 [PROFILE PAGE] ===== FETCHING USER DATA =====');
     setLoading(true);
     const token = localStorage.getItem('token');
     if (!token) {
+      console.log('📥 [PROFILE PAGE] No token found, redirecting to login');
       router.push('/login');
       return;
     }
     
     try {
       // Get user data from the original /api/profile endpoint
-      console.log('Fetching user data from /api/profile');
+      console.log('📥 [PROFILE PAGE] Fetching user data from /api/profile');
       const response = await fetch('/api/profile', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
       });
 
+      console.log('📥 [PROFILE PAGE] Response status:', response.status);
+      
       if (!response.ok) {
         // Handle errors but don't kick users out unnecessarily
         const errorText = await response.text().catch(() => 'No response text');
-        console.error('Profile fetch error:', response.status, errorText);
+        console.error('📥 [PROFILE PAGE] Profile fetch error:', response.status, errorText);
         
         // Only redirect for auth issues
         if (response.status === 401) {
@@ -268,7 +272,10 @@ export default function ProfilePage() {
       }
 
       const userData = await response.json();
-      console.log('User data from /api/profile:', userData);
+      console.log('📥 [PROFILE PAGE] User data received:', JSON.stringify(userData, null, 2));
+      console.log('📥 [PROFILE PAGE] Department in userData:', userData.department);
+      console.log('📥 [PROFILE PAGE] ReportsTo in userData:', userData.reportsTo);
+      console.log('📥 [PROFILE PAGE] Onboarding in userData:', userData.onboarding);
       setUser(userData);
       
       basicInfoForm.reset({
@@ -377,6 +384,9 @@ export default function ProfilePage() {
   };
 
   const handleJobProfileSubmit = async (values: z.infer<typeof jobProfileSchema>) => {
+    console.log('💼 [PROFILE PAGE] ===== JOB PROFILE SUBMIT STARTED =====');
+    console.log('💼 [PROFILE PAGE] Form values received:', JSON.stringify(values, null, 2));
+    
     setLoading(true);
     setSaveError("");
     
@@ -387,8 +397,8 @@ export default function ProfilePage() {
         hours: Number(duty.hours)
       }));
       
-      // Log the reportsTo value before submission
-      console.log("[Profile] Current reportsTo value:", values.reportsTo);
+      console.log('💼 [PROFILE PAGE] Department value from form:', values.department);
+      console.log('💼 [PROFILE PAGE] ReportsTo value from form:', values.reportsTo);
       
       // Format updated profile data
       const updatedProfile = {
@@ -404,6 +414,10 @@ export default function ProfilePage() {
         industry: values.industry,
         reportsTo: values.reportsTo || null, // Ensure it's null if empty string
       };
+      
+      console.log('💼 [PROFILE PAGE] Final payload to send:', JSON.stringify(updatedProfile, null, 2));
+      console.log('💼 [PROFILE PAGE] Department in payload:', updatedProfile.department);
+      console.log('💼 [PROFILE PAGE] ReportsTo in payload:', updatedProfile.reportsTo);
       
       console.log("[Profile] Submitting job profile update:", JSON.stringify(updatedProfile, null, 2));
       

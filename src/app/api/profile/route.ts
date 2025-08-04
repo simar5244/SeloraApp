@@ -93,16 +93,18 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     await connectDB();
 
     // Get company code from payload or header and normalize to lowercase
-    const companyCode = normalizeCompanyCode(
-      request.headers.get('X-Company-Code') || 
-      payload.companyCode
-    );
+    const rawCompanyCode = request.headers.get('X-Company-Code') || payload.companyCode;
+    const companyCode = normalizeCompanyCode(rawCompanyCode);
 
+    console.log('🏢 [GET /api/profile] Raw company code from header:', request.headers.get('X-Company-Code'));
+    console.log('🏢 [GET /api/profile] Raw company code from payload:', payload.companyCode);
+    console.log('🏢 [GET /api/profile] Final normalized company code:', companyCode);
     console.log(`[GET /api/profile] Looking for user ${payload.id} with company code: ${companyCode || 'none'}`);
     console.log('[GET /api/profile] Full payload:', JSON.stringify(payload));
 
     // Choose the appropriate user model based on normalized company code
     const UserModel = companyCode ? getUserModel(companyCode) : User;
+    console.log('🏢 [GET /api/profile] Using UserModel for company:', companyCode || 'default');
 
     // Always fetch the user from the database to get current role, company, etc.
     let user = null;
@@ -181,8 +183,13 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     // Convert user to plain object to safely access nested properties
     const userObj = user.toObject ? user.toObject() : user;
     
-    // Return user data with current role and company from database
-    return NextResponse.json({
+    console.log('📊 [GET /api/profile] Raw user object keys:', Object.keys(userObj));
+    console.log('📊 [GET /api/profile] Department field in userObj:', userObj.department);
+    console.log('📊 [GET /api/profile] ReportsTo field in userObj:', userObj.reportsTo);
+    console.log('📊 [GET /api/profile] Reports object in userObj:', userObj.reports);
+    console.log('📊 [GET /api/profile] Onboarding field in userObj:', userObj.onboarding);
+    
+    const responseData = {
       _id: userObj._id,
       username: userObj.username,
       email: userObj.email,
@@ -204,7 +211,15 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       industry: userObj.industry || "",
       // Handle both reports.To and reportsTo for backward compatibility
       reportsTo: (userObj.reports && userObj.reports.To) || userObj.reportsTo || "",
-    });
+      onboarding: userObj.onboarding
+    };
+    
+    console.log('📊 [GET /api/profile] Response data department:', responseData.department);
+    console.log('📊 [GET /api/profile] Response data reportsTo:', responseData.reportsTo);
+    console.log('📊 [GET /api/profile] Response data onboarding:', responseData.onboarding);
+    
+    // Return user data with current role and company from database
+    return NextResponse.json(responseData);
   } catch (error: any) {
     console.error('Error fetching profile:', error);
     return NextResponse.json({ error: error.message || 'Failed to fetch profile' }, { status: 500 });
@@ -281,6 +296,7 @@ export async function PATCH(request: NextRequest): Promise<NextResponse> {
     if (updateData.workMode !== undefined) userUpdate.workMode = updateData.workMode;
     if (updateData.officeLocation !== undefined) userUpdate.officeLocation = updateData.officeLocation;
     if (updateData.industry !== undefined) userUpdate.industry = updateData.industry;
+    if (updateData.department !== undefined) userUpdate.department = updateData.department;
     
     // Handle reportsTo field - store it in reports.To for MongoDB
     if (updateData.reportsTo !== undefined) {

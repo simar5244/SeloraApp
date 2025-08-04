@@ -3,16 +3,17 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { FiClock, FiLogOut, FiArrowLeft } from 'react-icons/fi';
+import { FiClock, FiLogOut } from 'react-icons/fi';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 import { initializeFirstTimeVisitTracking } from '@/utils/tutorialSettings';
-
+import { FaSpinner } from 'react-icons/fa';
 export default function PendingApprovalPage() {
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [lastChecked, setLastChecked] = useState<number | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   
   useEffect(() => {
     // Get user data from localStorage
@@ -93,8 +94,9 @@ export default function PendingApprovalPage() {
   
   const handleCheckStatus = async () => {
     try {
-      // Set the last checked timestamp
+      // Set the last checked timestamp and show spinner
       setLastChecked(Date.now());
+      setIsRefreshing(true);
       
       // Force a fresh check, bypassing cache
       console.log('Checking user status with token...');
@@ -154,6 +156,9 @@ export default function PendingApprovalPage() {
           .catch(err => {
             console.error('Error checking user status:', err);
             setLoading(false);
+          })
+          .finally(() => {
+            setIsRefreshing(false);
           });
       }
     } catch (error) {
@@ -187,38 +192,38 @@ export default function PendingApprovalPage() {
   }
   
   return (
-    <div className="min-h-screen bg-gradient-to-r from-blue-50 to-indigo-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-xl shadow-lg p-10 max-w-2xl w-full">
+    <div className="min-h-screen bg-white flex items-center justify-center p-4">
+      <div className="p-10 max-w-2xl w-full">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-800 mb-4">Account Pending Approval</h1>
+          <h1 className="text-3xl font-light text-gray-800 mb-4">Account Pending Approval</h1>
           
           <div className="flex justify-center mb-6">
-            <div className="rounded-full bg-yellow-100 p-4">
+            <div className="rounded-full  p-4">
               <FiClock className="w-12 h-12 text-yellow-500" />
             </div>
           </div>
           
-          <p className="text-gray-600 text-lg mb-6">
+          <p className="text-gray-600 text-lg font-light mb-6">
             Your account is currently awaiting administrator approval.
           </p>
           
           {user && (
             <div className="bg-gray-50 rounded-lg p-6 mb-6 text-left">
-              <h2 className="text-xl font-semibold mb-4 text-gray-700">Your Account Information</h2>
+              <h2 className="text-xl font-light mb-4 text-gray-700">Your Account Information</h2>
               <div className="space-y-3">
                 <p className="text-gray-700">
-                  <span className="font-medium inline-block w-24">Username:</span> {user.username}
+                  <span className="font-light inline-block w-24">Username:</span> {user.username}
                 </p>
                 <p className="text-gray-700">
-                  <span className="font-medium inline-block w-24">Email:</span> {user.email}
+                  <span className="font-light inline-block w-24">Email:</span> {user.email}
                 </p>
                 <p className="text-gray-700">
-                  <span className="font-medium inline-block w-24">Company:</span> {user.company}
+                  <span className="font-light inline-block w-24">Company:</span> {user.company}
                 </p>
                 
                 <p className="text-gray-700">
-                  <span className="font-medium inline-block w-24">Status:</span> 
-                  <span className={user.status === 'active' ? 'text-green-600 font-medium' : 'text-yellow-600 font-medium'}>
+                  <span className="font-light inline-block w-24">Status:</span> 
+                  <span className={user.status === 'active' ? 'text-green-600 font-light' : 'text-yellow-600 font-light'}>
                     {user.status?.toUpperCase() || 'PENDING'}
                   </span>
                 </p>
@@ -226,14 +231,9 @@ export default function PendingApprovalPage() {
             </div>
           )}
           
-          <div className="bg-blue-50 border-l-4 border-blue-500 p-4 text-blue-700 mb-6 text-left">
-            <p>
-              <span className="font-semibold">What happens next?</span> An administrator from your organization will review your account. 
-              Once approved, you'll be able to access the dashboard. This usually takes 1-2 business days.
-            </p>
-          </div>
+
           
-          <p className="text-gray-600 mb-6">
+          <p className="text-gray-600 font-light mb-6">
             Please check back later or contact your administrator to expedite the approval process.
           </p>
         </div>
@@ -241,16 +241,16 @@ export default function PendingApprovalPage() {
         <div className="flex flex-col space-y-4">
           <Button
             onClick={handleCheckStatus}
-            className="py-3 px-4 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-md font-medium flex items-center justify-center gap-2"
+            className="py-3 px-4 bg-purple-100 hover:bg-purple-200 text-purple-700 rounded-md font-light flex items-center justify-center gap-2"
             variant="ghost"
           >
-            <FiClock />
-            Refresh Status
+            {isRefreshing ? <FaSpinner className="animate-spin" /> : <FiClock />}
+            {isRefreshing ? 'Checking...' : 'Refresh Status'}
           </Button>
           
           <Button
             onClick={handleLogout}
-            className="py-3 px-4 bg-red-100 hover:bg-red-200 text-red-700 rounded-md font-medium flex items-center justify-center gap-2"
+            className="py-3 px-4 bg-red-100 hover:bg-red-200 text-red-700 rounded-md font-light flex items-center justify-center gap-2"
             variant="ghost"
           >
             <FiLogOut />
@@ -258,9 +258,7 @@ export default function PendingApprovalPage() {
           </Button>
         </div>
         
-        <div className="mt-8 text-center text-gray-500 text-sm">
-          Last status check: {lastChecked ? new Date(lastChecked).toLocaleTimeString() : 'Never'}
-        </div>
+
       </div>
     </div>
   );

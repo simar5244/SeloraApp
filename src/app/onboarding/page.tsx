@@ -490,7 +490,6 @@ export default function OnboardingPage() {
       return;
     }
 
-    localStorage.setItem('tutorialsEnabled', JSON.stringify(true));
     toast.success('Profile completed successfully!');
     
     setTimeout(() => {

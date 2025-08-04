@@ -549,9 +549,9 @@ export async function middleware(request: NextRequest) {
       });
 
       // ===== ONBOARDING CHECK =====
-      // Check if user needs to complete onboarding (except for onboarding page itself and logout)
+      // Check if user needs onboarding (only if not already on onboarding page)
       if (path !== '/onboarding' && path !== '/api/auth/logout' && !path.startsWith('/api/auth/')) {
-        console.log('[EXTREME_DEBUG NEW] 🎯 Checking onboarding status for user:', userId);
+        console.log('🔍 [MIDDLEWARE] Checking onboarding status for path:', path);
         
         try {
           // Fetch user's onboarding status from the database
@@ -560,7 +560,8 @@ export async function middleware(request: NextRequest) {
           const baseUrl = `${protocol}://${host}`;
           const userUrl = new URL(`/api/users/profile`, baseUrl);
           
-          console.log('[EXTREME_DEBUG NEW] 🎯 Fetching user profile for onboarding check:', userUrl.toString());
+          console.log('🔍 [MIDDLEWARE] User URL:', userUrl.toString());
+          console.log('🔍 [MIDDLEWARE] Token (first 20 chars):', finalToken?.substring(0, 20) + '...');
           
           const userRes = await fetch(userUrl, {
             headers: {
@@ -571,33 +572,54 @@ export async function middleware(request: NextRequest) {
             next: { revalidate: 0 }
           });
           
+          console.log('🔍 [MIDDLEWARE] User fetch response status:', userRes.status);
+          
           if (userRes.ok) {
             const userData = await userRes.json();
-            console.log('[EXTREME_DEBUG] 🎯 User profile data:', {
-              hasOnboardingField: 'onboarding' in userData,
-              onboardingValue: userData.onboarding,
-              hasDepartment: !!userData.department,
-              hasReportsTo: 'reportsTo' in userData
-            });
+            console.log('🔍 [MIDDLEWARE] User data retrieved:', JSON.stringify(userData, null, 2));
+            console.log('🔍 [MIDDLEWARE] Onboarding field value:', userData.onboarding);
+            console.log('🔍 [MIDDLEWARE] Onboarding field type:', typeof userData.onboarding);
+            console.log('🔍 [MIDDLEWARE] Department field:', userData.department);
+            console.log('🔍 [MIDDLEWARE] ReportsTo field:', userData.reportsTo);
             
-            // If onboarding field is missing, assume completed (for old entries)
-            // If onboarding field exists and is false, redirect to onboarding
-            const needsOnboarding = userData.onboarding === false;
+            // Check if user needs onboarding (ONLY for active users)
+            // Pending users should go to pending approval page, not onboarding
+            const userStatus = userData.status;
+            const onboardingField = userData.onboarding;
+            const firstName = userData.firstName || '';
+            const lastName = userData.lastName || '';
             
-            if (needsOnboarding) {
-              console.log('[EXTREME_DEBUG NEW] 🎯 ❌ User needs onboarding, redirecting to /onboarding');
-              return NextResponse.redirect(new URL('/onboarding', request.url));
+            console.log('🔍 [MIDDLEWARE] User status:', userStatus);
+            
+            if (userStatus === 'active') {
+              // Only check onboarding for active users
+              // 1. If onboarding field is false, redirect
+              // 2. If onboarding field is missing/undefined, check firstName and lastName
+              //    If both are empty, redirect to onboarding (user hasn't completed profile)
+              const needsOnboarding = onboardingField === false || 
+                                    (onboardingField === undefined && firstName === '' && lastName === '');
+              
+              if (needsOnboarding) {
+                console.log('🚨 [MIDDLEWARE] Active user needs onboarding! Redirecting to /onboarding');
+                console.log('🚨 [MIDDLEWARE] Reason: onboarding =', onboardingField, 'firstName =', firstName, 'lastName =', lastName);
+                return NextResponse.redirect(new URL('/onboarding', request.url));
+              } else {
+                console.log('✅ [MIDDLEWARE] Active user has completed onboarding');
+                console.log('✅ [MIDDLEWARE] onboarding =', onboardingField, 'firstName =', firstName, 'lastName =', lastName);
+              }
             } else {
-              console.log('[EXTREME_DEBUG NEW] 🎯 ✅ User has completed onboarding or is legacy user');
+              console.log('🕰️ [MIDDLEWARE] User status is not active (' + userStatus + '), skipping onboarding check');
             }
           } else {
-            console.warn('[EXTREME_DEBUG NEW] 🎯 ⚠️ Failed to fetch user profile for onboarding check:', userRes.status);
-            // Don't block access if we can't check onboarding status
+            const errorText = await userRes.text();
+            console.log('❌ [MIDDLEWARE] Failed to fetch user data:', userRes.status, errorText);
           }
         } catch (onboardingError) {
-          console.error('[EXTREME_DEBUG NEW] 🎯 ❌ Error checking onboarding status:', onboardingError);
+          console.error('❌ [MIDDLEWARE] Error checking onboarding status:', onboardingError);
           // Don't block access if there's an error checking onboarding
         }
+      } else {
+        console.log('⏭️ [MIDDLEWARE] Skipping onboarding check for path:', path);
       }
       
       // Redirect non-admin users trying to access the main dashboard to employee dashboard
