@@ -4,7 +4,6 @@ import connectDB from '@/lib/dbConnect';
 import User, { getUserModel } from '@/models/User';
 import { connectToMongoDB } from '@/lib/dbConnect';
 import { MongoClient } from 'mongodb';
-import EnhancedNotificationService from '@/services/enhancedNotificationService';
 
 // Helper function to extract token from Authorization header
 const extractToken = (request: NextRequest): string | null => {
@@ -321,24 +320,6 @@ export async function PATCH(request: NextRequest) {
         { error: 'Failed to update user' },
         { status: 500 }
       );
-    }
-    
-    // Send notification to the user about profile approval/rejection
-    try {
-      const approverUser = await UserModel.findById(payload.id);
-      const approverName = approverUser ? 
-        `${approverUser.firstName || ''} ${approverUser.lastName || ''}`.trim() || approverUser.email :
-        payload.email || 'Administrator';
-      
-      await EnhancedNotificationService.notifyProfileApproval(
-        updatedUser._id.toString(),
-        action === 'approve',
-        approverName,
-        updatedUser.email
-      );
-    } catch (notificationError) {
-      console.error('Error sending profile approval notification:', notificationError);
-      // Don't fail the approval if notification fails
     }
     
     return NextResponse.json({

@@ -8,7 +8,7 @@ import {
   FaCoins, FaUserTie, FaBars, FaSignOutAlt,
   FaUserAlt, FaTimes, FaChevronLeft, FaChevronRight, FaCamera, FaShieldAlt, FaFileAlt
 } from 'react-icons/fa';
-import NotificationPrompt from '@/components/NotificationPrompt';
+import NotificationCenter from '@/components/NotificationCenter';
 import Sidebar from '@/components/dashboard/Sidebar';
 import { ROUTES } from '@/lib/permissions';
 import DataProcessorInitializer from '@/components/DataProcessorInitializer';
@@ -321,7 +321,6 @@ export default function DashboardLayout({
           <main className="flex-1 overflow-y-auto bg-gray-50 p-4 md:p-6 lg:p-8">
             {children}
             <TourLauncher />
-            <NotificationPrompt />
           </main>
         </div>
       </RouteGuard>

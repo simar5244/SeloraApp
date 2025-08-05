@@ -1,52 +1,75 @@
 import { NextRequest, NextResponse } from 'next/server';
-import mongoose from 'mongoose';
-import Notification from '@/models/Notification';
-import User from '@/models/User';
-import { dbConnect } from '@/lib/dbConnect';
-import jwt from 'jsonwebtoken';
 
-async function getUserFromToken(request: NextRequest) {
-  try {
-    const authHeader = request.headers.get('authorization');
-    const token = authHeader?.replace('Bearer ', '');
-    
-    if (!token) {
-      return null;
-    }
-
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any;
-    const user = await User.findById(decoded.userId);
-    return user;
-  } catch (error) {
-    console.error('Error getting user from token:', error);
-    return null;
+// Mock notifications for quick testing
+const mockNotifications = [
+  {
+    id: '1',
+    userId: 'user123',
+    title: 'New Project Created',
+    message: 'Mobile App Redesign project has been created and assigned to your team.',
+    type: 'project',
+    isRead: false,
+    createdAt: new Date(Date.now() - 1000 * 60 * 30).toISOString()
   }
-}
+];
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+// GET /api/notifications/[id] - Get a specific notification
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
-    await dbConnect();
-
-    const user = await getUserFromToken(req);
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const notification = await Notification.findOneAndDelete({
-      _id: params.id,
-      userId: user._id
-    });
-
+    const { id } = params;
+    
+    // Find the notification with the matching ID
+    const notification = mockNotifications.find(n => n.id === id);
+    
     if (!notification) {
       return NextResponse.json({ error: 'Notification not found' }, { status: 404 });
     }
-
-    return NextResponse.json({ message: 'Notification deleted successfully' });
+    
+    return NextResponse.json(notification);
   } catch (error) {
-    console.error('Error deleting notification:', error);
-    return NextResponse.json(
-      { error: 'Failed to delete notification' },
-      { status: 500 }
-    );
+    console.error('Error fetching notification:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
+
+// PATCH /api/notifications/[id] - Update a notification
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const { id } = params;
+    
+    // In a real app, we would update the notification in the database
+    // For now, just return success
+    return NextResponse.json({
+      id,
+      message: 'Notification updated successfully'
+    });
+  } catch (error) {
+    console.error('Error updating notification:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
+}
+
+// DELETE /api/notifications/[id] - Delete a notification
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const { id } = params;
+    
+    // In a real app, we would delete the notification from the database
+    // For now, just return success
+    return NextResponse.json({
+      message: 'Notification deleted successfully'
+    });
+  } catch (error) {
+    console.error('Error deleting notification:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
+} 

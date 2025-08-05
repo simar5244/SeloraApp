@@ -1,43 +1,30 @@
 import { NextRequest, NextResponse } from 'next/server';
-import mongoose from 'mongoose';
+import dbConnect from '@/lib/dbConnect';
 import Notification from '@/models/Notification';
-import User from '@/models/User';
-import { dbConnect } from '@/lib/dbConnect';
-import jwt from 'jsonwebtoken';
+import { getToken } from 'next-auth/jwt';
+import { authOptions } from '@/lib/auth';
 
-async function getUserFromToken(request: NextRequest) {
-  try {
-    const authHeader = request.headers.get('authorization');
-    const token = authHeader?.replace('Bearer ', '');
-    
-    if (!token) {
-      return null;
-    }
-
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any;
-    const user = await User.findById(decoded.userId);
-    return user;
-  } catch (error) {
-    console.error('Error getting user from token:', error);
-    return null;
-  }
-}
-
-export async function PATCH(req: NextRequest) {
+// POST /api/notifications/mark-all-read - Mark all notifications as read
+export async function POST(request: NextRequest) {
   try {
     await dbConnect();
-
-    const user = await getUserFromToken(req);
-    if (!user) {
+    
+    // Verify authentication
+    const token = await getToken({ req: request, secret: authOptions.secret });
+    if (!token || !token.sub) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    await Notification.updateMany(
-      { userId: user._id, isRead: false },
-      { isRead: true }
+    // Update all unread notifications for this user
+    const result = await Notification.updateMany(
+      { userId: token.sub, isRead: false },
+      { $set: { isRead: true, readAt: new Date() } }
     );
-
-    return NextResponse.json({ message: 'All notifications marked as read' });
+    
+    return NextResponse.json({
+      message: 'All notifications marked as read',
+      count: result.modifiedCount
+    });
   } catch (error) {
     console.error('Error marking all notifications as read:', error);
     return NextResponse.json(
@@ -45,4 +32,4 @@ export async function PATCH(req: NextRequest) {
       { status: 500 }
     );
   }
-}
+} 

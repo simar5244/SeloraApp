@@ -22,7 +22,7 @@ const NotificationSchema = new mongoose.Schema(
     type: {
       type: String,
       required: true,
-      enum: ['system', 'erp', 'project', 'security', 'team', 'report', 'project_member', 'profile_approved', 'feedback_received', 'user_limit_warning', 'admin_new_content']
+      enum: ['system', 'erp', 'project', 'security', 'team', 'report']
     },
     title: {
       type: String,
@@ -37,14 +37,6 @@ const NotificationSchema = new mongoose.Schema(
       default: false
     },
     link: {
-      type: String,
-      default: null
-    },
-    entityId: {
-      type: String,
-      default: null
-    },
-    entityType: {
       type: String,
       default: null
     }

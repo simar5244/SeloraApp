@@ -3,7 +3,6 @@ import { unstable_noStore as noStore } from 'next/cache';
 import { MongoClient, ObjectId } from 'mongodb';
 import { z } from 'zod';
 import { verifyAuth } from '@/lib/auth';
-import EnhancedNotificationService from '@/services/enhancedNotificationService';
 
 // MongoDB connection string from environment variable
 const uri = process.env.MONGODB_URI || '';
@@ -341,81 +340,11 @@ export async function POST(request: Request) {
     const result = await collection.insertOne(goalDocument);
     
     if (result.insertedId) {
-      const goalId = result.insertedId.toString();
-      console.log(`Goal created successfully with ID: ${goalId}`);
-      
-      // Send notifications to team members and admins
-      try {
-        // Notify assigned employees about being added to the goal
-        if (goalDocument.assignedEmployees && Array.isArray(goalDocument.assignedEmployees)) {
-          for (const member of goalDocument.assignedEmployees) {
-            if (member.email && member.email !== userEmail) {
-              // Find user ID for notification
-              const defaultDb = client.db(defaultDbName);
-              const usersCol = defaultDb.collection('users');
-              const memberUser = await usersCol.findOne({ email: member.email });
-              
-              if (memberUser) {
-                await EnhancedNotificationService.notifyGoalMember(
-                  memberUser._id.toString(),
-                  goalDocument.title,
-                  goalId,
-                  'member',
-                  companyCode,
-                  member.email
-                );
-              }
-            }
-          }
-        }
-
-        // Notify viewers about being added to the goal
-        if (goalDocument.viewers && Array.isArray(goalDocument.viewers)) {
-          for (const viewer of goalDocument.viewers) {
-            if (viewer.email && viewer.email !== userEmail) {
-              // Find user ID for notification
-              const defaultDb = client.db(defaultDbName);
-              const usersCol = defaultDb.collection('users');
-              const viewerUser = await usersCol.findOne({ email: viewer.email });
-              
-              if (viewerUser) {
-                await EnhancedNotificationService.notifyGoalMember(
-                  viewerUser._id.toString(),
-                  goalDocument.title,
-                  goalId,
-                  'viewer',
-                  companyCode,
-                  viewer.email
-                );
-              }
-            }
-          }
-        }
-
-        // Notify all admins about new goal creation
-        const admins = await EnhancedNotificationService.getAdminUsers(companyCode);
-        for (const admin of admins) {
-          if (admin.email !== userEmail) {
-            await EnhancedNotificationService.notifyAdminNewContent(
-              admin._id.toString(),
-              'goal',
-              goalDocument.title,
-              userEmail || 'Unknown User',
-              goalId,
-              companyCode,
-              admin.email
-            );
-          }
-        }
-      } catch (notificationError) {
-        console.error('Error sending notifications:', notificationError);
-        // Don't fail the goal creation if notifications fail
-      }
-      
+      console.log(`Goal created successfully with ID: ${result.insertedId}`);
       return NextResponse.json({ 
         success: true, 
-        goalId: goalId,
-        goal: { ...goalDocument, id: goalId }
+        goalId: result.insertedId.toString(),
+        goal: { ...goalDocument, id: result.insertedId.toString() }
       });
     } else {
       throw new Error('Failed to create goal');
