@@ -1,350 +1,327 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
-import { FaBell, FaCheck, FaTrash, FaCheckDouble, FaProjectDiagram, FaUsers, FaExclamationTriangle } from 'react-icons/fa';
-import { MdKeyboardArrowDown } from 'react-icons/md';
-import { formatDistanceToNow } from 'date-fns';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { Bell, X, CheckCircle, Users, Target, MessageSquare, Crown, AlertTriangle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/card';
+import { useRouter } from 'next/navigation';
 
-// Define notification type
-export interface Notification {
-  id: string;
+interface Notification {
+  _id: string;
+  userId: string;
+  type: 'project_member' | 'profile_approved' | 'feedback_received' | 'user_limit_warning' | 'admin_new_content';
   title: string;
   message: string;
-  type: 'info' | 'success' | 'warning' | 'error' | 'project' | 'employee';
   isRead: boolean;
-  createdAt: string;
   link?: string;
+  createdAt: string;
+  entityId?: string;
+  entityType?: string;
 }
 
-interface NotificationCenterProps {
-  onNavigate?: (path: string) => void;
-}
+const getNotificationIcon = (type: string) => {
+  switch (type) {
+    case 'project_member':
+      return <Users className="h-4 w-4 text-blue-600" />;
+    case 'profile_approved':
+      return <CheckCircle className="h-4 w-4 text-green-600" />;
+    case 'feedback_received':
+      return <MessageSquare className="h-4 w-4 text-purple-600" />;
+    case 'user_limit_warning':
+      return <AlertTriangle className="h-4 w-4 text-orange-600" />;
+    case 'admin_new_content':
+      return <Target className="h-4 w-4 text-indigo-600" />;
+    default:
+      return <Bell className="h-4 w-4 text-gray-600" />;
+  }
+};
 
-export default function NotificationCenter({ onNavigate }: NotificationCenterProps) {
+const getNotificationColor = (type: string) => {
+  switch (type) {
+    case 'project_member':
+      return 'border-l-blue-500 bg-blue-50';
+    case 'profile_approved':
+      return 'border-l-green-500 bg-green-50';
+    case 'feedback_received':
+      return 'border-l-purple-500 bg-purple-50';
+    case 'user_limit_warning':
+      return 'border-l-orange-500 bg-orange-50';
+    case 'admin_new_content':
+      return 'border-l-indigo-500 bg-indigo-50';
+    default:
+      return 'border-l-gray-500 bg-gray-50';
+  }
+};
+
+export default function NotificationCenter() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [showNotifications, setShowNotifications] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
 
-  // Fetch notifications
-  useEffect(() => {
-    const fetchNotifications = async () => {
-      setLoading(true);
-      setError(null);
-      
-      try {
-        // In a real app, this would be an API call
-        const response = await fetch('/api/notifications');
-        
-        if (!response.ok) {
-          throw new Error('Failed to fetch notifications');
+  const fetchNotifications = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      const response = await fetch('/api/notifications', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
         }
-        
+      });
+
+      if (response.ok) {
         const data = await response.json();
         setNotifications(data.notifications || []);
-        setUnreadCount(data.notifications.filter((notification: Notification) => !notification.isRead).length);
-      } catch (err) {
-        console.error('Error fetching notifications:', err);
-        setError('Failed to load notifications');
-        
-        // Use demo notifications for development
-        const demoNotifications = getDemoNotifications();
-        setNotifications(demoNotifications);
-        setUnreadCount(demoNotifications.filter(notification => !notification.isRead).length);
-      } finally {
-        setLoading(false);
+        setUnreadCount(data.notifications?.filter((n: Notification) => !n.isRead).length || 0);
       }
-    };
-    
+    } catch (error) {
+      console.error('Error fetching notifications:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  const markAsRead = async (notificationId: string) => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      const response = await fetch(`/api/notifications/${notificationId}/read`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        setNotifications(prev => 
+          prev.map(n => n._id === notificationId ? { ...n, isRead: true } : n)
+        );
+        setUnreadCount(prev => Math.max(0, prev - 1));
+      }
+    } catch (error) {
+      console.error('Error marking notification as read:', error);
+    }
+  };
+
+  const markAllAsRead = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      const response = await fetch('/api/notifications/mark-all-read', {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+        setUnreadCount(0);
+      }
+    } catch (error) {
+      console.error('Error marking all notifications as read:', error);
+    }
+  };
+
+  const handleNotificationClick = async (notification: Notification) => {
+    if (!notification.isRead) {
+      await markAsRead(notification._id);
+    }
+
+    if (notification.link) {
+      router.push(notification.link);
+      setIsOpen(false);
+    }
+  };
+
+  const deleteNotification = async (notificationId: string, event: React.MouseEvent) => {
+    event.stopPropagation();
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      const response = await fetch(`/api/notifications/${notificationId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const wasUnread = notifications.find(n => n._id === notificationId)?.isRead === false;
+        setNotifications(prev => prev.filter(n => n._id !== notificationId));
+        if (wasUnread) {
+          setUnreadCount(prev => Math.max(0, prev - 1));
+        }
+      }
+    } catch (error) {
+      console.error('Error deleting notification:', error);
+    }
+  };
+
+  useEffect(() => {
     fetchNotifications();
     
-    // Set up polling for new notifications (every 30 seconds in a real app)
-    const intervalId = setInterval(fetchNotifications, 300000);
+    // Poll for new notifications every 30 seconds
+    const interval = setInterval(fetchNotifications, 30000);
     
-    return () => {
-      clearInterval(intervalId);
-    };
-  }, []);
-  
-  // Close dropdown when clicking outside
+    return () => clearInterval(interval);
+  }, [fetchNotifications]);
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setShowNotifications(false);
+        setIsOpen(false);
       }
     };
-    
-    document.addEventListener('mousedown', handleClickOutside);
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, []);
-  
-  // Mark a notification as read
-  const markAsRead = async (id: string) => {
-    try {
-      // Call the API endpoint
-      await fetch(`/api/notifications/${id}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ isRead: true }),
-      });
-      
-      // Update local state
-      setNotifications(prev => 
-        prev.map(notification => 
-          notification.id === id 
-            ? { ...notification, isRead: true } 
-            : notification
-        )
-      );
-      
-      // Update unread count
-      setUnreadCount(prev => Math.max(0, prev - 1));
-    } catch (err) {
-      console.error('Error marking notification as read:', err);
-    }
-  };
-  
-  // Mark all notifications as read
-  const markAllAsRead = async () => {
-    try {
-      // Call the API endpoint
-      await fetch('/api/notifications/actions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ action: 'markAllAsRead' }),
-      });
-      
-      // Update local state
-      setNotifications(prev => 
-        prev.map(notification => ({ ...notification, isRead: true }))
-      );
-      
-      // Update unread count
-      setUnreadCount(0);
-    } catch (err) {
-      console.error('Error marking all notifications as read:', err);
-    }
-  };
-  
-  // Clear all notifications
-  const clearAllNotifications = async () => {
-    try {
-      // In a real app, this would use an API endpoint like bulk delete
-      const unreadNotifications = notifications.filter(n => !n.isRead).map(n => n.id);
-      
-      if (unreadNotifications.length > 0) {
-        await fetch('/api/notifications/bulk', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ 
-            action: 'delete',
-            ids: unreadNotifications 
-          }),
-        });
-      }
-      
-      // Update local state
-      setNotifications([]);
-      setUnreadCount(0);
-    } catch (err) {
-      console.error('Error clearing notifications:', err);
-    }
-  };
-  
-  // Handle notification click
-  const handleNotificationClick = (notification: Notification) => {
-    if (!notification.isRead) {
-      markAsRead(notification.id);
-    }
+  }, [isOpen]);
+
+  const formatTimeAgo = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+    if (diffInSeconds < 60) return 'Just now';
+    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
+    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
+    if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)}d ago`;
     
-    if (notification.link && onNavigate) {
-      onNavigate(notification.link);
-      setShowNotifications(false);
-    }
-  };
-  
-  // Get icon based on notification type
-  const getNotificationIcon = (type: Notification['type']) => {
-    switch (type) {
-      case 'info':
-        return <FaBell className="text-blue-500" />;
-      case 'success':
-        return <FaCheck className="text-green-500" />;
-      case 'warning':
-        return <FaExclamationTriangle className="text-yellow-500" />;
-      case 'error':
-        return <FaExclamationTriangle className="text-red-500" />;
-      case 'project':
-        return <FaProjectDiagram className="text-purple-500" />;
-      case 'employee':
-        return <FaUsers className="text-indigo-500" />;
-      default:
-        return <FaBell className="text-gray-500" />;
-    }
-  };
-  
-  // Demo notifications for development/testing
-  const getDemoNotifications = (): Notification[] => {
-    return [
-      {
-        id: '1',
-        title: 'New Project Created',
-        message: 'Mobile App Redesign project has been created and assigned to your team.',
-        type: 'project',
-        isRead: false,
-        createdAt: new Date(Date.now() - 1000 * 60 * 30).toISOString(), // 30 minutes ago
-        link: '/dashboard/projects/1'
-      },
-      {
-        id: '2',
-        title: 'New Team Member',
-        message: 'Sarah Johnson has joined the Engineering department.',
-        type: 'employee',
-        isRead: false,
-        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(), // 2 hours ago
-        link: '/dashboard/employees/E001'
-      },
-      {
-        id: '3',
-        title: 'Project Update',
-        message: 'Customer Dashboard is now 75% complete. 3 tasks remaining.',
-        type: 'project',
-        isRead: true,
-        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(), // 1 day ago
-        link: '/dashboard/projects/2'
-      },
-      {
-        id: '4',
-        title: 'Warning: Overutilized Resources',
-        message: '3 employees have been working more than 45 hours per week.',
-        type: 'warning',
-        isRead: true,
-        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 48).toISOString(), // 2 days ago
-        link: '/dashboard'
-      }
-    ];
-  };
-  
-  // Format timestamp to relative time
-  const formatTimestamp = (timestamp: string) => {
-    try {
-      return formatDistanceToNow(new Date(timestamp), { addSuffix: true });
-    } catch (error) {
-      console.error('Error formatting timestamp:', error);
-      return 'some time ago';
-    }
+    return date.toLocaleDateString();
   };
 
   return (
-    <div className="relative" ref={dropdownRef}>
-      {/* Notification bell icon with badge */}
-      <button
-        onClick={() => setShowNotifications(!showNotifications)}
-        className="relative p-2 text-gray-600 rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        aria-label="Notifications"
-      >
-        <FaBell className="h-6 w-6" />
-        {unreadCount > 0 && (
-          <span className="absolute top-1 right-1 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full">
-            {unreadCount > 9 ? '9+' : unreadCount}
-          </span>
-        )}
-      </button>
-      
-      {/* Notification dropdown */}
-      {showNotifications && (
-        <div className="absolute right-0 mt-2 w-80 bg-white rounded-md shadow-lg overflow-hidden z-50 max-h-[80vh] flex flex-col">
-          <div className="p-3 bg-gray-50 border-b border-gray-200 flex justify-between items-center">
-            <h3 className="text-sm font-medium text-gray-700">Notifications</h3>
-            <div className="flex space-x-2">
-              <button 
-                onClick={markAllAsRead}
-                className="p-1 text-xs text-gray-600 hover:text-gray-900 rounded hover:bg-gray-200 focus:outline-none"
-                title="Mark all as read"
-              >
-                <FaCheckDouble className="h-4 w-4" />
-              </button>
-              <button 
-                onClick={clearAllNotifications}
-                className="p-1 text-xs text-gray-600 hover:text-gray-900 rounded hover:bg-gray-200 focus:outline-none"
-                title="Clear all notifications"
-              >
-                <FaTrash className="h-4 w-4" />
-              </button>
-            </div>
-          </div>
+    <div className="fixed top-6 right-6 z-[100]" ref={dropdownRef}>
+      <div className="relative">
+        <Button
+          onClick={() => setIsOpen(!isOpen)}
+          variant="outline"
+          className="group relative h-12 w-12 rounded-full bg-white border-gray-200 hover:bg-gray-50 hover:border-gray-300 shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105"
+        >
+          <Bell className="h-5 w-5 text-gray-600 transition-transform duration-200 group-hover:rotate-12" />
           
-          <div className="overflow-y-auto flex-grow">
-            {loading && (
-              <div className="py-4 text-center">
-                <div className="inline-block animate-spin rounded-full h-6 w-6 border-2 border-gray-300 border-t-blue-600"></div>
-                <p className="text-sm text-gray-500 mt-2">Loading notifications...</p>
-              </div>
-            )}
-            
-            {error && !loading && notifications.length === 0 && (
-              <div className="py-6 text-center">
-                <FaExclamationTriangle className="mx-auto h-6 w-6 text-yellow-500" />
-                <p className="text-sm text-gray-500 mt-2">{error}</p>
-              </div>
-            )}
-            
-            {!loading && notifications.length === 0 && !error && (
-              <div className="py-6 text-center">
-                <FaBell className="mx-auto h-6 w-6 text-gray-400" />
-                <p className="text-sm text-gray-500 mt-2">No notifications</p>
-              </div>
-            )}
-            
-            {notifications.map((notification) => (
-              <div 
-                key={notification.id}
-                onClick={() => handleNotificationClick(notification)}
-                className={`p-3 border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition ${notification.isRead ? 'bg-white' : 'bg-blue-50'}`}
-              >
-                <div className="flex items-start">
-                  <div className="flex-shrink-0 mt-1">
-                    {getNotificationIcon(notification.type)}
-                  </div>
-                  <div className="ml-3 flex-1">
-                    <p className={`text-sm font-medium ${notification.isRead ? 'text-gray-900' : 'text-blue-800'}`}>
-                      {notification.title}
-                    </p>
-                    <p className="text-xs text-gray-600 mt-1">
-                      {notification.message}
-                    </p>
-                    <p className="text-xs text-gray-500 mt-1">
-                      {formatTimestamp(notification.createdAt)}
-                    </p>
-                  </div>
+          {unreadCount > 0 && (
+            <Badge 
+              className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-xs bg-red-500 hover:bg-red-500"
+            >
+              {unreadCount > 99 ? '99+' : unreadCount}
+            </Badge>
+          )}
+
+          {/* Tooltip */}
+          <div className="absolute bottom-full right-0 mb-3 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">
+            Notifications
+            <div className="absolute top-full right-4 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
+          </div>
+        </Button>
+
+        {isOpen && (
+          <Card className="absolute top-full right-0 mt-2 w-96 max-h-96 overflow-hidden shadow-2xl border-gray-200 bg-white">
+            <div className="p-4 border-b border-gray-100 bg-gray-50">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold text-gray-900">Notifications</h3>
+                <div className="flex items-center space-x-2">
+                  {unreadCount > 0 && (
+                    <Button
+                      onClick={markAllAsRead}
+                      variant="ghost"
+                      size="sm"
+                      className="text-xs text-purple-600 hover:text-purple-700 hover:bg-purple-50"
+                    >
+                      Mark all read
+                    </Button>
+                  )}
+                  <Button
+                    onClick={() => setIsOpen(false)}
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 w-6 p-0 text-gray-400 hover:text-gray-600 hover:bg-gray-100"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
                 </div>
               </div>
-            ))}
-          </div>
-          
-          {notifications.length > 0 && (
-            <div className="p-2 bg-gray-50 border-t border-gray-200">
-              <button
-                onClick={() => onNavigate && onNavigate('/dashboard/notifications')}
-                className="w-full p-2 text-xs text-center text-blue-600 hover:text-blue-800 flex items-center justify-center"
-              >
-                View all notifications
-                <MdKeyboardArrowDown className="ml-1" />
-              </button>
             </div>
-          )}
-        </div>
-      )}
+
+            <CardContent className="p-0 max-h-80 overflow-y-auto">
+              {isLoading ? (
+                <div className="flex items-center justify-center py-8">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-600"></div>
+                </div>
+              ) : notifications.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-8 text-gray-500">
+                  <Bell className="h-8 w-8 text-gray-300 mb-2" />
+                  <p className="text-sm">No notifications yet</p>
+                </div>
+              ) : (
+                <div className="divide-y divide-gray-100">
+                  {notifications.map((notification) => (
+                    <div
+                      key={notification._id}
+                      onClick={() => handleNotificationClick(notification)}
+                      className={`p-4 cursor-pointer hover:bg-gray-50 transition-colors duration-150 border-l-4 ${
+                        !notification.isRead ? 'bg-blue-25' + getNotificationColor(notification.type) : 'border-l-transparent'
+                      } ${!notification.isRead ? 'bg-opacity-30' : ''}`}
+                    >
+                      <div className="flex items-start space-x-3">
+                        <div className="flex-shrink-0 mt-1">
+                          {getNotificationIcon(notification.type)}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <p className={`text-sm font-medium text-gray-900 ${!notification.isRead ? 'font-semibold' : ''}`}>
+                                {notification.title}
+                              </p>
+                              <p className="text-sm text-gray-600 mt-1 line-clamp-2">
+                                {notification.message}
+                              </p>
+                              <p className="text-xs text-gray-400 mt-2">
+                                {formatTimeAgo(notification.createdAt)}
+                              </p>
+                            </div>
+                            <div className="flex items-center space-x-1 ml-2">
+                              {!notification.isRead && (
+                                <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
+                              )}
+                              <Button
+                                onClick={(e) => deleteNotification(notification._id, e)}
+                                variant="ghost"
+                                size="sm"
+                                className="h-6 w-6 p-0 text-gray-400 hover:text-red-500 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-opacity"
+                              >
+                                <X className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+      </div>
     </div>
   );
-} 
+}

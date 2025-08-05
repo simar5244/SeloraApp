@@ -6,7 +6,7 @@ import { verifyAuth } from '@/lib/auth';
 const uri = process.env.MONGODB_URI || '';
 const notificationsCollection = 'notifications';
 
-export async function PATCH(request: Request) {
+export async function PATCH(request: Request, { params }: { params: { id: string } }) {
   const client = new MongoClient(uri);
   
   try {
@@ -33,22 +33,25 @@ export async function PATCH(request: Request) {
     const db = client.db(`company_${companyCode}`);
     const collection = db.collection(notificationsCollection);
 
-    const result = await collection.updateMany(
-      { userId: new ObjectId(userId), isRead: false },
-      { $set: { isRead: true, updatedAt: new Date() } }
+    const result = await collection.findOneAndUpdate(
+      { _id: new ObjectId(params.id), userId: new ObjectId(userId) },
+      { $set: { isRead: true, updatedAt: new Date() } },
+      { returnDocument: 'after' }
     );
 
     await client.close();
-    return NextResponse.json({ 
-      message: 'All notifications marked as read',
-      count: result.modifiedCount
-    });
+    
+    if (!result || !result.value) {
+      return NextResponse.json({ error: 'Notification not found' }, { status: 404 });
+    }
+
+    return NextResponse.json({ notification: result.value });
   } catch (error) {
-    console.error('Error marking all notifications as read:', error);
+    console.error('Error marking notification as read:', error);
     await client.close();
     return NextResponse.json(
-      { error: 'Failed to mark all notifications as read' },
+      { error: 'Failed to mark notification as read' },
       { status: 500 }
     );
   }
-} 
+}

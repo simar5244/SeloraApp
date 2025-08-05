@@ -12,6 +12,7 @@ import { writeFileSync } from 'fs';
 import { join } from 'path';
 import { spawn } from 'child_process';
 import { verifyAuth } from '@/lib/auth';
+import EnhancedNotificationService from '@/services/enhancedNotificationService';
 
 // Function to run the Python script as a child process
 async function runPythonScript(scriptArgs: string[]): Promise<any> {
@@ -591,12 +592,81 @@ export async function POST(request: Request) {
     
     // Insert the new project
     const result = await collection.insertOne(dataToInsert);
-    console.log(`Project inserted with ID: ${result.insertedId} in company DB: ${dbName}`);
+    const projectId = result.insertedId.toString();
+    console.log(`Project inserted with ID: ${projectId} in company DB: ${dbName}`);
+    
+    // Send notifications to team members and admins
+    try {
+      // Notify team members about being added to the project
+      if (dataToInsert.employees && Array.isArray(dataToInsert.employees)) {
+        for (const member of dataToInsert.employees) {
+          if (member.email && member.email !== creatorEmail) {
+            // Find user ID for notification
+            const defaultDb = client.db(defaultDbName);
+            const usersCol = defaultDb.collection('users');
+            const memberUser = await usersCol.findOne({ email: member.email });
+            
+            if (memberUser) {
+              await EnhancedNotificationService.notifyProjectMember(
+                memberUser._id.toString(),
+                dataToInsert.title || dataToInsert.project_title || 'Untitled Project',
+                projectId,
+                'member',
+                companyCode,
+                member.email
+              );
+            }
+          }
+        }
+      }
+
+      // Notify viewers about being added to the project
+      if (dataToInsert.viewers && Array.isArray(dataToInsert.viewers)) {
+        for (const viewer of dataToInsert.viewers) {
+          if (viewer.email && viewer.email !== creatorEmail) {
+            // Find user ID for notification
+            const defaultDb = client.db(defaultDbName);
+            const usersCol = defaultDb.collection('users');
+            const viewerUser = await usersCol.findOne({ email: viewer.email });
+            
+            if (viewerUser) {
+              await EnhancedNotificationService.notifyProjectMember(
+                viewerUser._id.toString(),
+                dataToInsert.title || dataToInsert.project_title || 'Untitled Project',
+                projectId,
+                'viewer',
+                companyCode,
+                viewer.email
+              );
+            }
+          }
+        }
+      }
+
+      // Notify all admins about new project creation
+      const admins = await EnhancedNotificationService.getAdminUsers(companyCode);
+      for (const admin of admins) {
+        if (admin.email !== creatorEmail) {
+          await EnhancedNotificationService.notifyAdminNewContent(
+            admin._id.toString(),
+            'project',
+            dataToInsert.title || dataToInsert.project_title || 'Untitled Project',
+            creatorEmail || 'Unknown User',
+            projectId,
+            companyCode,
+            admin.email
+          );
+        }
+      }
+    } catch (notificationError) {
+      console.error('Error sending notifications:', notificationError);
+      // Don't fail the project creation if notifications fail
+    }
     
     return NextResponse.json({ 
       success: true, 
       message: 'Project created successfully',
-      projectId: result.insertedId.toString(),
+      projectId: projectId,
       companyCode: companyCode
     });
 

@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card } from "@/components/ui/card";
 import { Plus, Minus, ArrowRight, ArrowLeft, Check, Briefcase } from 'lucide-react';
+import { FaSpinner } from 'react-icons/fa';
 import { toast } from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { addNewProject } from "../api";
@@ -232,6 +233,7 @@ const ProjectOnboardingPage = () => {
   const [projectSearchTerm, setProjectSearchTerm] = useState('');
   const [projectSearchResults, setProjectSearchResults] = useState<any[]>([]);
   const [showProjectSearch, setShowProjectSearch] = useState(false);
+  const [isProjectSearchLoading, setIsProjectSearchLoading] = useState(false);
   
   const [projectData, setProjectData] = useState({
     name: '',
@@ -345,10 +347,10 @@ const ProjectOnboardingPage = () => {
   };
   
   // Handle project search input change
-  const handleProjectSearchChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleProjectSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const term = e.target.value;
     setProjectSearchTerm(term);
-    await searchProjects(term);
+    searchProjects(term);
   };
   
   // Handle key press for manual add
@@ -429,14 +431,20 @@ const ProjectOnboardingPage = () => {
   const searchProjects = async (term: string) => {
     if (!term.trim()) {
       setProjectSearchResults([]);
+      setIsProjectSearchLoading(false);
       return;
     }
 
     console.log('Searching for projects with term:', term);
+    setIsProjectSearchLoading(true);
     
     try {
       // Call the projects search API endpoint
-      const response = await fetch(`/api/projects/search?term=${encodeURIComponent(term)}`);
+      const response = await fetch(`/api/projects/search?q=${encodeURIComponent(term)}`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
       
       if (!response.ok) {
         throw new Error('Failed to fetch project search results');
@@ -471,6 +479,8 @@ const ProjectOnboardingPage = () => {
       console.error('Error searching projects:', error);
       toast.error('Failed to search for projects. Please try again.');
       setProjectSearchResults([]);
+    } finally {
+      setIsProjectSearchLoading(false);
     }
   };
   
@@ -813,7 +823,7 @@ const ProjectOnboardingPage = () => {
       const result = await addNewProject(projectToSubmit);
       
       if (result.success) {
-        toast.success('Project created successfully!');
+        toast.success('Project created successfully! Redirecting to project detail page...');
         
         // Redirect to the project detail page
         if (result.projectId) {
@@ -893,7 +903,7 @@ const ProjectOnboardingPage = () => {
         
       case 2:
         return (
-          <div className="mt-32 mb-8">
+          <div className="mt-20 mb-8">
             <div className="text-center mb-8">
               <h2 className="text-2xl font-light text-gray-900">Project Details</h2>
               <p className="text-gray-600 font-light mt-2">Define your project's timeline and organizational details. Choose the department that will own this project, set realistic start and end dates, and assign priority and status levels that reflect the project's importance and current state.</p>
@@ -1026,30 +1036,21 @@ const ProjectOnboardingPage = () => {
                 </div>
 
                 {showEmployeeSearch && (
-                  <div className="border rounded-md p-4 bg-gray-50">
-                    <div className="space-y-2">
-                      <Input
-                        placeholder="Search by name or email..."
-                        value={employeeSearchTerm}
-                        onChange={handleEmployeeSearchChange}
-                        onKeyPress={handleEmployeeKeyPress}
-                      />
-                      
-                      {isLoadingUsers && (
-                        <div className="text-center py-2 text-gray-500">Loading users...</div>
-                      )}
-                      
-                            {isLoadingUsers ? (
-                        <div className="p-3 text-sm text-gray-500 text-center">
-                          <span className="inline-block animate-spin mr-2">⏳</span> Loading users...
-                        </div>
-                      ) : (viewerSearchTerm && viewerSearchResults.length === 0) ? (
-                        <div className="p-3 text-sm text-gray-500">
-                          No matching users found. Press Enter to add "{viewerSearchTerm}" as a viewer.
-                        </div>
-                      ) : viewerSearchResults.length > 0 ? (
-                        <div className="max-h-48 overflow-y-auto border rounded-md bg-white">
-                          {employeeSearchResults.map((employee, index) => (
+                  <div className="space-y-2">
+                    <Input
+                      placeholder="Search by name or email..."
+                      value={employeeSearchTerm}
+                      onChange={handleEmployeeSearchChange}
+                      onKeyPress={handleEmployeeKeyPress}
+                    />
+                    
+                    {isLoadingUsers ? (
+                      <div className="p-3 text-sm text-gray-500 text-center">
+                        <span className="inline-block animate-spin mr-2">⏳</span> Loading users...
+                      </div>
+                    ) : employeeSearchResults.length > 0 ? (
+                      <div className="max-h-40 overflow-y-auto border rounded-md">
+                        {employeeSearchResults.map((employee, index) => (
                             <div
                               key={employee.id || index}
                               className="p-3 hover:bg-gray-50 cursor-pointer border-b last:border-b-0"
@@ -1077,8 +1078,11 @@ const ProjectOnboardingPage = () => {
                             </div>
                           ))}
                         </div>
+                      ) : (employeeSearchTerm && employeeSearchResults.length === 0) ? (
+                        <div className="p-3 text-sm text-gray-500">
+                          No matching users found. Press Enter to add "{employeeSearchTerm}" as a team member.
+                        </div>
                       ) : null}
-                    </div>
                   </div>
                 )}
 
@@ -1251,11 +1255,18 @@ const ProjectOnboardingPage = () => {
 
                 {showProjectSearch && (
                   <div className="space-y-2">
-                    <Input
-                      placeholder="Search projects..."
-                      value={projectSearchTerm}
-                      onChange={handleProjectSearchChange}
-                    />
+                    <div className="relative">
+                      <Input
+                        placeholder="Search projects..."
+                        value={projectSearchTerm}
+                        onChange={handleProjectSearchChange}
+                      />
+                      {isProjectSearchLoading && (
+                        <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                          <FaSpinner className="animate-spin text-purple-600" />
+                        </div>
+                      )}
+                    </div>
                     
                     {projectSearchResults.length > 0 ? (
                       <div className="max-h-40 overflow-y-auto border rounded-md">
@@ -1369,6 +1380,12 @@ const ProjectOnboardingPage = () => {
                     <span className="text-sm text-gray-500">Team Size:</span>
                     <p>{projectData.employees.length || 0} members</p>
                   </div>
+                  {projectData.toolsUsed && (
+                    <div>
+                      <span className="text-sm text-gray-500">Tools & Technologies:</span>
+                      <p>{projectData.toolsUsed}</p>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -1461,15 +1478,7 @@ const ProjectOnboardingPage = () => {
                       Next
                       <ArrowRight className="w-4 h-4 ml-1" />
                     </button>
-                  ) : (
-                    <button
-                      onClick={handleComplete}
-                      disabled={isLoading}
-                      className="bg-purple-600 hover:bg-purple-700 text-white font-medium px-6 py-2 rounded-md flex items-center transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {isLoading ? 'Creating...' : 'Create Project'}
-                    </button>
-                  )}
+                  ) : null}
                 </div>
               </motion.div>
             </div>

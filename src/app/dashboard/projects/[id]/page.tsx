@@ -112,6 +112,8 @@ interface ExtendedProject extends Project {
   createdByRole?: string;
   tools_used?: any;
   risk_level?: number;
+  project_title?: string;
+  project_description?: string;
 }
 
 interface ExtendedEmployeeContribution extends EmployeeContribution {
@@ -859,7 +861,7 @@ export default function ProjectDetailPage({ params }: ProjectDetailProps) {
               Back to Projects
             </button>
             
-            <h1 className="text-3xl font-bold tracking-tight text-gray-900 mb-2">Edit Project</h1>
+            <h1 className="text-3xl font-bold tracking-tight text-gray-900 mb-2">Edit</h1>
             <p className="text-gray-500">Update the project details below.</p>
           </div>
           
@@ -1454,324 +1456,294 @@ export default function ProjectDetailPage({ params }: ProjectDetailProps) {
   }
 
   return (
-    <div className="p-6 h-full">
-      <div className="mb-6 flex items-center justify-between">
-        <button
-          onClick={() => router.push('/dashboard/projects')}
-          className="flex items-center text-purple-600 hover:text-purple-800"
-        >
-          <FaArrowLeft className="mr-2" />
-          Back to Projects
-        </button>
-        
-        {canEdit && (
+    <div className="container mx-auto px-4 py-8">
+      {/* Header */}
+      <div className="mb-8">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 flex items-center">
+                {project?.project_title || 'Project Details'}
+                {(project?.isManagementProject || 
+                  ['top_management_tier_1', 'top_management_tier_2', 'top_management_tier_3'].includes(project?.createdByRole || '')) && (
+                    <Badge className="ml-3 bg-purple-700 text-white">Management</Badge>
+                  )}
+              </h1>
+            </div>
+          </div>
           <div className="flex space-x-2">
-            <Button
-              variant="outline"
-              onClick={() => setIsEditing(true)}
-              className="text-purple-600 border-purple-600 hover:bg-purple-50"
-              disabled={!canEdit}
-            >
-              <FaEdit className="w-4 h-4 mr-2" />
-              Edit Project
-            </Button>
-
-            <Button
-              variant="outline"
-              onClick={() => setShowUpdateModal(true)}
-              className="text-purple-600 border-purple-600 hover:bg-purple-50"
-            >
-              <FaCommentDots className="w-4 h-4 mr-2" />
-              Update
-            </Button>
-
             {canEdit && (
-              <Dialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
-                <DialogTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className="text-red-600 border-red-600 hover:bg-red-50"
-                  >
-                    <FaTrash className="w-4 h-4 mr-2" />
-                    Delete Project
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="bg-white max-w-md">
-                  <DialogHeader>
-                    <DialogTitle className="text-gray-900">Delete Project</DialogTitle>
-                    <DialogDescription className="text-gray-600">
-                      Are you sure you want to delete this project? This action cannot be undone.
-                    </DialogDescription>
-                  </DialogHeader>
-                  <div className="flex justify-end pt-4">
-                    <Button 
-                      type="button"
-                      className="bg-red-600 hover:bg-red-700 text-white"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        handleDeleteProject();
-                        setDeleteConfirmOpen(false);
-                      }}
+              <>
+                <Button
+                  variant="outline"
+                  onClick={() => setIsEditing(true)}
+                  className="text-purple-600 border-purple-600 hover:bg-purple-50"
+                >
+                  <FaEdit className="w-4 h-4 mr-2" />
+                  Edit
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => setShowUpdateModal(true)}
+                  className="text-purple-600 border-purple-600 hover:bg-purple-50"
+                >
+                  <FaCommentDots className="w-4 h-4 mr-2" />
+                  Update
+                </Button>
+                <Dialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
+                  <DialogTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className="text-red-600 border-red-600 hover:bg-red-50"
                     >
+                      <FaTrash className="w-4 h-4 mr-2" />
                       Delete
                     </Button>
-                  </div>
-                </DialogContent>
-              </Dialog>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-md border border-red-300 shadow-md shadow-red-100 rounded-lg overflow-hidden">
+                    <DialogHeader className="px-6 py-4 border-b border-gray-200 bg-red-50">
+                      <DialogTitle className="text-lg font-semibold text-red-900">Delete Project</DialogTitle>
+                      <DialogDescription className="text-sm text-red-700">
+                        Are you sure you want to delete this project? This action cannot be undone and will remove all associated data.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="p-6">
+                      <div className="flex justify-end space-x-3">
+                        <Button 
+                          variant="outline"
+                          onClick={() => setDeleteConfirmOpen(false)}
+                          className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border-gray-300 hover:bg-gray-50"
+                        >
+                          Cancel
+                        </Button>
+                        <Button 
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handleDeleteProject();
+                            setDeleteConfirmOpen(false);
+                          }}
+                          className="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md shadow-sm hover:bg-red-700"
+                        >
+                          Delete Project
+                        </Button>
+                      </div>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </>
             )}
+            <Button
+              variant="outline"
+              onClick={() => router.push('/dashboard/projects')}
+              className="text-gray-600 border-gray-300 hover:bg-gray-50"
+            >
+              <FaArrowLeft className="w-4 h-4 mr-2" />
+              Back
+            </Button>
           </div>
-        )}
+        </div>
       </div>
       
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
-        <div className="mb-6">
-          {/* Project Title and Status Section */}
-          <div className="flex justify-between items-start gap-4">
-            <div className="flex-1 overflow-hidden">
-              <h1 className="text-3xl font-bold text-gray-900 break-words">
-                {project?.project_title || project?.name || 'Project Details'}
-              </h1>
-              
-              {/* Add Management badge if applicable */}
-              {(project?.isManagementProject || 
-                ['top_management_tier_1', 'top_management_tier_2', 'top_management_tier_3'].includes(project?.createdByRole)) && (
-                  <Badge className="bg-purple-100 text-purple-800 text-sm mt-2 inline-flex">
-                    Management
-                  </Badge>
-                )}
-            </div>
-            
-            <div className="flex-shrink-0">
-              <div className="flex flex-col items-end gap-2">
-                <Badge className={statusStyles[normalizedStatus] || 'bg-gray-100 text-gray-800'}>
-                  {normalizedStatus.charAt(0).toUpperCase() + normalizedStatus.slice(1).replace('-', ' ')}
-                </Badge>
-                
-                <Badge className={priorityStyles[normalizedPriority] || 'bg-gray-100 text-gray-800'}>
-                  {normalizedPriority.charAt(0).toUpperCase() + normalizedPriority.slice(1)} Priority
-                </Badge>
+      {/* Project Details */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2">
+          {/* Basic Info Card */}
+          <div className="mb-6 border border-gray-200 rounded-lg p-6">
+            <h3 className="text-lg font-medium text-gray-800 mb-4">Project Details</h3>
+            <div className="space-y-4">
+              <div>
+                <Label>Description</Label>
+                <p className="text-gray-700 mt-1">{project.project_description}</p>
               </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Department</Label>
+                  <p className="text-gray-700 mt-1">{project.department}</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="flex items-center space-x-2">
+                  <Label className="whitespace-nowrap">Status:</Label>
+                  <Badge className={statusStyles[normalizedStatus] || 'bg-gray-100 text-gray-800'}>
+                    {normalizedStatus.charAt(0).toUpperCase() + normalizedStatus.slice(1).replace('-', ' ')}
+                  </Badge>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Label className="whitespace-nowrap">Priority:</Label>
+                  <Badge className={priorityStyles[normalizedPriority] || 'bg-gray-100 text-gray-800'}>
+                    {normalizedPriority.charAt(0).toUpperCase() + normalizedPriority.slice(1)} Priority
+                  </Badge>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Start Date</Label>
+                  <p className="text-gray-700 mt-1 flex items-center">
+                    <FaCalendar className="mr-2 text-gray-500" />
+                    {new Date(project.start_date).toLocaleDateString()}
+                  </p>
+                </div>
+                <div>
+                  <Label>End Date</Label>
+                  <p className="text-gray-700 mt-1 flex items-center">
+                    <FaCalendar className="mr-2 text-gray-500" />
+                    {project.end_date ? new Date(project.end_date).toLocaleDateString() : 'Ongoing'}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Linked Projects */}
+          <div className="mb-6 border border-gray-200 rounded-lg p-6">
+            <h3 className="text-lg font-medium text-gray-800 mb-4">Linked Projects</h3>
+            <div className="space-y-2">
+              {project?.linkedProjects && project.linkedProjects.length > 0 ? (
+                project.linkedProjects.map((lp) => (
+                  <div key={lp.id}>
+                    <a href={`/dashboard/projects/${lp.id}`} className="text-blue-600 hover:underline">
+                      {lp.title}
+                    </a>
+                  </div>
+                ))
+              ) : (
+                <p className="text-gray-500 text-sm">No linked projects</p>
+              )}
+            </div>
+          </div>
+          
+          {/* Tech Stack */}
+          <div className="mb-6 border border-gray-200 rounded-lg p-6">
+            <h3 className="text-lg font-medium text-gray-800 mb-4">Tech Stack</h3>
+            <div className="flex flex-wrap gap-2">
+              {project.tools_used ? (
+                project.tools_used.split(',').map((tech: string, index: number) => (
+                  <span key={index} className="px-3 py-1 bg-gray-100 text-gray-800 rounded-md text-sm">
+                    {tech.trim()}
+                  </span>
+                ))
+              ) : (
+                <p className="text-gray-500 text-sm">No tools specified</p>
+              )}
+            </div>
+          </div>
+
+          {/* Project Updates Timeline */}
+          <div className="mb-6 border border-gray-200 rounded-lg p-6">
+            <h3 className="text-lg font-medium text-gray-800 mb-4">
+              Project Updates Timeline
+            </h3>
+            <div className="space-y-4">
+              {projectUpdates && projectUpdates.length > 0 ? (
+                projectUpdates.map((update: any, index: number) => (
+                  <div key={update._id || index} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                    <div className="flex items-start space-x-3">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center space-x-2">
+                            <span className="font-medium text-gray-900">
+                              {update.author_name || 'Unknown User'}
+                            </span>
+                            <span className="text-sm text-gray-500">posted an update</span>
+                          </div>
+                          <span className="text-sm text-gray-500">
+                            {new Date(update.created_at).toLocaleDateString('en-US', {
+                              year: 'numeric',
+                              month: 'short',
+                              day: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })}
+                          </span>
+                        </div>
+                        <div className="text-gray-700 whitespace-pre-wrap break-words">
+                          {update.message}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  <FaCommentDots className="mx-auto h-12 w-12 text-gray-300 mb-4" />
+                  <p className="text-lg font-medium text-gray-900 mb-2">No updates yet</p>
+                  <p className="text-gray-500">
+                    Project updates will appear here when team members post progress reports.
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         </div>
-        
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 space-y-6">
-            <div>
-              <h2 className="text-lg font-medium text-gray-800 mb-2">Description</h2>
-              <p className="text-gray-600 whitespace-pre-line">{project.project_description}</p>
-            </div>
-            
-            <div>
-              <h2 className="text-lg font-medium text-gray-800 mb-2">Linked Projects</h2>
-              <div className="space-y-2">
-                {project?.linkedProjects && project.linkedProjects.length > 0 ? (
-                  project.linkedProjects.map((lp) => (
-                    <div key={lp.id}>
-                      <a href={`/dashboard/projects/${lp.id}`} className="text-blue-600 hover:underline">
-                        {lp.title}
-                      </a>
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-gray-600">No linked projects</p>
-                )}
-              </div>
-            </div>
-            
-            <div>
-              <h2 className="text-lg font-medium text-gray-800 mb-2">Tech Stack</h2>
-              <div className="flex flex-wrap gap-2">
-                {Array.isArray(project.tech_stack)
-                  ? project.tech_stack.map((tech, index) => (
-                      <span key={index} className="px-3 py-1 bg-gray-100 text-gray-800 rounded-md text-sm">
-                        {tech}
-                      </span>
-                    ))
-                  : null}
-              </div>
-            </div>
-            
-            <div>
-              <h2 className="text-lg font-medium text-gray-800 mb-2">Team Members</h2>
+
+        {/* Sidebar */}
+        <div className="space-y-6">
+          {/* Team Members */}
+          <div className="border border-gray-200 rounded-lg p-6">
+            <h3 className="text-lg font-medium text-gray-800 mb-4">Team Members</h3>
+            {project.employee_contributions?.length === 0 && (!project.employees || project.employees.length === 0) ? (
+              <p className="text-gray-500 text-sm">No members assigned</p>
+            ) : (
               <div className="space-y-3">
                 {project.employee_contributions?.map((contribution, index) => (
-                  <div key={index} className="p-3 bg-white border border-gray-200 rounded-md shadow-sm flex items-center justify-between">
-                    <div className="flex items-center">
-                      <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 mr-3">
-                        <FaUser />
-                      </div>
-                      <div>
-                        <p className="font-medium text-gray-900">{contribution.name || contribution.employee_id}</p>
-                        {contribution.email && <p className="text-sm text-gray-800">{contribution.email}</p>}
-                        {contribution.role && <p className="text-sm text-gray-700">{contribution.role}</p>}
-                      </div>
+                  <div key={index} className="flex items-center space-x-3">
+                    <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
+                      <span className="text-gray-600 text-sm font-medium">
+                        {(contribution.name || contribution.employee_id)?.charAt(0).toUpperCase()}
+                      </span>
                     </div>
-                    <div className="flex items-center text-sm text-gray-800">
-                      <FaClock className="mr-1" />
-                      {contribution.hours_per_week} hours/week
+                    <div>
+                      <p className="text-sm text-gray-900">{contribution.name || contribution.employee_id}</p>
+                      {contribution.email && <p className="text-xs text-gray-600">{contribution.email}</p>}
+                      <p className="text-xs text-gray-500">{contribution.hours_per_week}h/week</p>
                     </div>
                   </div>
                 ))}
                 
                 {/* List project.employees without contributions */}
-
-                
-                {(!project.employee_contributions || project.employee_contributions.length === 0) && project.employees?.length === 0 && (
-                  <p className="text-gray-500 italic">No team members assigned to this project.</p>
-                )}
-              </div>
-            </div>
-            
-            {/* Viewers section */}
-            <div className="mt-6">
-              <h2 className="text-lg font-medium text-gray-800 mb-2">Project Viewers</h2>
-              <div className="space-y-3">
-                {project.viewers?.map((viewer: any, index: number) => (
-                  <div key={index} className="p-3 bg-gray-50 border border-gray-200 rounded-md shadow-sm">
-                    <div className="flex items-center">
-                      <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-500 mr-3">
-                        <FaUser />
-                      </div>
-                      <div>
-                        <p className="font-medium text-gray-700">{viewer.name}</p>
-                        <p className="text-sm text-gray-600">{viewer.email}</p>
-                      </div>
+                {project.employees?.filter((emp: any) => 
+                  !project.employee_contributions?.some((contrib: any) => contrib.email === emp.email)
+                ).map((employee: any, index: number) => (
+                  <div key={`emp-${index}`} className="flex items-center space-x-3">
+                    <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
+                      <span className="text-gray-600 text-sm font-medium">
+                        {employee.name?.charAt(0).toUpperCase()}
+                      </span>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-900">{employee.name}</p>
+                      <p className="text-xs text-gray-600">{employee.email}</p>
+                      <p className="text-xs text-gray-500">{employee.hours_per_week ? `${employee.hours_per_week}h/week` : 'No hours set'}</p>
                     </div>
                   </div>
                 ))}
-                
-                {(!project.viewers || project.viewers.length === 0) && (
-                  <p className="text-gray-500 italic">No viewers added to this project.</p>
-                )}
               </div>
-            </div>
-
-            {/* Project Updates Timeline */}
-            <div className="mt-6">
-              <h2 className="text-lg font-medium text-gray-800 mb-4">
-                Project Updates Timeline
-              </h2>
-              <div className="space-y-4">
-                {projectUpdates && projectUpdates.length > 0 ? (
-                  projectUpdates.map((update: any, index: number) => (
-                    <div key={update._id || index} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-                      <div className="flex items-start space-x-3">
-                        
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center justify-between mb-2">
-                            <div className="flex items-center space-x-2">
-                              <span className="font-medium text-gray-900">
-                                {update.author_name || 'Unknown User'}
-                              </span>
-                              <span className="text-sm text-gray-500">posted an update</span>
-                            </div>
-                            <span className="text-sm text-gray-500">
-                              {new Date(update.created_at).toLocaleDateString('en-US', {
-                                year: 'numeric',
-                                month: 'short',
-                                day: 'numeric',
-                                hour: '2-digit',
-                                minute: '2-digit'
-                              })}
-                            </span>
-                          </div>
-                          <div className="text-gray-700 whitespace-pre-wrap break-words">
-                            {update.message}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <div className="text-center py-8 text-gray-500">
-                    <FaCommentDots className="mx-auto h-12 w-12 text-gray-300 mb-4" />
-                    <p className="text-lg font-medium text-gray-900 mb-2">No updates yet</p>
-                    <p className="text-gray-500">
-                      Project updates will appear here when team members post progress reports.
-                    </p>
-                  </div>
-                )}
-              </div>
-            </div>
+            )}
           </div>
 
-          <div className="space-y-6">
-            <div className="bg-white rounded-lg p-4 border border-gray-200 shadow-sm">
-              <h2 className="text-lg font-medium text-gray-900 mb-3">Project Details</h2>
-              
+          {/* Project Viewers */}
+          <div className="border border-gray-200 rounded-lg p-6">
+            <h3 className="text-lg font-medium text-gray-800 mb-4">Project Viewers</h3>
+            {(!project.viewers || project.viewers.length === 0) ? (
+              <p className="text-gray-500 text-sm">No viewers assigned</p>
+            ) : (
               <div className="space-y-3">
-                <div>
-                  <p className="text-sm font-medium text-gray-700">Department</p>
-                  <p className="text-gray-900">{project.department}</p>
-                </div>
-                
-                <div>
-                  <p className="text-sm font-medium text-gray-700">Timeline</p>
-                  <p className="text-gray-900">
-                    {new Date(project.start_date).toLocaleDateString()} - 
-                    {project.end_date ? new Date(project.end_date).toLocaleDateString() : 'Ongoing'}
-                  </p>
-                </div>
-                
-                <div>
-                  <p className="text-sm font-medium text-gray-700">Estimated Hours</p>
-                  <p className="text-gray-900">{project.total_hours}</p>
-                </div>
-                
-                <div>
-                  <p className="text-sm font-medium text-gray-700">Active Contributors</p>
-                  <p className="text-gray-900">
-                    {project.employee_contributions?.filter(c => c.active).length || 0}
-                  </p>
-                </div>
-              </div>
-            </div>
-            
-            {(project.complexity_score || project.impact_score || project.risk_level) && (
-              <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                <h2 className="text-lg font-medium text-gray-800 mb-3">Analytics</h2>
-                
-                <div className="space-y-3">
-                  {project.complexity_score !== undefined && (
-                    <div>
-                      <p className="text-sm text-gray-500">Complexity Score</p>
-                      <div className="w-full bg-gray-200 rounded-full h-2.5 mt-1">
-                        <div 
-                          className="bg-blue-600 h-2.5 rounded-full" 
-                          style={{ width: `${project.complexity_score}%` }}
-                        ></div>
-                      </div>
-                      <p className="text-xs text-right mt-1">{project.complexity_score}/100</p>
+                {project.viewers?.map((viewer: any, index: number) => (
+                  <div key={index} className="flex items-center space-x-3">
+                    <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
+                      <span className="text-gray-600 text-sm font-medium">
+                        {viewer.name?.charAt(0).toUpperCase()}
+                      </span>
                     </div>
-                  )}
-                  
-                  {project.impact_score !== undefined && (
                     <div>
-                      <p className="text-sm text-gray-500">Impact Score</p>
-                      <div className="w-full bg-gray-200 rounded-full h-2.5 mt-1">
-                        <div 
-                          className="bg-green-600 h-2.5 rounded-full" 
-                          style={{ width: `${project.impact_score}%` }}
-                        ></div>
-                      </div>
-                      <p className="text-xs text-right mt-1">{project.impact_score}/100</p>
+                      <p className="text-sm text-gray-900">{viewer.name}</p>
+                      <p className="text-xs text-gray-600">{viewer.email}</p>
                     </div>
-                  )}
-                  
-                  {project.risk_level && (
-                    <div>
-                      <p className="text-sm text-gray-500">Risk Level</p>
-                      <p className={`font-medium ${
-                        project.risk_level === 'High' ? 'text-red-600' :
-                        project.risk_level === 'Medium' ? 'text-yellow-600' :
-                        'text-green-600'
-                      }`}>
-                        {project.risk_level}
-                      </p>
-                    </div>
-                  )}
-                </div>
+                  </div>
+                ))}
               </div>
             )}
           </div>

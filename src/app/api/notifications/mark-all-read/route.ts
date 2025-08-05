@@ -1,30 +1,43 @@
 import { NextRequest, NextResponse } from 'next/server';
-import dbConnect from '@/lib/dbConnect';
+import mongoose from 'mongoose';
 import Notification from '@/models/Notification';
-import { getToken } from 'next-auth/jwt';
-import { authOptions } from '@/lib/auth';
+import User from '@/models/User';
+import { dbConnect } from '@/lib/dbConnect';
+import jwt from 'jsonwebtoken';
 
-// POST /api/notifications/mark-all-read - Mark all notifications as read
-export async function POST(request: NextRequest) {
+async function getUserFromToken(request: NextRequest) {
+  try {
+    const authHeader = request.headers.get('authorization');
+    const token = authHeader?.replace('Bearer ', '');
+    
+    if (!token) {
+      return null;
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any;
+    const user = await User.findById(decoded.userId);
+    return user;
+  } catch (error) {
+    console.error('Error getting user from token:', error);
+    return null;
+  }
+}
+
+export async function PATCH(req: NextRequest) {
   try {
     await dbConnect();
-    
-    // Verify authentication
-    const token = await getToken({ req: request, secret: authOptions.secret });
-    if (!token || !token.sub) {
+
+    const user = await getUserFromToken(req);
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Update all unread notifications for this user
-    const result = await Notification.updateMany(
-      { userId: token.sub, isRead: false },
-      { $set: { isRead: true, readAt: new Date() } }
+    await Notification.updateMany(
+      { userId: user._id, isRead: false },
+      { isRead: true }
     );
-    
-    return NextResponse.json({
-      message: 'All notifications marked as read',
-      count: result.modifiedCount
-    });
+
+    return NextResponse.json({ message: 'All notifications marked as read' });
   } catch (error) {
     console.error('Error marking all notifications as read:', error);
     return NextResponse.json(
@@ -32,4 +45,4 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
-} 
+}

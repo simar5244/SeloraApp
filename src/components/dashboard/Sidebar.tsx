@@ -6,7 +6,7 @@ import {
   Home, Users, LayoutGrid, Search, Coins, UserCog, Camera,
   User, Settings, LogOut, X, Menu, ChevronLeft, ChevronRight,
   LineChart, Database, Building2, Shield, MessageSquare, ListChecks, Briefcase,
-  ClipboardList, Plug, FileText, BarChart2, Building, Target
+  ClipboardList, Plug, FileText, BarChart2, Building, Target, ChevronDown
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ROUTES, getUserAccessibleRoutes, hasRouteAccess } from '@/lib/permissions';
@@ -29,6 +29,7 @@ export default function Sidebar({ user, isOpen, toggleSidebar }: SidebarProps) {
   const router = useRouter();
   const pathname = usePathname();
   const [isMobile, setIsMobile] = useState(false);
+  const [showProfileDropdown, setShowProfileDropdown] = useState(false);
 
   // Check if a nav item is active
   const isActive = (path: string) => {
@@ -94,6 +95,21 @@ export default function Sidebar({ user, isOpen, toggleSidebar }: SidebarProps) {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (showProfileDropdown) {
+        const target = event.target as Element;
+        if (!target.closest('.profile-dropdown-container')) {
+          setShowProfileDropdown(false);
+        }
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showProfileDropdown]);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -184,54 +200,104 @@ export default function Sidebar({ user, isOpen, toggleSidebar }: SidebarProps) {
           </ul>
         </nav>
 
-        {/* Footer Area with Billing, Profile and Logout */}
-        <div className="mt-auto border-t border-gray-700 p-3 flex-shrink-0 space-y-2">
-          {/* Billing Button - Only show for users with billing access */}
-          {user && hasRouteAccess(user.role, ROUTES.BILLING) && (
-            <Link
-              href={ROUTES.BILLING}
-              className={`flex items-center px-3 py-2.5 rounded-md text-sm font-medium transition-colors w-full
-                ${pathname === ROUTES.BILLING
-                  ? 'bg-purple-600 text-white' 
-                  : 'text-gray-800 hover:bg-purple-200 hover:text-black'
-                } 
-                ${!isOpen ? 'justify-center' : ''}`}
-              title={!isOpen ? 'Billing' : undefined}
-            >
-              <Coins className="w-4 h-4 mr-2" />
-              {isOpen && <span className="text-sm">Billing</span>}
-              {!isOpen && <span className="sr-only">Billing</span>}
-            </Link>
-          )}
-          
-          {/* Profile Button */}
-          <Link
-            href="/dashboard/profile"
-            className={`flex items-center px-3 py-2.5 rounded-md text-sm font-medium transition-colors w-full
-              ${pathname === '/dashboard/profile'
-                ? 'bg-purple-600 text-white' 
-                : 'text-gray-800 hover:bg-purple-200 hover:text-black'
-              } 
-              ${!isOpen ? 'justify-center' : ''}`}
-            title={!isOpen ? 'Profile' : undefined}
-          >
-            <User className="w-4 h-4 mr-2" />
-            {isOpen && <span className="text-sm">Profile</span>}
-            {!isOpen && <span className="sr-only">Profile</span>}
-          </Link>
-          
-          {/* Logout Button */}
+        {/* Footer Area with Profile Dropdown */}
+        <div className="mt-auto border-t border-gray-700 p-3 flex-shrink-0 relative profile-dropdown-container">
+          {/* Profile Dropdown Trigger */}
           <button
-            onClick={handleLogout}
+            onClick={() => setShowProfileDropdown(!showProfileDropdown)}
             className={`w-full flex items-center px-3 py-2.5 rounded-md text-sm font-medium transition-colors text-left
-              text-gray-800 hover:bg-red-100 hover:text-red-700
-              ${!isOpen ? 'justify-center' : ''}`}
-            title={!isOpen ? 'Sign Out' : undefined}
+              text-gray-800 hover:bg-purple-200 hover:text-black
+              ${!isOpen ? 'justify-center' : 'justify-between'}`}
+            title={!isOpen ? `${user?.firstName || ''} ${user?.lastName || ''}`.trim() || user?.email : undefined}
           >
-            <LogOut className="w-4 h-4 mr-2" />
-            {isOpen && <span>Sign Out</span>}
-            <span className="sr-only">Sign Out</span>
+            <div className="flex items-center">
+              <User className="w-4 h-4 mr-2 flex-shrink-0" />
+              {isOpen && (
+                <span className="truncate">
+                  {`${user?.firstName || ''} ${user?.lastName || ''}`.trim() || user?.email || 'User'}
+                </span>
+              )}
+            </div>
+            {isOpen && <ChevronDown className={`w-4 h-4 transition-transform ${showProfileDropdown ? 'rotate-180' : ''}`} />}
           </button>
+
+          {/* Dropdown Menu */}
+          {showProfileDropdown && isOpen && (
+            <div className="absolute bottom-full left-3 right-3 mb-2 bg-white border border-gray-200 rounded-md shadow-lg py-1 z-50">
+              {/* Billing - Only show for users with billing access */}
+              {user && hasRouteAccess(user.role, ROUTES.BILLING) && (
+                <Link
+                  href={ROUTES.BILLING}
+                  className="flex items-center px-3 py-2.5 text-sm font-medium text-gray-800 hover:bg-purple-200 hover:text-black transition-colors"
+                  onClick={() => setShowProfileDropdown(false)}
+                >
+                  <Coins className="w-5 h-5 mr-3" />
+                  Billing
+                </Link>
+              )}
+              
+              {/* Profile */}
+              <Link
+                href="/dashboard/profile"
+                className="flex items-center px-3 py-2.5 text-sm font-medium text-gray-800 hover:bg-purple-200 hover:text-black transition-colors"
+                onClick={() => setShowProfileDropdown(false)}
+              >
+                <User className="w-5 h-5 mr-3" />
+                Profile
+              </Link>
+              
+              {/* Logout */}
+              <button
+                onClick={() => {
+                  setShowProfileDropdown(false);
+                  handleLogout();
+                }}
+                className="w-full flex items-center px-3 py-2.5 text-sm font-medium text-gray-800 hover:bg-purple-200 hover:text-black transition-colors text-left"
+              >
+                <LogOut className="w-5 h-5 mr-3" />
+                Sign Out
+              </button>
+            </div>
+          )}
+
+          {/* Collapsed state - show dropdown to the right */}
+          {showProfileDropdown && !isOpen && (
+            <div className="absolute bottom-0 left-full ml-2 bg-white border border-gray-200 rounded-md shadow-lg py-1 z-50 min-w-[160px]">
+              {/* Billing - Only show for users with billing access */}
+              {user && hasRouteAccess(user.role, ROUTES.BILLING) && (
+                <Link
+                  href={ROUTES.BILLING}
+                  className="flex items-center px-3 py-2.5 text-sm font-medium text-gray-800 hover:bg-purple-200 hover:text-black transition-colors"
+                  onClick={() => setShowProfileDropdown(false)}
+                >
+                  <Coins className="w-5 h-5 mr-3" />
+                  Billing
+                </Link>
+              )}
+              
+              {/* Profile */}
+              <Link
+                href="/dashboard/profile"
+                className="flex items-center px-3 py-2.5 text-sm font-medium text-gray-800 hover:bg-purple-200 hover:text-black transition-colors"
+                onClick={() => setShowProfileDropdown(false)}
+              >
+                <User className="w-5 h-5 mr-3" />
+                Profile
+              </Link>
+              
+              {/* Logout */}
+              <button
+                onClick={() => {
+                  setShowProfileDropdown(false);
+                  handleLogout();
+                }}
+                className="w-full flex items-center px-3 py-2.5 text-sm font-medium text-gray-800 hover:bg-purple-200 hover:text-black transition-colors text-left"
+              >
+                <LogOut className="w-5 h-5 mr-3" />
+                Sign Out
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </>

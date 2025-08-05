@@ -996,11 +996,9 @@ export default function GoalDetailsPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2">
           {/* Basic Info Card */}
-          <Card className="mb-6">
-            <CardHeader>
-              <CardTitle>Goal Details</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
+          <div className="mb-6 border border-gray-200 rounded-lg p-6">
+            <h3 className="text-lg font-medium text-gray-800 mb-4">Goal Details</h3>
+            <div className="space-y-4">
               <div>
                 <Label>Description</Label>
                 {isEditing ? (
@@ -1111,8 +1109,8 @@ export default function GoalDetailsPage() {
                   )}
                 </div>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
           {/* Tabs for Projects, KPIs, etc. */}
           <Tabs defaultValue="projects" className="space-y-4">
@@ -1432,7 +1430,10 @@ export default function GoalDetailsPage() {
                             {employee.name?.charAt(0).toUpperCase()}
                           </span>
                         </div>
-                        <p className="text-sm text-gray-900">{employee.name}</p>
+                        <div>
+                          <p className="text-sm text-gray-900">{employee.name}</p>
+                          {employee.email && <p className="text-xs text-gray-600">{employee.email}</p>}
+                        </div>
                       </div>
                       {isEditing && (
                         <Button
@@ -1546,7 +1547,10 @@ export default function GoalDetailsPage() {
                             {viewer.name?.charAt(0).toUpperCase()}
                           </span>
                         </div>
-                        <p className="text-sm text-gray-900">{viewer.name}</p>
+                        <div>
+                          <p className="text-sm text-gray-900">{viewer.name}</p>
+                          {viewer.email && <p className="text-xs text-gray-600">{viewer.email}</p>}
+                        </div>
                       </div>
                       {isEditing && (
                         <Button
