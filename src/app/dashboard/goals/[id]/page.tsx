@@ -235,55 +235,18 @@ export default function GoalDetailsPage() {
           try {
             console.log(`Loading projects linked to goal ${goalId}`);
             
-            // Query projects collection for projects linked to this goal with cache busting
-            const response = await fetch(`/api/projects?linkedToGoal=true&goalId=${goalId}${cacheBuster}`, {
-              headers: { 
-                'Authorization': `Bearer ${localStorage.getItem('token')}`,
-                'Cache-Control': 'no-cache, no-store, must-revalidate',
-                'Pragma': 'no-cache',
-                'Expires': '0'
-              },
-              cache: 'no-store'
-            });
-            
-            if (response.ok) {
-              const result = await response.json();
-              console.log('Linked projects result:', result);
-              
-              if (result.projects && Array.isArray(result.projects)) {
-                // Filter projects that are specifically linked to this goal
-                const linkedProjects = result.projects.filter((project: any) => 
-                  project.linkedToGoal === true && 
-                  project.goalContext && 
-                  project.goalContext.goalId === goalId
-                );
-                
-                console.log(`Found ${linkedProjects.length} projects linked to goal ${goalId}`);
-                setProjects(linkedProjects);
-              } else {
-                console.log('No linked projects found in response');
-                setProjects([]);
-              }
+            // Use the correct API endpoint that handles assigned projects
+            const projectsResult = await fetchGoalProjects(goalId);
+            if (projectsResult.projects) {
+              console.log('Assigned projects data:', projectsResult.projects);
+              setProjects(projectsResult.projects);
             } else {
-              console.error('Failed to fetch linked projects:', response.status, response.statusText);
-              // Fallback: try the old API endpoint
-              const projectsResult = await fetchGoalProjects(goalId);
-              if (projectsResult.projects) {
-                setProjects(projectsResult.projects);
-              }
+              console.log('No assigned projects found');
+              setProjects([]);
             }
           } catch (error) {
-            console.error('Error loading linked projects:', error);
-            // Fallback: try the old API endpoint
-            try {
-              const projectsResult = await fetchGoalProjects(goalId);
-              if (projectsResult.projects) {
-                setProjects(projectsResult.projects);
-              }
-            } catch (fallbackError) {
-              console.error('Error with fallback project loading:', fallbackError);
-              setProjects([]); // Clear projects to avoid showing stale data
-            }
+            console.error('Error loading assigned projects:', error);
+            setProjects([]); // Clear projects to avoid showing stale data
           }
         } else {
           toast.error('Goal not found');
@@ -1086,8 +1049,8 @@ export default function GoalDetailsPage() {
                       </SelectContent>
                     </Select>
                   ) : (
-                    <Badge className={StatusColors[goal.status]}>
-                      {goal.status.replace('-', ' ').toUpperCase()}
+                    <Badge className={goal?.status ? StatusColors[goal.status] : 'bg-gray-100 text-gray-800'}>
+                      {goal?.status ? goal.status.replace('-', ' ').toUpperCase() : 'LOADING...'}
                     </Badge>
                   )}
                 </div>
@@ -1109,8 +1072,8 @@ export default function GoalDetailsPage() {
                       </SelectContent>
                     </Select>
                   ) : (
-                    <Badge className={PriorityColors[goal.priority]}>
-                      {goal.priority.toUpperCase()}
+                    <Badge className={goal?.priority ? PriorityColors[goal.priority] : 'bg-gray-100 text-gray-800'}>
+                      {goal?.priority ? goal.priority.toUpperCase() : 'LOADING...'}
                     </Badge>
                   )}
                 </div>

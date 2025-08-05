@@ -57,3 +57,28 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
 }
+
+/* Hide sidebar when no-sidebar class is present */
+body.no-sidebar .sidebar {
+  display: none !important;
+}
+
+body.no-sidebar .main-content {
+  margin-left: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+/* Ensure full height for the onboarding page */
+body.no-sidebar {
+  overflow: hidden;
+}
+
+body.no-sidebar .fixed.inset-0 {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 50;
+}

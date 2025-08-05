@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { FaBell, FaCheck, FaTrash, FaCheckDouble, FaProject, FaProjectDiagram, FaUsers, FaUserPlus, FaExclamationTriangle } from 'react-icons/fa';
+import { FaBell, FaCheck, FaTrash, FaCheckDouble, FaProjectDiagram, FaUsers, FaExclamationTriangle } from 'react-icons/fa';
 import { MdKeyboardArrowDown } from 'react-icons/md';
 import { formatDistanceToNow } from 'date-fns';
 

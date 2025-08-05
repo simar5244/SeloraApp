@@ -7,6 +7,7 @@ import AddProjectModal from "../AddProjectModal";
 import { addNewProject } from "../api";
 import { toast } from "react-hot-toast";
 import { ProjectsTourLauncher } from "@/components/tour/ProjectsTourLauncher";
+import ProjectOnboardingLauncher from "@/components/tour/ProjectOnboardingLauncher";
 import { ArrowLeft } from "lucide-react";
 
 export default function CreateProjectPage() {
@@ -62,6 +63,7 @@ export default function CreateProjectPage() {
         </div>
       </div>
       <ProjectsTourLauncher />
+      <ProjectOnboardingLauncher />
     </div>
   );
 }
