@@ -893,6 +893,12 @@ export async function middleware(request: NextRequest) {
         return NextResponse.redirect(new URL('/dashboard', request.url));
       }
 
+      // Restrict access to invite page for non-admin users
+      if ((path === '/dashboard/invite' || path === '/invite') && !isAdmin) {
+        console.log('[EXTREME_DEBUG] 👤 ❌ Non-admin attempting to access invite page, redirecting');
+        return NextResponse.redirect(new URL('/dashboard', request.url));
+      }
+
       // For API requests, add company info to headers for database selection
       if (path.startsWith('/api/')) {
         console.log('[EXTREME_DEBUG] 🔌 Adding headers for API request');

@@ -331,6 +331,94 @@ export const sendNotificationEmail = async (
   }
 };
 
+// Send a company invitation email
+export const sendCompanyInvitationEmail = async (
+  to: string,
+  adminName: string,
+  companyCode: string,
+  organizationName: string = 'your organization'
+): Promise<boolean> => {
+  try {
+    console.log(`[EMAIL] Sending company invitation email to ${to}`);
+    const transporter = getTransporter();
+    
+    await transporter.sendMail({
+      from: process.env.EMAIL_FROM || `"Selora" <${process.env.SMTP_USER || process.env.EMAIL_USER || 'noreply@selora.com'}>`,
+      to,
+      subject: `${adminName} invites you to join ${organizationName} on Selora`,
+      html: `
+        <div style="font-family: 'Arial', sans-serif; max-width: 600px; margin: 0 auto; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);">
+          <!-- Header with brand color -->
+          <div style="background-color: #6A0DAD; padding: 30px 20px; text-align: center; color: white;">
+            <h1 style="margin: 0; font-size: 28px; font-weight: 600;">You're Invited to Join Selora!</h1>
+          </div>
+          
+          <!-- Email content -->
+          <div style="padding: 30px; background-color: #ffffff;">
+            <p style="font-size: 16px; line-height: 1.6; color: #333; margin-bottom: 20px;">
+              Hello,<br>
+              <strong>${adminName}</strong> has invited you to join <strong>${organizationName}</strong> on Selora - a powerful platform for managing goals, projects, and team collaboration.
+            </p>
+            
+            <div style="background-color: #f9f5ff; border-left: 4px solid #6A0DAD; padding: 20px; margin: 25px 0; border-radius: 0 4px 4px 0;">
+              <h3 style="margin: 0 0 10px 0; color: #4a1d96; font-size: 18px;">Your Company Code:</h3>
+              <div style="background-color: #ffffff; border: 1px solid #e9d8fd; border-radius: 6px; padding: 15px; text-align: center; margin: 10px 0;">
+                <span style="font-size: 24px; font-weight: 700; letter-spacing: 2px; color: #6A0DAD; font-family: monospace;">${companyCode}</span>
+              </div>
+              <p style="margin: 10px 0 0 0; color: #4a1d96; font-size: 14px; font-weight: 500;">
+                You'll need this code to complete your signup process.
+              </p>
+            </div>
+            
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/auth/signup" 
+                 style="background-color: #6A0DAD; color: white; padding: 15px 30px; text-align: center; 
+                        text-decoration: none; display: inline-block; border-radius: 6px; font-weight: 600; 
+                        font-size: 16px; transition: background-color 0.3s;">
+                Get Started with Selora
+              </a>
+            </div>
+            
+            <div style="background-color: #f8fafc; border-radius: 6px; padding: 20px; margin: 25px 0;">
+              <h4 style="margin: 0 0 10px 0; color: #374151; font-size: 16px;">What you can do with Selora:</h4>
+              <ul style="margin: 10px 0; padding-left: 20px; color: #4b5563; line-height: 1.6;">
+                <li>Set and track organizational goals</li>
+                <li>Manage projects and collaborate with your team</li>
+                <li>Monitor progress and performance metrics</li>
+                <li>Streamline communication and feedback</li>
+              </ul>
+            </div>
+            
+            <p style="font-size: 15px; line-height: 1.6; color: #4b5563; margin: 25px 0 10px;">
+              Simply click the button above and use the company code <strong>${companyCode}</strong> during signup to join your team.
+            </p>
+            
+            <p style="font-size: 14px; line-height: 1.6; color: #6b7280; margin: 30px 0 10px;">
+              Questions? Just reply to this email and we'll help you get started.
+            </p>
+          </div>
+          
+          <!-- Footer -->
+          <div style="background-color: #f3f4f6; padding: 20px; text-align: center; border-top: 1px solid #e5e7eb;">
+            <p style="margin: 0; font-size: 14px; color: #6b7280;">
+              &copy; 2025 Selora. All rights reserved.
+            </p>
+            <p style="margin: 10px 0 0; font-size: 13px; color: #9ca3af;">
+              This invitation was sent by ${adminName} from ${organizationName}.
+            </p>
+          </div>
+        </div>
+      `
+    });
+    
+    console.log(`[EMAIL] Company invitation email sent successfully to ${to}`);
+    return true;
+  } catch (error) {
+    console.error('[EMAIL] Failed to send company invitation email:', error);
+    return false;
+  }
+};
+
 // Send an OTP verification email
 export const sendOTPVerificationEmail = async (
   to: string, 
