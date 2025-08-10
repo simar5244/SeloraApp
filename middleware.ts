@@ -549,8 +549,47 @@ export async function middleware(request: NextRequest) {
       });
 
       // ===== ONBOARDING CHECK =====
-      // Check if user needs onboarding (only if not already on onboarding page)
-      if (path !== '/onboarding' && path !== '/api/auth/logout' && !path.startsWith('/api/auth/')) {
+      // Check onboarding redirects
+      // 1) If user is on /onboarding but has already completed onboarding (onboarding === true or has firstName & lastName)
+      //    then redirect them to /dashboard to prevent accessing onboarding again
+      if (path === '/onboarding' && !path.startsWith('/api/auth/')) {
+        console.log('🔍 [MIDDLEWARE] Onboarding page access detected, verifying completion status');
+        try {
+          const host = request.headers.get('host') || '';
+          const protocol = host.includes('localhost') ? 'http' : 'https';
+          const baseUrl = `${protocol}://${host}`;
+          const userUrl = new URL(`/api/users/profile`, baseUrl);
+
+          const userRes = await fetch(userUrl, {
+            headers: {
+              Authorization: `Bearer ${finalToken}`,
+              'Content-Type': 'application/json',
+              'x-middleware-request': 'true'
+            },
+            next: { revalidate: 0 }
+          });
+
+          if (userRes.ok) {
+            const userData = await userRes.json();
+            const onboardingField = userData.onboarding;
+            const firstName = userData.firstName || '';
+            const lastName = userData.lastName || '';
+
+            const hasCompleted = onboardingField === true || (firstName.trim() !== '' && lastName.trim() !== '');
+            console.log('🔍 [MIDDLEWARE] Onboarding completion check:', { onboardingField, firstNamePresent: !!firstName, lastNamePresent: !!lastName, hasCompleted });
+
+            if (hasCompleted) {
+              console.log('✅ [MIDDLEWARE] User has completed onboarding, redirecting away from /onboarding to /dashboard');
+              return NextResponse.redirect(new URL('/dashboard', request.url));
+            }
+          } else {
+            console.log('⚠️ [MIDDLEWARE] Could not fetch user profile while on /onboarding, allowing access');
+          }
+        } catch (err) {
+          console.error('❌ [MIDDLEWARE] Error verifying onboarding completion on /onboarding:', err);
+          // If there's an error, allow access to onboarding to avoid blocking users
+        }
+      } else if (path !== '/onboarding' && path !== '/api/auth/logout' && !path.startsWith('/api/auth/')) {
         console.log('🔍 [MIDDLEWARE] Checking onboarding status for path:', path);
         
         try {

@@ -21,6 +21,7 @@ import {
   FaFileAlt as FaFileAltSolid,
   FaSitemap
 } from 'react-icons/fa';
+import AdminChecklist from '@/components/checklist/AdminChecklist';
 
 // Types for overworked employees
 interface JobResponsibility {
@@ -484,6 +485,12 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Admin Checklist bubble (Stripe-like) - only on admin dashboard */}
+      <AdminChecklist
+        totalEmployees={stats.totalEmployees}
+        activeProjects={stats.activeProjects}
+        currentUser={user}
+      />
       {/* Main Content */}
       <div className="space-y-8 max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         {/* Welcome section - using purple accent */}

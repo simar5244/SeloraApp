@@ -37,6 +37,40 @@ export const areTutorialsEnabled = async (): Promise<boolean> => {
 };
 
 /**
+ * Checklist visibility settings (decoupled from tutorials)
+ */
+
+/** Sync getter for checklist visibility */
+export const areChecklistEnabledSync = (): boolean => {
+  if (typeof window === 'undefined') return true;
+  const raw = localStorage.getItem('checklistEnabled');
+  if (raw === null) return true; // default: enabled
+  try { return JSON.parse(raw); } catch { return true; }
+};
+
+/** Sync setter for checklist visibility */
+export const setChecklistEnabledSync = (enabled: boolean): void => {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem('checklistEnabled', JSON.stringify(enabled));
+  // broadcast change to other tabs/components
+  window.dispatchEvent(new StorageEvent('storage', { key: 'checklistEnabled', newValue: JSON.stringify(enabled) }));
+};
+
+/** Subscribe to checklist visibility changes */
+export const onChecklistSettingChange = (callback: (enabled: boolean) => void): (() => void) => {
+  if (typeof window === 'undefined') return () => {};
+  const handler = (e: StorageEvent) => {
+    if (e.key === 'checklistEnabled' && e.newValue !== null) {
+      try {
+        callback(JSON.parse(e.newValue));
+      } catch { callback(true); }
+    }
+  };
+  window.addEventListener('storage', handler);
+  return () => window.removeEventListener('storage', handler);
+};
+
+/**
  * Set tutorial enabled/disabled state (to database)
  * @param enabled - boolean indicating if tutorials should be enabled
  */

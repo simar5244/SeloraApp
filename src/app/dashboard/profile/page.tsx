@@ -158,6 +158,7 @@ export default function ProfilePage() {
   const [saveSuccess, setSaveSuccess] = useState("");
   const [saveError, setSaveError] = useState("");
   const [tutorialsEnabled, setTutorialsEnabled] = useState(false);
+  const [checklistEnabled, setChecklistEnabled] = useState(true);
 
   // Show toast notifications when saveSuccess or saveError state changes
   useEffect(() => {
@@ -317,12 +318,35 @@ export default function ProfilePage() {
     }
   };
 
+  const handleChecklistToggle = (enabled: boolean) => {
+    setChecklistEnabled(enabled);
+    localStorage.setItem('checklistEnabled', JSON.stringify(enabled));
+
+    // Trigger storage event for other components to listen
+    window.dispatchEvent(new StorageEvent('storage', {
+      key: 'checklistEnabled',
+      newValue: JSON.stringify(enabled),
+      oldValue: JSON.stringify(!enabled)
+    }));
+
+    // Show success message
+    toast.success(enabled ? 'Onboarding Checklist Enabled' : 'Onboarding Checklist Disabled', {
+      position: 'top-right',
+      duration: 3000,
+    });
+  };
+
   useEffect(() => {
     fetchUserData();
     // Load tutorial setting from localStorage
     const tutorialSetting = localStorage.getItem('tutorialsEnabled');
     if (tutorialSetting !== null) {
       setTutorialsEnabled(JSON.parse(tutorialSetting));
+    }
+    // Load checklist setting from localStorage (default true)
+    const checklistSetting = localStorage.getItem('checklistEnabled');
+    if (checklistSetting !== null) {
+      try { setChecklistEnabled(JSON.parse(checklistSetting)); } catch {}
     }
   }, [router]);
 
@@ -1276,6 +1300,21 @@ export default function ProfilePage() {
                       <Checkbox
                         checked={tutorialsEnabled}
                         onCheckedChange={handleTutorialToggle}
+                        className="data-[state=checked]:bg-purple-600 data-[state=checked]:border-purple-600"
+                      />
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                    <div className="flex-1">
+                      <h3 className="text-base font-medium text-gray-900">Onboarding Checklist</h3>
+                      <p className="text-sm text-gray-500 mt-1">
+                        Show or hide the floating onboarding checklist on dashboards. This is independent of Tutorial Mode.
+                      </p>
+                    </div>
+                    <div className="ml-4">
+                      <Checkbox
+                        checked={checklistEnabled}
+                        onCheckedChange={handleChecklistToggle}
                         className="data-[state=checked]:bg-purple-600 data-[state=checked]:border-purple-600"
                       />
                     </div>

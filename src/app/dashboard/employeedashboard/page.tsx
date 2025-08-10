@@ -1,5 +1,6 @@
 'use client';
 import React, { useState, useEffect } from 'react';
+import EmployeeChecklist from '@/components/checklist/EmployeeChecklist';
 import Link from 'next/link';
 import {
   FaUsers,
@@ -347,6 +348,9 @@ export default function EmployeeDashboard() {
           <p className="text-gray-500 italic">No active projects assigned to you.</p>
         )}
       </div>
+
+      {/* Floating employee onboarding checklist */}
+      <EmployeeChecklist currentUser={user} />
 
     </div>
   );
