@@ -1,24 +1,30 @@
 import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import Notification from '@/models/Notification';
-import { getToken } from 'next-auth/jwt';
-import { authOptions } from '@/lib/auth';
+import { verifyAuth } from '@/lib/auth';
+import { ObjectId } from 'mongodb';
 
 // POST /api/notifications/mark-all-read - Mark all notifications as read
 export async function POST(request: NextRequest) {
   try {
-    await dbConnect();
-    
-    // Verify authentication
-    const token = await getToken({ req: request, secret: authOptions.secret });
-    if (!token || !token.sub) {
+    const authHeader = request.headers.get('authorization');
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    const token = authHeader.split(' ')[1];
+    const payload = await verifyAuth(token);
+    if (!payload || !payload.id || !payload.companyCode) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    await dbConnect(payload.companyCode);
+
     // Update all unread notifications for this user
+    let userObjectId: ObjectId;
+    try { userObjectId = new ObjectId(payload.id); } catch { return NextResponse.json({ error: 'Invalid user id' }, { status: 400 }); }
     const result = await Notification.updateMany(
-      { userId: token.sub, isRead: false },
-      { $set: { isRead: true, readAt: new Date() } }
+      { userId: userObjectId, isRead: false },
+      { $set: { isRead: true } }
     );
     
     return NextResponse.json({

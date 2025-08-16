@@ -304,21 +304,73 @@ export const sendPasswordResetOTPEmail = async (to: string, otp: string, usernam
 export const sendNotificationEmail = async (
   to: string, 
   subject: string, 
-  message: string
+  message: string,
+  projectTitle?: string,
+  projectId?: string
 ): Promise<boolean> => {
   try {
     console.log(`[EMAIL] Sending notification email to ${to}`);
     const transporter = getTransporter();
     
+    // Create project link if projectId is provided
+    const projectLink = projectId ? `${process.env.NEXT_PUBLIC_APP_URL || 'https://app.selora.com'}/dashboard/projects/${projectId}` : null;
+    
     await transporter.sendMail({
-      from: process.env.EMAIL_FROM || `"selora" <${process.env.SMTP_USER || process.env.EMAIL_USER || 'noreply@selora.com'}>`,
+      from: process.env.EMAIL_FROM || `"Selora" <${process.env.SMTP_USER || process.env.EMAIL_USER || 'noreply@selora.com'}>`,
       to,
       subject,
       html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-          <h2>${subject}</h2>
-          <p>${message}</p>
-          <p>Best regards,<br>The Selora Team</p>
+        <div style="font-family: 'Arial', sans-serif; max-width: 600px; margin: 0 auto; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);">
+          <!-- Header with brand color -->
+          <div style="background-color: #6A0DAD; padding: 30px 20px; text-align: center; color: white;">
+            <h1 style="margin: 0; font-size: 24px; font-weight: 600;">Project Notification</h1>
+          </div>
+          
+          <!-- Email content -->
+          <div style="padding: 30px; background-color: #ffffff;">
+            <p style="font-size: 16px; line-height: 1.6; color: #333; margin-bottom: 20px;">
+              Hello,<br>
+              ${message}
+            </p>
+            
+            ${projectTitle ? `
+            <!-- Project Info Box -->
+            <div style="background-color: #f9f5ff; border: 1px solid #e9d8fd; border-radius: 8px; padding: 20px; margin: 25px 0;">
+              <h3 style="margin: 0 0 10px; font-size: 18px; color: #6A0DAD; font-weight: 600;">
+                📋 ${projectTitle}
+              </h3>
+              <p style="margin: 0; font-size: 14px; color: #4b5563;">
+                You've been added as a team member to this project.
+              </p>
+            </div>
+            ` : ''}
+            
+            ${projectLink ? `
+            <!-- Action Button -->
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="${projectLink}" 
+                 style="background-color: #6A0DAD; color: white; padding: 14px 28px; 
+                        text-decoration: none; border-radius: 6px; font-weight: 600; 
+                        font-size: 16px; display: inline-block; box-shadow: 0 2px 4px rgba(106, 13, 173, 0.2);">
+                View Project Details
+              </a>
+            </div>
+            ` : ''}
+            
+            <p style="font-size: 14px; line-height: 1.6; color: #6b7280; margin: 30px 0 10px;">
+              Need help? Feel free to reach out to your project manager or reply to this email.
+            </p>
+          </div>
+          
+          <!-- Footer -->
+          <div style="background-color: #f3f4f6; padding: 20px; text-align: center; border-top: 1px solid #e5e7eb;">
+            <p style="margin: 0; font-size: 14px; color: #6b7280;">
+              &copy; 2025 Selora. All rights reserved.
+            </p>
+            <p style="margin: 10px 0 0; font-size: 13px; color: #9ca3af;">
+              This notification was sent automatically when you were added to a project.
+            </p>
+          </div>
         </div>
       `
     });

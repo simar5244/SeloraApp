@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { FaBell, FaCheck, FaTrash, FaCheckDouble, FaProjectDiagram, FaUsers, FaExclamationTriangle } from 'react-icons/fa';
-import { MdKeyboardArrowDown } from 'react-icons/md';
+import { FaBell as FaSolidBell, FaCheck, FaTrash, FaCheckDouble, FaProjectDiagram, FaUsers, FaExclamationTriangle } from 'react-icons/fa';
+import { FaRegBell } from 'react-icons/fa';
+import { FiCheck, FiTrash2, FiX } from 'react-icons/fi';
 import { formatDistanceToNow } from 'date-fns';
 
 // Define notification type
@@ -26,6 +27,7 @@ export default function NotificationCenter({ onNavigate }: NotificationCenterPro
   const [error, setError] = useState<string | null>(null);
   const [showNotifications, setShowNotifications] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [visibleCount, setVisibleCount] = useState(5);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Fetch notifications
@@ -35,16 +37,29 @@ export default function NotificationCenter({ onNavigate }: NotificationCenterPro
       setError(null);
       
       try {
-        // In a real app, this would be an API call
-        const response = await fetch('/api/notifications');
+        const token = localStorage.getItem('token');
+        const response = await fetch('/api/notifications', {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
         
         if (!response.ok) {
           throw new Error('Failed to fetch notifications');
         }
         
         const data = await response.json();
-        setNotifications(data.notifications || []);
-        setUnreadCount(data.notifications.filter((notification: Notification) => !notification.isRead).length);
+        const items = Array.isArray(data.notifications) ? data.notifications : [];
+        const normalized: Notification[] = items.map((n: any) => ({
+          id: String(n.id || n._id),
+          title: n.title || 'Notification',
+          message: n.message || '',
+          type: (n.type || 'info') as Notification['type'],
+          isRead: Boolean(n.isRead),
+          createdAt: typeof n.createdAt === 'string' ? n.createdAt : new Date(n.createdAt).toISOString(),
+          link: n.link || undefined,
+        }));
+
+        setNotifications(normalized);
+        setUnreadCount(normalized.filter((notification: Notification) => !notification.isRead).length);
       } catch (err) {
         console.error('Error fetching notifications:', err);
         setError('Failed to load notifications');
@@ -60,8 +75,8 @@ export default function NotificationCenter({ onNavigate }: NotificationCenterPro
     
     fetchNotifications();
     
-    // Set up polling for new notifications (every 30 seconds in a real app)
-    const intervalId = setInterval(fetchNotifications, 300000);
+    // Poll for new notifications frequently
+    const intervalId = setInterval(fetchNotifications, 20000);
     
     return () => {
       clearInterval(intervalId);
@@ -85,13 +100,14 @@ export default function NotificationCenter({ onNavigate }: NotificationCenterPro
   // Mark a notification as read
   const markAsRead = async (id: string) => {
     try {
-      // Call the API endpoint
-      await fetch(`/api/notifications/${id}`, {
-        method: 'PATCH',
+      const token = localStorage.getItem('token');
+      await fetch(`/api/notifications/actions`, {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
-        body: JSON.stringify({ isRead: true }),
+        body: JSON.stringify({ action: 'markAsRead', ids: [id] }),
       });
       
       // Update local state
@@ -113,13 +129,13 @@ export default function NotificationCenter({ onNavigate }: NotificationCenterPro
   // Mark all notifications as read
   const markAllAsRead = async () => {
     try {
-      // Call the API endpoint
-      await fetch('/api/notifications/actions', {
+      const token = localStorage.getItem('token');
+      await fetch('/api/notifications/mark-all-read', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
-        body: JSON.stringify({ action: 'markAllAsRead' }),
       });
       
       // Update local state
@@ -137,19 +153,16 @@ export default function NotificationCenter({ onNavigate }: NotificationCenterPro
   // Clear all notifications
   const clearAllNotifications = async () => {
     try {
-      // In a real app, this would use an API endpoint like bulk delete
-      const unreadNotifications = notifications.filter(n => !n.isRead).map(n => n.id);
-      
-      if (unreadNotifications.length > 0) {
-        await fetch('/api/notifications/bulk', {
-          method: 'POST',
+      const token = localStorage.getItem('token');
+      const ids = notifications.map(n => n.id).filter(Boolean);
+      if (ids.length > 0) {
+        await fetch('/api/notifications', {
+          method: 'DELETE',
           headers: {
             'Content-Type': 'application/json',
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
           },
-          body: JSON.stringify({ 
-            action: 'delete',
-            ids: unreadNotifications 
-          }),
+          body: JSON.stringify({ ids }),
         });
       }
       
@@ -167,8 +180,9 @@ export default function NotificationCenter({ onNavigate }: NotificationCenterPro
       markAsRead(notification.id);
     }
     
-    if (notification.link && onNavigate) {
-      onNavigate(notification.link);
+    if (notification.link) {
+      if (onNavigate) onNavigate(notification.link);
+      else window.location.href = notification.link;
       setShowNotifications(false);
     }
   };
@@ -245,104 +259,188 @@ export default function NotificationCenter({ onNavigate }: NotificationCenterPro
     }
   };
 
+  
+  // Reset visible slice when opening panel or when list changes length
+  useEffect(() => {
+    if (showNotifications) setVisibleCount(5);
+  }, [showNotifications, notifications.length]);
+
   return (
-    <div className="relative" ref={dropdownRef}>
-      {/* Notification bell icon with badge */}
-      <button
-        onClick={() => setShowNotifications(!showNotifications)}
-        className="relative p-2 text-gray-600 rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        aria-label="Notifications"
-      >
-        <FaBell className="h-6 w-6" />
+    <div className="relative inline-block text-left">
+      {/* Floating button */}
+      <div className="relative">
+        <button
+          onClick={() => setShowNotifications(prev => !prev)}
+          className="relative flex items-center justify-center w-10 h-10 md:w-10 md:h-10 rounded-full bg-white text-purple-600 border border-purple-200 shadow-lg hover:shadow-xl hover:bg-purple-50 transition-transform duration-150 hover:-translate-y-0.5 focus:outline-none overflow-hidden"
+          aria-label="Notifications"
+        >
+          <FaRegBell className="h-5 w-5" />
+        </button>
+        {/* Unread indicator (dot) */}
         {unreadCount > 0 && (
-          <span className="absolute top-1 right-1 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full">
-            {unreadCount > 9 ? '9+' : unreadCount}
-          </span>
+          <span
+            className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-purple-600 ring-2 ring-white shadow-sm"
+            aria-label="Unread notifications indicator"
+          />
         )}
-      </button>
+        {/* Tooltip */}
+        <div className="absolute right-0 mt-2 opacity-0 hover:opacity-100 focus-within:opacity-100 transition pointer-events-none">
+          <div className="bg-gray-900/90 text-white text-[11px] px-2 py-1 rounded-md shadow-sm max-w-[12rem] whitespace-nowrap">
+            Notifications
+          </div>
+        </div>
+      </div>
       
       {/* Notification dropdown */}
       {showNotifications && (
-        <div className="absolute right-0 mt-2 w-80 bg-white rounded-md shadow-lg overflow-hidden z-50 max-h-[80vh] flex flex-col">
-          <div className="p-3 bg-gray-50 border-b border-gray-200 flex justify-between items-center">
-            <h3 className="text-sm font-medium text-gray-700">Notifications</h3>
-            <div className="flex space-x-2">
-              <button 
+        <div className="absolute top-0 right-0 w-96 bg-white rounded-xl shadow-2xl overflow-hidden z-[10000] max-h-[32rem] flex flex-col border border-gray-200">
+          {/* Header */}
+          <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 bg-white/70 backdrop-blur">
+            <div className="flex items-center gap-2">
+              <div className="text-sm font-semibold text-gray-900">Notifications</div>
+              {unreadCount > 0 && (
+                <span
+                  className="ml-1 h-2.5 w-2.5 rounded-full bg-purple-600 inline-block"
+                  aria-label="Unread notifications"
+                />
+              )}
+            </div>
+            <div className="flex items-center gap-1">
+              <button
                 onClick={markAllAsRead}
-                className="p-1 text-xs text-gray-600 hover:text-gray-900 rounded hover:bg-gray-200 focus:outline-none"
+                className="p-1.5 rounded hover:bg-gray-100 text-black"
+                aria-label="Mark all as read"
                 title="Mark all as read"
               >
-                <FaCheckDouble className="h-4 w-4" />
+                <FiCheck className="h-4 w-4" />
               </button>
-              <button 
+              <button
                 onClick={clearAllNotifications}
-                className="p-1 text-xs text-gray-600 hover:text-gray-900 rounded hover:bg-gray-200 focus:outline-none"
+                className="p-1.5 rounded hover:bg-gray-100 text-black"
+                aria-label="Clear all notifications"
                 title="Clear all notifications"
               >
-                <FaTrash className="h-4 w-4" />
+                <FiTrash2 className="h-4 w-4" />
+              </button>
+              <button
+                onClick={() => setShowNotifications(false)}
+                className="p-1.5 rounded hover:bg-gray-100 text-black"
+                aria-label="Close panel"
+                title="Close"
+              >
+                <FiX className="h-4 w-4" />
               </button>
             </div>
           </div>
           
-          <div className="overflow-y-auto flex-grow">
+          {/* Content */}
+          <div className="overflow-y-auto flex-grow bg-gray-50/50">
             {loading && (
-              <div className="py-4 text-center">
-                <div className="inline-block animate-spin rounded-full h-6 w-6 border-2 border-gray-300 border-t-blue-600"></div>
-                <p className="text-sm text-gray-500 mt-2">Loading notifications...</p>
+              <div className="py-8 text-center">
+                <div className="inline-block animate-spin rounded-full h-8 w-8 border-2 border-gray-300 border-t-purple-600 mb-3"></div>
+                <p className="text-sm text-gray-600 font-medium">Loading notifications...</p>
               </div>
             )}
             
             {error && !loading && notifications.length === 0 && (
-              <div className="py-6 text-center">
-                <FaExclamationTriangle className="mx-auto h-6 w-6 text-yellow-500" />
-                <p className="text-sm text-gray-500 mt-2">{error}</p>
+              <div className="py-8 text-center">
+                <div className="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <FaExclamationTriangle className="h-6 w-6 text-yellow-600" />
+                </div>
+                <p className="text-sm text-gray-600 font-medium">{error}</p>
+                <p className="text-xs text-gray-500 mt-1">Please try again later</p>
               </div>
             )}
             
             {!loading && notifications.length === 0 && !error && (
-              <div className="py-6 text-center">
-                <FaBell className="mx-auto h-6 w-6 text-gray-400" />
-                <p className="text-sm text-gray-500 mt-2">No notifications</p>
+              <div className="py-8 text-center">
+                <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <FaBell className="h-6 w-6 text-gray-400" />
+                </div>
+                <p className="text-sm text-gray-600 font-medium">No notifications</p>
+                <p className="text-xs text-gray-500 mt-1">You're all caught up!</p>
               </div>
             )}
             
-            {notifications.map((notification) => (
+            {notifications.slice(0, visibleCount).map((notification, index) => (
               <div 
                 key={notification.id}
                 onClick={() => handleNotificationClick(notification)}
-                className={`p-3 border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition ${notification.isRead ? 'bg-white' : 'bg-blue-50'}`}
+                className={`relative px-6 py-4 cursor-pointer transition-all duration-200 group ${
+                  notification.isRead 
+                    ? 'bg-white hover:bg-gray-50' 
+                    : 'bg-purple-50/50 hover:bg-purple-100/50 border-l-4 border-purple-500'
+                } ${index !== Math.min(visibleCount, notifications.length) - 1 ? 'border-b border-gray-100' : ''}`}
               >
-                <div className="flex items-start">
-                  <div className="flex-shrink-0 mt-1">
+                <div className="flex items-start space-x-4">
+                  {/* Icon */}
+                  <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${
+                    notification.isRead ? 'bg-gray-100' : 'bg-white shadow-sm'
+                  }`}>
                     {getNotificationIcon(notification.type)}
                   </div>
-                  <div className="ml-3 flex-1">
-                    <p className={`text-sm font-medium ${notification.isRead ? 'text-gray-900' : 'text-blue-800'}`}>
-                      {notification.title}
-                    </p>
-                    <p className="text-xs text-gray-600 mt-1">
+                  
+                  {/* Content */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between mb-1">
+                      <h4 className={`text-sm font-semibold leading-tight ${
+                        notification.isRead ? 'text-gray-800' : 'text-purple-900'
+                      }`}>
+                        {notification.title}
+                      </h4>
+                      {!notification.isRead && (
+                        <div className="flex-shrink-0 w-2 h-2 bg-purple-500 rounded-full ml-2 mt-1"></div>
+                      )}
+                    </div>
+                    
+                    <p className="text-sm text-gray-600 leading-relaxed mb-2 line-clamp-2">
                       {notification.message}
                     </p>
-                    <p className="text-xs text-gray-500 mt-1">
-                      {formatTimestamp(notification.createdAt)}
-                    </p>
+                    
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-gray-500 font-medium">
+                        {formatTimestamp(notification.createdAt)}
+                      </span>
+                      {notification.link && (
+                        <span className="text-xs text-purple-600 font-medium group-hover:text-purple-700">
+                          View →
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
+                
+                {/* Mark as read button */}
+                {!notification.isRead && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      markAsRead(notification.id);
+                    }}
+                    className="absolute top-3 right-3 p-1 text-gray-400 hover:text-purple-600 opacity-0 group-hover:opacity-100 transition-all duration-200"
+                    aria-label="Mark as read"
+                    title="Mark as read"
+                  >
+                    <FaCheck className="h-3 w-3" />
+                  </button>
+                )}
               </div>
             ))}
+
+            {/* Show more */}
+            {!loading && !error && notifications.length > visibleCount && (
+              <div className="px-6 py-3 bg-white/60 text-center">
+                <button
+                  onClick={() => setVisibleCount(v => Math.min(v + 5, notifications.length))}
+                  className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-purple-700 hover:text-purple-800 hover:bg-purple-50 rounded-lg transition-all duration-200"
+                >
+                  Show more
+                </button>
+              </div>
+            )}
           </div>
           
-          {notifications.length > 0 && (
-            <div className="p-2 bg-gray-50 border-t border-gray-200">
-              <button
-                onClick={() => onNavigate && onNavigate('/dashboard/notifications')}
-                className="w-full p-2 text-xs text-center text-blue-600 hover:text-blue-800 flex items-center justify-center"
-              >
-                View all notifications
-                <MdKeyboardArrowDown className="ml-1" />
-              </button>
-            </div>
-          )}
+          
         </div>
       )}
     </div>

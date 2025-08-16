@@ -2,9 +2,9 @@
 
 import axios from 'axios';
 import nodemailer from 'nodemailer';
-import mongoose from 'mongoose';
-import Notification, { INotification } from '@/models/Notification';
-import User, { IUser } from '@/models/User';
+import type mongoose from 'mongoose';
+import type { INotification } from '@/models/Notification';
+import type { IUser } from '@/models/User';
 import { sendEmail } from '@/utils/email';
 
 // Define notification types

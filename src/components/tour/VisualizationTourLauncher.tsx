@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { HelpCircle, Sparkles, X } from 'lucide-react';
+import { Lightbulb, Sparkles, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 
@@ -457,8 +457,9 @@ export function VisualizationTourLauncher() {
     setIsTourOpen(false);
   };
 
-  // Only show on visualization page
-  if (!isMounted || !pathname?.includes('/dashboard/visualizations') || !tutorialsEnabled) return null;
+  // Only show on visualization-related pages (including objective visualization)
+  const isVisualizationRoute = pathname?.includes('/dashboard/visualizations') || pathname?.includes('/dashboard/objective-visualization');
+  if (!isMounted || !isVisualizationRoute || !tutorialsEnabled) return null;
 
   return (
     <>
@@ -474,16 +475,16 @@ export function VisualizationTourLauncher() {
       <div className="fixed bottom-6 right-6 z-[100]">
         <Button
           onClick={manualStartTour}
-          className="group relative h-12 w-12 rounded-full bg-gradient-to-br from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105"
-          style={{
-            boxShadow: '0 4px 12px rgba(147, 51, 234, 0.3)',
-          }}
+          className="group relative flex items-center justify-center w-10 h-10 rounded-full bg-white text-purple-600 border border-purple-200 shadow-lg hover:shadow-xl hover:bg-purple-50 transition-transform duration-150 hover:-translate-y-0.5 focus:outline-none overflow-hidden p-0"
+          aria-label="Tutorial"
         >
-          <HelpCircle className="h-5 w-5 transition-transform duration-200 group-hover:rotate-12" />
+          <div className="relative">
+            <Lightbulb className="h-4 w-4 text-purple-600 transition-transform duration-200 group-hover:rotate-12" fill="currentColor" fillOpacity="0.1" />
+          </div>
 
           {/* Tooltip */}
           <div className="absolute bottom-full right-0 mb-3 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">
-            Take Tutorial
+            Need help?
             <div className="absolute top-full right-4 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
           </div>
         </Button>

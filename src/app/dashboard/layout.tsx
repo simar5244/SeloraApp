@@ -13,7 +13,7 @@ import Sidebar from '@/components/dashboard/Sidebar';
 import { ROUTES } from '@/lib/permissions';
 import DataProcessorInitializer from '@/components/DataProcessorInitializer';
 import RouteGuard from '@/components/RouteGuard';
-import { TourLauncher } from '@/components/tour/TourLauncher';
+
 import '@/utils/tutorialTestUtils'; // Import test utilities for browser console testing
 
 export default function DashboardLayout({
@@ -27,6 +27,7 @@ export default function DashboardLayout({
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
 
   useEffect(() => {
     // Check for auth token
@@ -119,11 +120,29 @@ export default function DashboardLayout({
       setSidebarOpen(savedSidebarState === 'true');
     }
 
+    // Load and sync notificationsEnabled from localStorage
+    try {
+      const raw = localStorage.getItem('notificationsEnabled');
+      if (raw !== null) setNotificationsEnabled(JSON.parse(raw));
+    } catch {}
+
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === 'notificationsEnabled') {
+        try {
+          if (e.newValue !== null) {
+            setNotificationsEnabled(JSON.parse(e.newValue));
+          }
+        } catch {}
+      }
+    };
+    window.addEventListener('storage', handleStorage);
+
     checkScreenSize();
     window.addEventListener('resize', checkScreenSize);
     
     return () => {
       window.removeEventListener('resize', checkScreenSize);
+      window.removeEventListener('storage', handleStorage);
     };
   }, [isMobile]);
 
@@ -316,14 +335,19 @@ export default function DashboardLayout({
       <RouteGuard>
         <Sidebar user={user} isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
         <div 
-          className={`flex flex-1 flex-col overflow-hidden transition-all duration-300 ease-in-out ${sidebarOpen ? 'md:ml-64' : 'md:ml-20'}`}
+          className={`flex flex-1 flex-col overflow-visible transition-all duration-300 ease-in-out ${sidebarOpen ? 'md:ml-64' : 'md:ml-20'}`}
         >
           <main className="flex-1 overflow-y-auto bg-gray-50 p-4 md:p-6 lg:p-8">
             {children}
-            <TourLauncher />
           </main>
+          {/* Floating Notifications button (top-right) */}
+          {notificationsEnabled && (
+            <div className="fixed top-6 right-6 z-[9999]">
+              <NotificationCenter onNavigate={handleNotificationNavigate} />
+            </div>
+          )}
         </div>
       </RouteGuard>
     </div>
   );
-} 
+}

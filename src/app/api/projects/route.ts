@@ -12,6 +12,9 @@ import { writeFileSync } from 'fs';
 import { join } from 'path';
 import { spawn } from 'child_process';
 import { verifyAuth } from '@/lib/auth';
+import dbConnect from '@/lib/dbConnect';
+import Notification from '@/models/Notification';
+import { sendNotificationEmail } from '@/services/emailService';
 
 // Function to run the Python script as a child process
 async function runPythonScript(scriptArgs: string[]): Promise<any> {
@@ -593,6 +596,113 @@ export async function POST(request: Request) {
     const result = await collection.insertOne(dataToInsert);
     console.log(`Project inserted with ID: ${result.insertedId} in company DB: ${dbName}`);
     
+    // Create notifications and send emails to assigned members (including creator)
+    try {
+      // Ensure DB connection for Notification model
+      await dbConnect(companyCode);
+
+      // Build a unique set of member emails from various possible fields
+      const memberEmailsSet = new Set<string>();
+      const pushEmail = (val: any) => {
+        if (!val) return;
+        const email = (typeof val === 'string') ? val : (val.email || val.employee_email || val.user_email);
+        if (email && typeof email === 'string') memberEmailsSet.add(email.toLowerCase());
+      };
+
+      // From employees array (this API uses employees for members)
+      if (Array.isArray(dataToInsert.employees)) {
+        dataToInsert.employees.forEach(pushEmail);
+      }
+
+      // From assignedEmployees or assigned_employees payloads
+      if (Array.isArray(requestData.assignedEmployees)) {
+        requestData.assignedEmployees.forEach(pushEmail);
+      }
+      if (Array.isArray(requestData.assigned_employees)) {
+        requestData.assigned_employees.forEach(pushEmail);
+      }
+
+      // From team_members (some flows may provide this)
+      if (Array.isArray(requestData.team_members)) {
+        requestData.team_members.forEach(pushEmail);
+      }
+
+      // Include creator if available
+      if (creatorEmail) pushEmail({ email: creatorEmail });
+
+      const memberEmails = Array.from(memberEmailsSet);
+
+      // Resolve userIds by email for Notification.userId (fallback to skipping if user not found)
+      const defaultDb = client.db(defaultDbName);
+      const usersCol = defaultDb.collection('users');
+
+      // Helper to find user _id by email across known user stores
+      const findUserIdByEmail = async (email: string) => {
+        // 1) Try central auth_db linkage
+        try {
+          const authDb = client.db('auth_db');
+          const authUsers = authDb.collection('authUsers');
+          const authUser = await authUsers.findOne({ email });
+          if (authUser?.userId) {
+            // If authUser.userId is a valid ObjectId, prefer that
+            try {
+              return new ObjectId(String(authUser.userId));
+            } catch {}
+          }
+        } catch {}
+
+        // 2) Try default org users
+        const defaultUser = await usersCol.findOne({ email });
+        if (defaultUser?._id) return defaultUser._id;
+
+        // 3) Try company-specific users collection
+        try {
+          const companyDb = client.db(dbName);
+          const companyUsers = companyDb.collection('users');
+          const companyUser = await companyUsers.findOne({ email });
+          if (companyUser?._id) return companyUser._id;
+        } catch {}
+
+        return null;
+      };
+
+      const projectIdStr = result.insertedId.toString();
+      const projectTitle = dataToInsert.project_title || dataToInsert.name || 'New Project';
+      const subject = `You were added to a project: ${projectTitle}`;
+      const linkPath = `/dashboard/projects/${projectIdStr}`;
+
+      // Create notifications sequentially (keep it simple and reliable)
+      for (const email of memberEmails) {
+        try {
+          const userId = await findUserIdByEmail(email);
+          if (userId) {
+            await Notification.create({
+              userId,
+              type: 'project',
+              title: 'Added to a project',
+              message: `You were added as a member to "${projectTitle}"`,
+              link: linkPath,
+              isRead: false,
+            });
+          }
+
+          // Send email (best-effort; uses fallback logger if SMTP not configured)
+          await sendNotificationEmail(
+            email,
+            subject,
+            `You have been added as a member to the project "${projectTitle}". Click the button below to view the project details and get started.`,
+            projectTitle,
+            projectIdStr
+          );
+        } catch (notifErr) {
+          console.error('[PROJECT CREATE] Failed to create/send notification for', email, notifErr);
+        }
+      }
+    } catch (notifyError) {
+      console.error('[PROJECT CREATE] Notification/email dispatch error:', notifyError);
+      // Do not fail project creation because of notification issues
+    }
+
     return NextResponse.json({ 
       success: true, 
       message: 'Project created successfully',

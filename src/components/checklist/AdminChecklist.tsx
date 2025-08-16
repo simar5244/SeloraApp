@@ -191,33 +191,27 @@ export default function AdminChecklist({ totalEmployees, activeProjects, current
   if (completedTotal === totalSteps) return null;
 
   return (
-    <div className="fixed top-6 right-6 z-[101]">
+    <div className="fixed top-6 right-20 z-[101]">
       {/* Bubble trigger (Stripe-like) */}
       {!open && (
         <button
           onClick={() => setOpen(true)}
-          className="group relative flex items-center space-x-2 rounded-full bg-white/90 backdrop-blur px-3 py-2 shadow-lg border border-gray-200 hover:shadow-xl transition-all"
+          className="group relative flex items-center h-10 rounded-full bg-white text-purple-600 border border-purple-200 shadow-lg hover:shadow-xl hover:bg-purple-50 transition-all px-3 gap-2"
           aria-label="Open admin checklist"
         >
           {/* Compact circular progress ring */}
           <div
-            className="relative h-8 w-8 rounded-full p-[2px]"
-            style={{
-              background: `conic-gradient(#8b5cf6 ${progressDeg}deg, #e5e7eb 0deg)`
-            }}
+            className="relative h-6 w-6 rounded-full p-[2px]"
+            style={{ background: `conic-gradient(#8b5cf6 ${progressDeg}deg, #e5e7eb 0deg)` }}
             aria-hidden
           >
-            <div className="absolute inset-[2px] rounded-full bg-white flex items-center justify-center">
-              <div className="h-2 w-2 rounded-full bg-purple-600" />
-            </div>
+            <div className="absolute inset-[2px] rounded-full bg-white" />
           </div>
-          <span className="text-sm font-medium text-gray-900">{completedTotal} of {totalSteps} steps</span>
-          {/* subtle cue only */}
-          <ChevronRight className="h-4 w-4 text-gray-400 group-hover:text-gray-600 transition" />
+          <span className="text-sm font-medium text-purple-700">{completedTotal}/{totalSteps}</span>
 
-          {/* Tooltip */}
-          <div className="absolute -bottom-8 right-0 mb-1 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity">
-            Open checklist
+          {/* Tooltip with full text */}
+          <div className="absolute -bottom-8 right-0 mb-1 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+            {completedTotal} of {totalSteps} steps
           </div>
         </button>
       )}

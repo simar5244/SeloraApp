@@ -159,6 +159,7 @@ export default function ProfilePage() {
   const [saveError, setSaveError] = useState("");
   const [tutorialsEnabled, setTutorialsEnabled] = useState(false);
   const [checklistEnabled, setChecklistEnabled] = useState(true);
+  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
 
   // Show toast notifications when saveSuccess or saveError state changes
   useEffect(() => {
@@ -318,6 +319,24 @@ export default function ProfilePage() {
     }
   };
 
+  const handleNotificationToggle = (enabled: boolean) => {
+    setNotificationsEnabled(enabled);
+    localStorage.setItem('notificationsEnabled', JSON.stringify(enabled));
+
+    // Trigger storage event for other components to listen
+    window.dispatchEvent(new StorageEvent('storage', {
+      key: 'notificationsEnabled',
+      newValue: JSON.stringify(enabled),
+      oldValue: JSON.stringify(!enabled)
+    }));
+
+    // Show success message
+    toast.success(enabled ? 'Notifications Enabled' : 'Notifications Disabled', {
+      position: 'top-right',
+      duration: 3000,
+    });
+  };
+
   const handleChecklistToggle = (enabled: boolean) => {
     setChecklistEnabled(enabled);
     localStorage.setItem('checklistEnabled', JSON.stringify(enabled));
@@ -347,6 +366,11 @@ export default function ProfilePage() {
     const checklistSetting = localStorage.getItem('checklistEnabled');
     if (checklistSetting !== null) {
       try { setChecklistEnabled(JSON.parse(checklistSetting)); } catch {}
+    }
+    // Load notifications setting from localStorage (default true)
+    const notifSetting = localStorage.getItem('notificationsEnabled');
+    if (notifSetting !== null) {
+      try { setNotificationsEnabled(JSON.parse(notifSetting)); } catch {}
     }
   }, [router]);
 
@@ -1308,13 +1332,28 @@ export default function ProfilePage() {
                     <div className="flex-1">
                       <h3 className="text-base font-medium text-gray-900">Onboarding Checklist</h3>
                       <p className="text-sm text-gray-500 mt-1">
-                        Show or hide the floating onboarding checklist on dashboards. This is independent of Tutorial Mode.
+                        Show or hide the floating onboarding checklist on dashboards.
                       </p>
                     </div>
                     <div className="ml-4">
                       <Checkbox
                         checked={checklistEnabled}
                         onCheckedChange={handleChecklistToggle}
+                        className="data-[state=checked]:bg-purple-600 data-[state=checked]:border-purple-600"
+                      />
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                    <div className="flex-1">
+                      <h3 className="text-base font-medium text-gray-900">Notifications Visibility</h3>
+                      <p className="text-sm text-gray-500 mt-1">
+                        Show or hide the floating notifications button across all dashboard pages.
+                      </p>
+                    </div>
+                    <div className="ml-4">
+                      <Checkbox
+                        checked={notificationsEnabled}
+                        onCheckedChange={handleNotificationToggle}
                         className="data-[state=checked]:bg-purple-600 data-[state=checked]:border-purple-600"
                       />
                     </div>
