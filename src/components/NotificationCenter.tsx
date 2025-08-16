@@ -27,8 +27,9 @@ export default function NotificationCenter({ onNavigate }: NotificationCenterPro
   const [error, setError] = useState<string | null>(null);
   const [showNotifications, setShowNotifications] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
-  const [visibleCount, setVisibleCount] = useState(5);
+  const [visibleCount, setVisibleCount] = useState(3);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const expanded = visibleCount >= notifications.length && notifications.length > 0;
 
   // Fetch notifications
   useEffect(() => {
@@ -264,7 +265,7 @@ export default function NotificationCenter({ onNavigate }: NotificationCenterPro
   
   // Reset visible slice when opening panel or when list changes length
   useEffect(() => {
-    if (showNotifications) setVisibleCount(5);
+    if (showNotifications) setVisibleCount(3);
   }, [showNotifications, notifications.length]);
 
   return (
@@ -295,9 +296,12 @@ export default function NotificationCenter({ onNavigate }: NotificationCenterPro
       
       {/* Notification dropdown */}
       {showNotifications && (
-        <div className="absolute top-0 right-0 w-96 bg-white rounded-xl shadow-2xl overflow-hidden z-[10000] max-h-[32rem] flex flex-col border border-gray-200">
+        <div
+          ref={dropdownRef}
+          className={`absolute top-0 right-0 w-96 bg-white rounded-xl shadow-2xl z-[10000] ${expanded ? 'h-[80vh]' : 'max-h-[80vh]'} flex flex-col border border-gray-200 pointer-events-auto overflow-hidden`}
+        >
           {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 bg-white/70 backdrop-blur">
+          <div className="sticky top-0 z-10 flex items-center justify-between px-4 py-3 border-b border-gray-100 bg-white/70 backdrop-blur">
             <div className="flex items-center gap-2">
               <div className="text-sm font-semibold text-gray-900">Notifications</div>
               {unreadCount > 0 && (
@@ -336,7 +340,10 @@ export default function NotificationCenter({ onNavigate }: NotificationCenterPro
           </div>
           
           {/* Content */}
-          <div className="overflow-y-auto flex-grow bg-gray-50/50">
+          <div
+            className={`${expanded ? 'overflow-y-scroll' : 'overflow-y-auto'} bg-gray-50/50 pr-1 overscroll-contain`}
+            style={{ ...(expanded ? { height: 'calc(80vh - 56px)' } : {}), WebkitOverflowScrolling: 'touch', scrollbarGutter: 'stable both-edges', scrollbarWidth: 'thin' as any, touchAction: 'pan-y', overscrollBehavior: 'contain' as any }}
+          >
             {loading && (
               <div className="py-8 text-center">
                 <div className="inline-block animate-spin rounded-full h-8 w-8 border-2 border-gray-300 border-t-purple-600 mb-3"></div>
@@ -357,7 +364,7 @@ export default function NotificationCenter({ onNavigate }: NotificationCenterPro
             {!loading && notifications.length === 0 && !error && (
               <div className="py-8 text-center">
                 <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <FaBell className="h-6 w-6 text-gray-400" />
+                  <FaRegBell className="h-6 w-6 text-gray-400" />
                 </div>
                 <p className="text-sm text-gray-600 font-medium">No notifications</p>
                 <p className="text-xs text-gray-500 mt-1">You're all caught up!</p>
@@ -412,32 +419,30 @@ export default function NotificationCenter({ onNavigate }: NotificationCenterPro
                   </div>
                 </div>
                 
-                {/* Mark as read button */}
-                {!notification.isRead && (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      markAsRead(notification.id);
-                    }}
-                    className="absolute top-3 right-3 p-1 text-gray-400 hover:text-purple-600 opacity-0 group-hover:opacity-100 transition-all duration-200"
-                    aria-label="Mark as read"
-                    title="Mark as read"
-                  >
-                    <FaCheck className="h-3 w-3" />
-                  </button>
-                )}
+                {/* Removed tick icon on hover */}
               </div>
             ))}
 
-            {/* Show more */}
-            {!loading && !error && notifications.length > visibleCount && (
+            {/* Show all / collapse */}
+            {!loading && !error && notifications.length > 3 && (
               <div className="px-6 py-3 bg-white/60 text-center">
-                <button
-                  onClick={() => setVisibleCount(v => Math.min(v + 5, notifications.length))}
-                  className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-purple-700 hover:text-purple-800 hover:bg-purple-50 rounded-lg transition-all duration-200"
-                >
-                  Show more
-                </button>
+                {visibleCount < notifications.length ? (
+                  <button
+                    onClick={() => setVisibleCount(notifications.length)}
+                    className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-purple-700 hover:text-purple-800 hover:bg-purple-50 rounded-lg transition-all duration-200"
+                    aria-label="Show all notifications"
+                  >
+                    Show all
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => setVisibleCount(3)}
+                    className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-purple-700 hover:text-purple-800 hover:bg-purple-50 rounded-lg transition-all duration-200"
+                    aria-label="Show fewer notifications"
+                  >
+                    Show less
+                  </button>
+                )}
               </div>
             )}
           </div>

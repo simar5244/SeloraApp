@@ -45,7 +45,6 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { User as UserIcon, Briefcase, Bell, Lock, Terminal, LineChart, Loader2, RefreshCcw, Mail, UserCog, Phone, Building, Settings } from "lucide-react";
 import { FaSpinner } from 'react-icons/fa';
 import { useFieldArray } from 'react-hook-form';
-import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { ProfileTourLauncher } from '@/components/tour/ProfileTourLauncher';
 import '@/utils/tutorialTestUtils'; // Import test utilities for browser console testing
@@ -624,10 +623,9 @@ export default function ProfilePage() {
         <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
           <div className="text-center md:text-left">
             <h1 className="text-3xl font-bold text-white">{user?.firstName} {user?.lastName}</h1>
-            <p className="text-white text-lg">{user?.jobTitle || 'Position not set'}</p>
-            <div className="mt-2 flex flex-wrap gap-2 justify-center md:justify-start">
-              {user?.department && <Badge className="bg-white/20 hover:bg-white/30 text-white">{user.department}</Badge>}
-            </div>
+            <p className="text-white text-lg">
+              {(user?.jobTitle || 'Position not set')}{user?.department ? ` • ${user.department}` : ''}
+            </p>
           </div>
         </div>
       </div>
@@ -793,7 +791,7 @@ export default function ProfilePage() {
                       <div className="flex justify-end">
                         <Button 
                           type="submit" 
-                          className="bg-purple-600 hover:bg-purple-700"
+                          className="bg-purple-600 hover:bg-purple-700 text-white"
                           disabled={!basicInfoForm.formState.isValid || basicInfoForm.formState.isSubmitting}
                         >
                           {basicInfoForm.formState.isSubmitting ? (
@@ -1131,7 +1129,7 @@ export default function ProfilePage() {
                       <div className="flex justify-end mt-8">
                         <Button 
                           type="submit" 
-                          className="bg-purple-600 hover:bg-purple-700"
+                          className="bg-purple-600 hover:bg-purple-700 text-white"
                           disabled={jobProfileForm.formState.isSubmitting}
                         >
                           {jobProfileForm.formState.isSubmitting ? (
@@ -1252,7 +1250,7 @@ export default function ProfilePage() {
                             </div>
                           </FormControl>
                           <FormDescription className="text-xs text-gray-500">
-                            Must be at least 6 characters long.
+                            Recommended to be at least 8 characters long.
                           </FormDescription>
                           <FormMessage />
                         </FormItem>
@@ -1277,7 +1275,7 @@ export default function ProfilePage() {
                     <div className="flex justify-end">
                       <Button 
                         type="submit" 
-                        className="bg-purple-600 hover:bg-purple-700"
+                        className="bg-purple-600 hover:bg-purple-700 text-white"
                         disabled={passwordForm.formState.isSubmitting}
                       >
                         {passwordForm.formState.isSubmitting ? (

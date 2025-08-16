@@ -7,11 +7,12 @@ import { usePathname } from 'next/navigation';
 import { Tour } from 'antd';
 import type { TourProps } from 'antd';
 import { areTutorialsEnabledSync, onTutorialSettingChange } from '@/utils/tutorialSettings';
+import { createPortal } from 'react-dom';
 
 const YourReportsWelcomeScreen = ({ open, onStart, onClose, isClosing }: { open: boolean; onStart: () => void; onClose: () => void; isClosing?: boolean }) => {
   if (!open) return null;
 
-  return (
+  const content = (
     <div
       className={`yourreports-welcome-overlay fixed bg-black bg-opacity-50 flex items-center justify-center p-4 transition-opacity duration-500 ${isClosing ? 'opacity-0' : 'opacity-100'}`}
       style={{
@@ -20,9 +21,8 @@ const YourReportsWelcomeScreen = ({ open, onStart, onClose, isClosing }: { open:
         left: 0,
         right: 0,
         bottom: 0,
-        width: '100vw',
-        height: '100vh',
-        zIndex: 9999
+        zIndex: 99999,
+        inset: 0,
       }}
     >
       <div className={`bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl border border-purple-100 relative transform transition-all duration-500 ${isClosing ? 'scale-95 opacity-0' : 'scale-100 opacity-100'}`}>
@@ -90,14 +90,16 @@ const YourReportsWelcomeScreen = ({ open, onStart, onClose, isClosing }: { open:
           left: 0 !important;
           right: 0 !important;
           bottom: 0 !important;
-          width: 100vw !important;
-          height: 100vh !important;
-          z-index: 9999 !important;
+          inset: 0 !important;
+          z-index: 99999 !important;
           background-color: rgba(0, 0, 0, 0.5) !important;
+          pointer-events: all !important;
         }
       `}</style>
     </div>
   );
+
+  return createPortal(content, document.body);
 };
 
 const YourReportsTour = ({ open, onClose }: { open: boolean; onClose: () => void }) => {
@@ -169,16 +171,13 @@ const YourReportsTour = ({ open, onClose }: { open: boolean; onClose: () => void
         steps={steps}
         type="primary"
         arrow={true}
+        zIndex={2000}
         rootClassName={`classic-your-reports-tour ${isVisible ? 'tour-fade-in' : ''}`}
         mask={{
           color: 'rgba(0, 0, 0, 0.5)',
           style: {
             position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            zIndex: 1000,
+            inset: 0,
           }
         }}
         onFinish={onClose}
@@ -190,11 +189,22 @@ const YourReportsTour = ({ open, onClose }: { open: boolean; onClose: () => void
         onChange={(current) => {
           // Custom scrolling logic to keep cards center-aligned
           setTimeout(() => {
-            const targetElement = document.querySelector(`[data-tour="${steps[current]?.target?.()?.getAttribute('data-tour')}"]`);
+            const targetProp = steps[current]?.target as unknown;
+            let targetElement: HTMLElement | null = null;
+            if (typeof targetProp === 'function') {
+              try {
+                targetElement = (targetProp as () => HTMLElement)();
+              } catch {
+                targetElement = null;
+              }
+            } else {
+              targetElement = (targetProp as HTMLElement) ?? null;
+            }
+
             if (targetElement) {
               const rect = targetElement.getBoundingClientRect();
               const viewportHeight = window.innerHeight;
-              
+
               // If element is in bottom 20% of screen, scroll up more
               if (rect.top > viewportHeight * 0.8) {
                 window.scrollBy({
@@ -331,25 +341,20 @@ const YourReportsTour = ({ open, onClose }: { open: boolean; onClose: () => void
         /* Ensure the mask covers everything including sidebar */
         .classic-your-reports-tour .ant-tour-mask {
           position: fixed !important;
-          top: 0 !important;
-          left: 0 !important;
-          right: 0 !important;
-          bottom: 0 !important;
-          width: 100vw !important;
-          height: 100vh !important;
-          z-index: 1050 !important;
+          inset: 0 !important;
+          z-index: 2000 !important;
           background-color: rgba(0, 0, 0, 0.5) !important;
         }
 
         /* Ensure tour content is above the mask and sidebar */
         .classic-your-reports-tour .ant-tour {
-          z-index: 1060 !important;
+          z-index: 2010 !important;
         }
 
         /* Make sure highlighted elements are visible above everything */
         .classic-your-reports-tour [data-tour] {
           position: relative;
-          z-index: 1070 !important;
+          z-index: 2020 !important;
         }
 
         /* Tour fade-in animation */

@@ -22,6 +22,7 @@ import {
   FaSitemap
 } from 'react-icons/fa';
 import AdminChecklist from '@/components/checklist/AdminChecklist';
+import { TourLauncher } from '@/components/tour/TourLauncher';
 
 // Types for overworked employees
 interface JobResponsibility {
@@ -380,10 +381,10 @@ export default function Dashboard() {
   // Define features with a consistent purple/white theme
   const features = [
     {
-      title: 'Organization Galaxy',
-      description: '3D visualization of your organization.',
-      icon: <FaLightbulb className="h-8 w-8 text-purple-600" />,
-      href: '/dashboard/galaxy-view',
+      title: 'Objective Visualization',
+      description: 'Interactive objective-to-project map that reveals dependencies, ownership, and execution flow at a glance.',
+      icon: <FaChartLine className="h-8 w-8 text-purple-600" />,
+      href: '/dashboard/objective-visualization',
       color: 'border-purple-200 bg-purple-50 hover:bg-purple-100'
     },
     {
@@ -1170,6 +1171,9 @@ export default function Dashboard() {
           </div>
         </div>
       )}
+
+      {/* Dashboard Tutorial Launcher */}
+      <TourLauncher />
     </div>
   );
 }

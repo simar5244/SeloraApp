@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import connectDB from '@/lib/dbConnect';
 export const runtime = 'nodejs';
 import { unstable_noStore as noStore } from 'next/cache';
 import { verifyAuth } from '@/lib/auth';
@@ -9,7 +8,6 @@ import feedbackService from '@/services/feedbackService';
 // POST handler to submit feedback
 export async function POST(request: NextRequest): Promise<NextResponse> {
   noStore();
-  await connectDB();
   
   try {
     // Verify authentication with enhanced company validation
@@ -72,8 +70,19 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       return NextResponse.json({ error: 'Top skills feedback is required' }, { status: 400 });
     }
     
+    // Diagnostic: log server time and computed quarter
+    const now = new Date();
+    const diagQuarter = `Q${Math.ceil((now.getMonth() + 1) / 3)}-${now.getFullYear()}`;
+    console.log('Route POST /api/feedback diagnostics:', {
+      nowIso: now.toISOString(),
+      nowStr: now.toString(),
+      month: now.getMonth(),
+      utcMonth: now.getUTCMonth(),
+      diagQuarter,
+      evaluatorEmail: userEmail,
+      companyCode: rawCompanyCode,
+    });
     // Submit feedback via service (service will validate evaluator and evaluated user)
-    console.log('Route POST /api/feedback: evaluator email =', userEmail, 'companyCode =', rawCompanyCode);
     const feedback = await feedbackService.submitFeedback(
       userEmail.toLowerCase(),
       evaluatedEmail.toLowerCase(),
@@ -92,7 +101,6 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 // GET handler to retrieve feedback
 export async function GET(request: NextRequest): Promise<NextResponse> {
   noStore();
-  await connectDB();
   console.log('Route GET /api/feedback: headers =', Object.fromEntries(request.headers.entries()));
   
   try {
@@ -134,6 +142,20 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     const type = searchParams.get('type') || 'given';
     const targetEmail = searchParams.get('email')?.toLowerCase();
     const quarter = searchParams.get('quarter') || undefined;
+    // Diagnostic: log server time and computed quarter for GET
+    const now = new Date();
+    const diagQuarter = `Q${Math.ceil((now.getMonth() + 1) / 3)}-${now.getFullYear()}`;
+    console.log('Route GET /api/feedback diagnostics:', {
+      nowIso: now.toISOString(),
+      nowStr: now.toString(),
+      month: now.getMonth(),
+      utcMonth: now.getUTCMonth(),
+      diagQuarter,
+      queryQuarter: quarter,
+      type,
+      targetEmail,
+      companyCode: rawCompanyCode,
+    });
     
     // Return feedback and metrics based on type
     if (type === 'given') {

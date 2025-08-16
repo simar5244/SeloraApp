@@ -32,6 +32,7 @@ import { Target, Users, Briefcase, Calendar, AlertCircle, CheckCircle, Clock, Pa
 import Link from 'next/link';
 import { toast } from "react-hot-toast";
 import html2canvas from 'html2canvas';
+import { ObjectiveVisualizationTourLauncher } from "@/components/tour/ObjectiveVisualizationTourLauncher";
 
 // Types
 interface Goal {
@@ -163,7 +164,7 @@ const GoalNode = ({ data }: { data: ObjectiveNode['data'] }) => {
   };
 
   return (
-    <div className="relative">
+    <div className="relative" data-tour="objective-goal-node">
       {/* Output handle for connecting to projects */}
       <Handle
         type="source"
@@ -248,7 +249,7 @@ const ProjectNode = ({ data }: { data: ObjectiveNode['data'] }) => {
   const teamSize = (project.employee_contributions || project.employees || []).length;
 
   return (
-    <div className="relative">
+    <div className="relative" data-tour="objective-project-node">
       {/* Input handle for connections from goals or other projects */}
       <Handle
         type="target"
@@ -351,7 +352,7 @@ const EmployeeNode = ({ data }: { data: ObjectiveNode['data'] }) => {
   };
 
   return (
-    <div className="relative">
+    <div className="relative" data-tour="objective-employee-node">
       {/* Input handle for connections from projects */}
       <Handle
         type="target"
@@ -1990,17 +1991,18 @@ const ObjectiveVisualizationPage = () => {
           {/* Search Bar */}
           <div className="relative w-64">
             <Input
+              data-tour="objective-search"
               placeholder="Search objectives..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="bg-white/10 text-white placeholder:text-white/70 border-white/20 focus-visible:ring-0 focus-visible:ring-offset-0"
+              className="bg-white text-black placeholder:text-gray-500 border-white/20 focus-visible:ring-0 focus-visible:ring-offset-0"
             />
-            <FaSearch className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white/70 w-4 h-4" />
+            <FaSearch className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 w-4 h-4" />
           </div>
           
           {/* Department Filter */}
           <Select value={selectedDepartment} onValueChange={setSelectedDepartment}>
-            <SelectTrigger className="bg-white/10 text-white border-white/20 w-48">
+            <SelectTrigger data-tour="objective-dept-filter" className="bg-white/10 text-white border-white/20 w-48">
               <SelectValue placeholder="All Departments" />
             </SelectTrigger>
             <SelectContent>
@@ -2015,7 +2017,7 @@ const ObjectiveVisualizationPage = () => {
           
           {/* Status Filter */}
           <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-            <SelectTrigger className="bg-white/10 text-white border-white/20 w-36">
+            <SelectTrigger data-tour="objective-status-filter" className="bg-white/10 text-white border-white/20 w-36">
               <SelectValue placeholder="All Status" />
             </SelectTrigger>
             <SelectContent>
@@ -2030,7 +2032,7 @@ const ObjectiveVisualizationPage = () => {
           
           {/* Priority Filter */}
           <Select value={selectedPriority} onValueChange={setSelectedPriority}>
-            <SelectTrigger className="bg-white/10 text-white border-white/20 w-32">
+            <SelectTrigger data-tour="objective-priority-filter" className="bg-white/10 text-white border-white/20 w-32">
               <SelectValue placeholder="All Priorities" />
             </SelectTrigger>
             <SelectContent>
@@ -2186,6 +2188,7 @@ const ObjectiveVisualizationPage = () => {
               </div>
             }>
               <ReactFlow
+                data-tour="objective-canvas"
                 nodes={nodes}
                 edges={edges}
                 key={`${nodes.length}-${edges.length}`} // Force re-render when data changes
@@ -2253,7 +2256,7 @@ const ObjectiveVisualizationPage = () => {
                 />
                 
                 {/* Zoom controls */}
-                <div className="absolute right-8 top-1/4 transform -translate-y-1/2 flex flex-col gap-2 z-10">
+                <div data-tour="objective-zoom-controls" className="absolute right-8 top-1/4 transform -translate-y-1/2 flex flex-col gap-2 z-10">
                   <Button 
                     variant="default" 
                     size="sm" 
@@ -2286,13 +2289,16 @@ const ObjectiveVisualizationPage = () => {
           onClose={() => setShowDetailModal(false)}
         />
       )}
+
+      {/* Tutorial Launcher */}
+      <ObjectiveVisualizationTourLauncher />
     </div>
   );
 };
 
 // Detail Modal Component
 const DetailModal = ({ data, onClose }: { data: any; onClose: () => void }): JSX.Element => {
-  const [activeTab, setActiveTab] = useState<'overview' | 'details' | 'team' | 'projects'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'details' | 'team' | 'projects' | 'tasks'>('overview');
 
   const renderGoalContent = (goal: Goal) => {
     const statusColors = {
@@ -2302,13 +2308,9 @@ const DetailModal = ({ data, onClose }: { data: any; onClose: () => void }): JSX
       'on-hold': 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200',
       canceled: 'bg-red-100 text-red-800 hover:bg-red-200'
     };
-    //this is useless, no impact on anything
-    const priorityColors = {
-      low: 'bg-green-100 text-green-800 hover:bg-green-200',
-      medium: 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200',
-      high: 'bg-amber-100 text-amber-800 hover:bg-amber-200 border-l-4 border-amber-500',
-      critical: 'bg-red-100 text-red-800 hover:bg-red-200'
-    };
+
+    // Normalize priority for reliable styling
+    const normalizedPriority = (goal.priority || 'medium').toLowerCase();
 
     // Get all projects and employees from the component's state
     const { projects = [], employees: allEmployees = [] } = data?.state || { projects: [], employees: [] };
@@ -2384,14 +2386,17 @@ const DetailModal = ({ data, onClose }: { data: any; onClose: () => void }): JSX
             <h2 className="text-2xl font-bold text-gray-900">{goal.title}</h2>
             <p className="text-gray-600 mt-1">{goal.description}</p>
             <div className="flex items-center space-x-3 mt-3">
-              <Badge className={`${statusColors[goal.status]} font-medium`}>
+              <Badge className={`${statusColors[goal.status] || 'bg-gray-100 text-gray-800'} font-medium`}>
                 {goal.status.replace('-', ' ').toUpperCase()}
               </Badge>
-              <Badge variant="outline" className={`text-xs font-medium ${
-                goal.priority === 'critical' ? 'border-red-400 bg-red-100 text-red-700' :
-                goal.priority === 'high' ? 'border-amber-400 bg-amber-100 text-amber-700' :
-                goal.priority === 'medium' ? 'border-yellow-400 bg-yellow-100 text-yellow-700' :
-                'border-green-400 bg-green-100 text-green-700'
+              <Badge className={`border text-xs font-medium ${
+                normalizedPriority === 'critical'
+                  ? '!border-red-400 !bg-red-100 !text-red-700 hover:!bg-red-200'
+                  : normalizedPriority === 'high'
+                  ? '!border-amber-400 !bg-amber-100 !text-amber-700 hover:!bg-amber-200'
+                  : normalizedPriority === 'medium'
+                  ? '!border-yellow-400 !bg-yellow-100 !text-yellow-700 hover:!bg-yellow-200'
+                  : '!border-green-400 !bg-green-100 !text-green-700 hover:!bg-green-200'
               }`}>
                 {goal.priority.toUpperCase()} PRIORITY
               </Badge>
@@ -2443,18 +2448,18 @@ const DetailModal = ({ data, onClose }: { data: any; onClose: () => void }): JSX
 
               <Card className="p-4">
                 <h4 className="font-semibold text-gray-900 mb-3">Assignments</h4>
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-600">Projects:</span>
-                    <span className="font-medium">{projectCount}</span>
+                <div className="space-y-0">
+                  <div className="flex items-baseline text-sm leading-tight">
+                    <span className="text-gray-600 whitespace-nowrap flex-1">Projects:</span>
+                    <span className="font-medium tabular-nums w-8 text-right">{projectCount}</span>
                   </div>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-600">Employees:</span>
-                    <span className="font-medium">{employeeCount}</span>
+                  <div className="flex items-baseline text-sm leading-tight">
+                    <span className="text-gray-600 whitespace-nowrap flex-1">Employees:</span>
+                    <span className="font-medium tabular-nums w-8 text-right">{employeeCount}</span>
                   </div>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-600">KPIs:</span>
-                    <span className="font-medium">{goal.kpis?.length || 0}</span>
+                  <div className="flex items-baseline text-sm leading-tight">
+                    <span className="text-gray-600 whitespace-nowrap flex-1">KPIs:</span>
+                    <span className="font-medium tabular-nums w-8 text-right">{goal.kpis?.length || 0}</span>
                   </div>
                 </div>
               </Card>
@@ -2551,13 +2556,6 @@ const DetailModal = ({ data, onClose }: { data: any; onClose: () => void }): JSX
       default: 'bg-gray-100 text-gray-800 hover:bg-gray-200'
     };
 
-    const priorityColors = {
-      low: 'bg-green-100 text-green-800 hover:bg-green-200',
-      medium: 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200',
-      high: 'bg-amber-100 text-amber-800 hover:bg-amber-200',
-      critical: 'bg-red-100 text-red-800 hover:bg-red-200'
-    };
-
     const teamMembers = project.employee_contributions || project.employees || [];
     const isMainProject = data.level === 2;
 
@@ -2576,10 +2574,10 @@ const DetailModal = ({ data, onClose }: { data: any; onClose: () => void }): JSX
                 {project.status.replace('-', ' ').toUpperCase()}
               </Badge>
               <Badge variant="outline" className={`text-xs font-medium ${
-                project.priority === 'critical' ? 'border-red-400 bg-red-50 text-red-700' :
-                project.priority === 'high' ? 'border-amber-400 bg-amber-50 text-amber-700' :
-                project.priority === 'medium' ? 'border-yellow-400 bg-yellow-50 text-yellow-700' :
-                'border-green-400 bg-green-50 text-green-700'
+                project.priority === 'critical' ? '!border-red-400 !bg-red-50 text-red-700' :
+                project.priority === 'high' ? '!border-amber-400 !bg-amber-50 text-amber-700' :
+                project.priority === 'medium' ? '!border-yellow-400 !bg-yellow-50 text-yellow-700' :
+                '!border-green-400 !bg-green-50 text-green-700'
               }`}>
                 {project.priority.toUpperCase()} PRIORITY
               </Badge>
@@ -2595,7 +2593,7 @@ const DetailModal = ({ data, onClose }: { data: any; onClose: () => void }): JSX
 
         {/* Tabs */}
         <div className="border-b border-gray-200">
-          <nav className="-mb-px flex space-x-8">
+          <nav className="-mb-px flex space-x-6">
             {['overview', 'details', 'team'].map((tab) => (
               <button
                 key={tab}
@@ -2793,11 +2791,11 @@ const DetailModal = ({ data, onClose }: { data: any; onClose: () => void }): JSX
               <Card className="p-4">
                 <h4 className="font-semibold text-gray-900 mb-3">Contact Information</h4>
                 <div className="space-y-2">
-                  <div className="flex items-center text-sm">
+                  <div className="flex items-center text-sm space-x-2">
                     <span className="text-gray-600 w-16">Email:</span>
                     <span className="font-medium">{employee.email || 'Not provided'}</span>
                   </div>
-                  <div className="flex items-center text-sm">
+                  <div className="flex items-center text-sm space-x-2">
                     <span className="text-gray-600 w-16">Role:</span>
                     <span className="font-medium">{employee.role || employee.jobTitle || 'Employee'}</span>
                   </div>
@@ -2807,14 +2805,14 @@ const DetailModal = ({ data, onClose }: { data: any; onClose: () => void }): JSX
               <Card className="p-4">
                 <h4 className="font-semibold text-gray-900 mb-3">Work Information</h4>
                 <div className="space-y-2">
-                  <div className="flex items-center text-sm">
-                    <span className="text-gray-600 w-20">Department:</span>
+                  <div className="flex items-center text-sm space-x-2">
+                    <span className="text-gray-600 w-24">Department:</span>
                     <span className="font-medium">{employee.department || 'Unknown'}</span>
                   </div>
                   {employee.hours_per_week && (
-                    <div className="flex items-center text-sm">
-                      <span className="text-gray-600 w-20">Hours/Week:</span>
-                      <span className="font-medium">{employee.hours_per_week}</span>
+                    <div className="flex items-center text-sm space-x-2">
+                      <span className="text-gray-600 w-24">Hours/Week:</span>
+                      <span className="font-medium">{`${employee.hours_per_week} h/week`}</span>
                     </div>
                   )}
                 </div>
@@ -2924,14 +2922,11 @@ const DetailModal = ({ data, onClose }: { data: any; onClose: () => void }): JSX
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" onClick={onClose}>
       <div 
-        className="bg-white rounded-lg w-full max-w-4xl max-h-[90vh] flex flex-col shadow-2xl"
+        className="bg-white rounded-lg overflow-hidden w-full max-w-4xl max-h-[90vh] flex flex-col shadow-2xl"
         onClick={e => e.stopPropagation()}
       >
         <div className="flex-shrink-0 flex items-center justify-between p-6 border-b border-gray-200 bg-gray-50">
           <div className="flex items-center space-x-3">
-            {data.type === 'goal' && <Target className="w-6 h-6 text-purple-600" />}
-            {data.type === 'project' && <Briefcase className="w-6 h-6 text-blue-600" />}
-            {data.type === 'employee' && <Users className="w-6 h-6 text-green-600" />}
             <h1 className="text-xl font-bold text-gray-900">
               {data.type === 'goal' ? 'Goal Details' :
                data.type === 'project' ? 'Project Details' : 'Employee Profile'}

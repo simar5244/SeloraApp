@@ -250,13 +250,27 @@ FeedbackSchema.methods.calculateWeightedScore = function(this: IFeedback & Docum
 
 // Pre-save hook to calculate and store ratings
 // Note: Accessing evaluator data here can be complex. We'll adjust the weighted score calculation in the service instead.
-FeedbackSchema.pre<IFeedback & Document>('save', function(this: IFeedback & Document, next: CallbackWithoutResult) {
-  if (this.documentType === 'feedback' && this.ratings) {
-    this.averageRating = this.getAverageRating();
-    // We will calculate the final weightedRating (with potential reduction) 
-    // in the service before saving the User model.
-    // Here we store the basic weighted score first.
-    this.weightedRating = this.calculateWeightedScore(); 
+FeedbackSchema.pre<IFeedback & Document>('save', function(this: IFeedback & Document, next) {
+  try {
+    if (this.documentType === 'feedback' && this.ratings) {
+      this.averageRating = this.getAverageRating();
+      // We will calculate the final weightedRating (with potential reduction) 
+      // in the service before saving the User model.
+      // Here we store the basic weighted score first.
+      this.weightedRating = this.calculateWeightedScore(); 
+    }
+    // Diagnostic logging for quarter persistence
+    const now = new Date();
+    console.log('[FeedbackModel.pre-save] quarter persistence check:', {
+      nowIso: now.toISOString(),
+      nowStr: now.toString(),
+      quarter: this.quarter,
+      company: this.company,
+      evaluatorEmail: this.evaluatorEmail,
+      evaluatedEmail: this.evaluatedEmail,
+    });
+  } catch (e) {
+    console.warn('[FeedbackModel.pre-save] logging error (non-fatal):', e);
   }
   next();
 });

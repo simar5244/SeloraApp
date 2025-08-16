@@ -1993,9 +1993,9 @@ const ObjectiveVisualizationPage = () => {
               placeholder="Search objectives..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="bg-white/10 text-white placeholder:text-white/70 border-white/20 focus-visible:ring-0 focus-visible:ring-offset-0"
+              className="bg-white text-black placeholder:text-gray-500 border-white/20 focus-visible:ring-0 focus-visible:ring-offset-0"
             />
-            <FaSearch className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white/70 w-4 h-4" />
+            <FaSearch className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 w-4 h-4" />
           </div>
           
           {/* Department Filter */}

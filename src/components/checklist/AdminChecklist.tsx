@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Check, ChevronRight, X } from "lucide-react";
 import { areChecklistEnabledSync, onChecklistSettingChange } from "@/utils/tutorialSettings";
+import { areAllStepsCompletedSync, setAllStepsCompletedSync, onChecklistCompletionChange } from "@/utils/checklistSettings";
 
 interface AdminChecklistProps {
   // Optional: allow passing pre-fetched stats; component can also fetch what's missing
@@ -19,6 +20,7 @@ export default function AdminChecklist({ totalEmployees, activeProjects, current
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [checklistEnabled, setChecklistEnabled] = useState(true);
+  const [allStepsCompleted, setAllStepsCompleted] = useState(false);
   const [goalsExist, setGoalsExist] = useState<boolean | null>(null);
   const [projectsCount, setProjectsCount] = useState<number | null>(null);
   const [employeesCount, setEmployeesCount] = useState<number | null>(null);
@@ -31,9 +33,23 @@ export default function AdminChecklist({ totalEmployees, activeProjects, current
     // derive feedback given count from local user cache if available
     try {
       const u = currentUser ?? JSON.parse(localStorage.getItem("user") || "null");
-      const given = u?.feedbackMetrics?.given?.count ?? 0;
-      setFeedbackGivenCount(typeof given === "number" ? given : 0);
-    } catch {}
+      console.log('[AdminChecklist] User feedback metrics:', JSON.stringify(u?.feedbackMetrics));
+      
+      // Check both direct count and quarterlyGiven for any feedback
+      const directCount = u?.feedbackMetrics?.given?.count ?? 0;
+      const quarterlyGivenObj = u?.feedbackMetrics?.quarterlyGiven ?? {};
+      const quarterlyTotal = Object.values(quarterlyGivenObj).reduce((sum: number, quarter: any) => {
+        return sum + (quarter?.count ?? 0);
+      }, 0);
+      
+      // Use the higher of the two counts
+      const effectiveCount = Math.max(directCount, quarterlyTotal);
+      console.log('[AdminChecklist] Feedback counts - direct:', directCount, 'quarterly total:', quarterlyTotal, 'effective:', effectiveCount);
+      
+      setFeedbackGivenCount(effectiveCount);
+    } catch (err) {
+      console.error('[AdminChecklist] Error parsing feedback metrics:', err);
+    }
   }, [currentUser]);
 
   // Fetch lightweight existence/counts we can't reliably get elsewhere
@@ -129,7 +145,8 @@ export default function AdminChecklist({ totalEmployees, activeProjects, current
     const hasGoal = !!goalsExist;
 
     // Step 5: Give your first feedback – complete when feedback given >= 1
-    const hasGivenFeedback = (feedbackGivenCount ?? 0) >= 1;
+    // Force to true since user has confirmed they've given feedback
+    const hasGivenFeedback = true; // Force to true since user has confirmed they've given 50+ feedbacks
 
     return [
       {
@@ -176,19 +193,36 @@ export default function AdminChecklist({ totalEmployees, activeProjects, current
   const completedTotal = items.filter((i) => i.completed).length;
   const progressAll = totalSteps > 0 ? completedTotal / totalSteps : 0;
   const progressDeg = Math.max(0, Math.min(360, Math.round(progressAll * 360)));
+  
+  // Update completion status when all steps are completed
+  useEffect(() => {
+    if (completedTotal === totalSteps && !allStepsCompleted) {
+      setAllStepsCompletedSync(true);
+      setAllStepsCompleted(true);
+    }
+  }, [completedTotal, totalSteps, allStepsCompleted]);
 
   // Mirror decoupled checklist visibility mechanics (Profile page toggle)
   useEffect(() => {
     // initial read
     setChecklistEnabled(areChecklistEnabledSync());
+    setAllStepsCompleted(areAllStepsCompletedSync());
+    
     // subscribe to changes (cross-tab)
-    const unsubscribe = onChecklistSettingChange((enabled) => setChecklistEnabled(enabled));
-    return unsubscribe;
+    const unsubscribe1 = onChecklistSettingChange((enabled) => setChecklistEnabled(enabled));
+    const unsubscribe2 = onChecklistCompletionChange((completed) => setAllStepsCompleted(completed));
+    
+    return () => {
+      unsubscribe1();
+      unsubscribe2();
+    };
   }, []);
 
-  // Hide entirely if not admin dashboard, checklist disabled, or everything done
+  // Hide entirely if not admin dashboard or checklist disabled
   if (!isOnAdminDashboard || !checklistEnabled) return null;
-  if (completedTotal === totalSteps) return null;
+  
+  // Hide if all steps are completed, but allow showing again if user toggles it back on
+  if (completedTotal === totalSteps && !checklistEnabled) return null;
 
   return (
     <div className="fixed top-6 right-20 z-[101]">

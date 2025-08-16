@@ -1,4 +1,4 @@
-'use client';
+  'use client';
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { FiUser, FiEdit, FiSearch, FiCheck, FiX, FiInfo, FiUsers, FiEye, FiCheckCircle, FiXCircle, FiStar } from 'react-icons/fi';
@@ -82,6 +82,18 @@ interface User {
   workMode?: string;
   officeLocation?: string;
   industry?: string;
+  // Optional feedback metrics used in the Feedback tab
+  feedbackMetrics?: {
+    given?: {
+      count?: number;
+      averageRating?: number;
+    };
+    received?: {
+      count?: number;
+      averageRating?: number;
+      weightedAverageRating?: number;
+    };
+  };
 }
 
 interface UserDetails {
@@ -173,8 +185,16 @@ const officeLocationOptions = [
 export default function DepartmentManagementPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+
+  // Debounce the search term to avoid triggering fetch on every keystroke
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedSearch(searchTerm), 300);
+    return () => clearTimeout(t);
+  }, [searchTerm]);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -358,7 +378,7 @@ export default function DepartmentManagementPage() {
       const cachedData = sessionStorage.getItem('departmentUsers');
       const cachedSearchTerm = sessionStorage.getItem('departmentSearchTerm');
       
-      if (cachedData && (!searchTerm || searchTerm === cachedSearchTerm)) {
+      if (cachedData && (!debouncedSearch || debouncedSearch === cachedSearchTerm)) {
         try {
           const parsedData = JSON.parse(cachedData);
           setUsers(parsedData);
@@ -386,9 +406,9 @@ export default function DepartmentManagementPage() {
       
       // Construct API URL
       const url = new URL('/api/department-management/users', window.location.origin);
-      if (searchTerm) {
-        url.searchParams.set('search', searchTerm);
-        sessionStorage.setItem('departmentSearchTerm', searchTerm);
+      if (debouncedSearch) {
+        url.searchParams.set('search', debouncedSearch);
+        sessionStorage.setItem('departmentSearchTerm', debouncedSearch);
       } else {
         sessionStorage.removeItem('departmentSearchTerm');
       }
@@ -474,20 +494,15 @@ export default function DepartmentManagementPage() {
       }
     } finally {
       setIsLoading(false);
+      setIsInitialLoading(false);
     }
-  }, [searchTerm, currentUserDepartment]);
+  }, [debouncedSearch, currentUserDepartment]);
 
-  // Fetch users only when component mounts or search changes
-  // Using a ref to track initial load to avoid dependency on currentUserDepartment
-  const initialLoadRef = useRef(true);
-  
+  // Fetch users on mount and whenever debouncedSearch changes (handled in fetchUsers deps)
   useEffect(() => {
     fetchUsers();
     setCurrentPage(1);
-    
-    // Mark initial load as complete
-    initialLoadRef.current = false;
-  }, [fetchUsers]); // fetchUsers already depends on searchTerm
+  }, [fetchUsers]);
 
   const handleApproveProfile = async (user: User, approve: boolean) => {
     const token = localStorage.getItem('token');
@@ -822,7 +837,7 @@ export default function DepartmentManagementPage() {
     </div>
   );
 
-  if (isLoading) {
+  if (isInitialLoading && isLoading) {
     return (
       <div className="flex h-screen items-center justify-center">
         <div className="mb-4">
@@ -860,11 +875,16 @@ export default function DepartmentManagementPage() {
               <Input
                 type="text"
                 placeholder="Search employees..."
-                className="pl-9 pr-4 py-2.5 w-full text-sm rounded-md border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-white text-gray-900"
+                className="pl-9 pr-9 py-2.5 w-full text-sm rounded-md border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-white text-gray-900"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 data-tour="search-employees"
               />
+              <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
+                {isLoading && !isInitialLoading && (
+                  <FaSpinner className="h-4 w-4 text-purple-600 animate-spin" />
+                )}
+              </div>
             </div>
 
             {/* Filters */}
@@ -1937,8 +1957,8 @@ export default function DepartmentManagementPage() {
                         <div>
                           <h4 className="font-medium mb-2 text-gray-900">Skills Mentioned (Received)</h4>
                           <div className="flex flex-wrap gap-2">
-                            {userDetails.skillsFeedback.received.map((skill, index) => (
-                              <Badge key={index} variant="secondary" className="bg-purple-100 text-purple-800">{skill}</Badge>
+                            {userDetails.skillsFeedback.received.map((skill: string, index: number) => (
+                              <Badge key={index} variant="outline" className="bg-purple-100 text-purple-800">{skill}</Badge>
                             ))}
                           </div>
                         </div>
@@ -1987,7 +2007,7 @@ export default function DepartmentManagementPage() {
                                     <span className="text-sm text-gray-600">Match Score:</span>
                                     <span className="font-bold text-lg">{successor.score}%</span>
                                   </div>
-                                  <Badge variant={successor.isViable ? "default" : "secondary"}>
+                                  <Badge variant={successor.isViable ? "default" : "outline"}>
                                     {successor.isViable ? "Viable" : "Needs Development"}
                                   </Badge>
                                 </div>
@@ -2006,7 +2026,7 @@ export default function DepartmentManagementPage() {
                                     <div>
                                       <h5 className="font-medium text-green-700 mb-1">Strengths</h5>
                                       <ul className="text-sm text-gray-600 list-disc list-inside">
-                                        {successor.strengths.map((strength, i) => (
+                                        {successor.strengths.map((strength: string, i: number) => (
                                           <li key={i}>{strength}</li>
                                         ))}
                                       </ul>
@@ -2017,7 +2037,7 @@ export default function DepartmentManagementPage() {
                                     <div>
                                       <h5 className="font-medium text-orange-700 mb-1">Development Areas</h5>
                                       <ul className="text-sm text-gray-600 list-disc list-inside">
-                                        {successor.developmentAreas.map((area, i) => (
+                                        {successor.developmentAreas.map((area: string, i: number) => (
                                           <li key={i}>{area}</li>
                                         ))}
                                       </ul>

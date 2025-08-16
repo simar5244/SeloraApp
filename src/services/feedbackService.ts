@@ -95,12 +95,26 @@ class FeedbackService {
     const currentYear = now.getFullYear();
     const currentQuarter = Math.ceil((now.getMonth() + 1) / 3);
     const quarter = `Q${currentQuarter}-${currentYear}`;
+    console.log('[feedbackService.submitFeedback] time/quarter:', {
+      nowIso: now.toISOString(),
+      month: now.getMonth(),
+      utcMonth: now.getUTCMonth(),
+      currentYear,
+      currentQuarter,
+      quarter
+    });
 
     // Connect to the company-specific database and get model
     await connectDB(company);
     const FeedbackModel = getFeedbackModel(company);
 
     // Check for existing feedback in the company database
+    console.log('[feedbackService.submitFeedback] checking existing feedback with:', {
+      evaluatorEmail: evaluator.email,
+      evaluatedEmail,
+      quarter,
+      company
+    });
     const existingFeedback = await FeedbackModel.findOne({
       documentType: 'feedback', 
       evaluatorEmail: evaluator.email, 
@@ -178,6 +192,11 @@ class FeedbackService {
     });
 
     await feedback.save();
+    console.log('[feedbackService.submitFeedback] saved feedback:', {
+      id: (feedback as any)?._id?.toString?.(),
+      quarter: feedback.quarter,
+      createdAt: (feedback as any)?.createdAt,
+    });
 
     // Update metrics: first update giver (no reduction), then receiver with potential reduction
     const evaluatorAvg = evaluator.feedbackMetrics?.given?.averageRating || 0;
@@ -459,6 +478,7 @@ class FeedbackService {
     // Connect and query company-specific Feedback model
     await connectDB(company);
     const FeedbackModel = getFeedbackModel(company);
+    console.log('[feedbackService.getFeedbackByEvaluator] params:', { evaluatorEmail, company, quarter });
     const query: any = { 
       documentType: 'feedback', 
       evaluatorEmail: { $regex: `^${evaluatorEmail}$`, $options: 'i' },
@@ -482,6 +502,7 @@ class FeedbackService {
     // Connect and query company-specific Feedback model
     await connectDB(company);
     const FeedbackModel = getFeedbackModel(company);
+    console.log('[feedbackService.getFeedbackForEmployee] params:', { evaluatedEmail, company, quarter });
     const query: any = { 
       documentType: 'feedback',
       evaluatedEmail: { $regex: `^${evaluatedEmail}$`, $options: 'i' },

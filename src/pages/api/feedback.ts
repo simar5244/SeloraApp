@@ -25,6 +25,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const userEmail = payload.email as string;
 
   if (req.method === 'GET') {
+    const now = new Date();
+    const diagQuarter = `Q${Math.ceil((now.getMonth() + 1) / 3)}-${now.getFullYear()}`;
+    console.log('Legacy Route GET /api/feedback diagnostics:', {
+      nowIso: now.toISOString(),
+      nowStr: now.toString(),
+      month: now.getMonth(),
+      utcMonth: now.getUTCMonth(),
+      diagQuarter,
+      companyCode: rawCompanyCode,
+      userEmail,
+      query: req.query,
+    });
     const { type = 'given', email: targetEmail, quarter } = req.query;
     try {
       // If querying feedback for another user, handle first
@@ -84,7 +96,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (req.method === 'POST') {
     const { evaluatedEmail, relationshipType, ratings, topSkills } = req.body;
     if (!evaluatedEmail) return res.status(400).json({ error: 'Evaluated email required' });
-    console.log('API POST /api/feedback: userEmail =', userEmail, 'rawCompanyCode =', rawCompanyCode, 'body =', req.body);
+    const now = new Date();
+    const diagQuarter = `Q${Math.ceil((now.getMonth() + 1) / 3)}-${now.getFullYear()}`;
+    console.log('Legacy Route POST /api/feedback diagnostics:', {
+      nowIso: now.toISOString(),
+      nowStr: now.toString(),
+      month: now.getMonth(),
+      utcMonth: now.getUTCMonth(),
+      diagQuarter,
+      companyCode: rawCompanyCode,
+      userEmail,
+    });
     try {
       const { feedback, updatedReceiver: user } = await feedbackService.submitFeedback(
         userEmail.toLowerCase(),
