@@ -15,8 +15,7 @@ const env = {
 };
 
 const nextConfig = {
-  // Enable React strict mode
-  reactStrictMode: true,
+  // React Strict Mode configured below
   
   // Enable production optimizations in production
   productionBrowserSourceMaps: false,
@@ -42,15 +41,15 @@ const nextConfig = {
   },
   
   // Use SWC minification (default in Next.js 15+)
-  swcMinify: true,
+  // swcMinify removed (always enabled in Next.js 15+)
   
   // Experimental features
   experimental: {
-    // Required for Railway
-    serverActions: true,
-    // Keep existing experimental features
-    serverComponentsExternalPackages: ['mongoose'],
+    // Required for Railway - Next.js 15 expects an object here
+    serverActions: {},
   },
+  // Next.js 15: moved from experimental.serverComponentsExternalPackages
+  serverExternalPackages: ['mongoose'],
   
   // Configure output file tracing
   outputFileTracingRoot: path.join(__dirname, '../../'),
@@ -63,7 +62,6 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
     // @ts-ignore - Force ignore all TypeScript errors
-    ignoreBuildErrors: true,
   },
   
   // Disable React Strict Mode to prevent double rendering in development

@@ -34,6 +34,87 @@ const getEmailConfig = () => {
   return config;
 };
 
+// Send a goal notification email (goal-centric template)
+export const sendGoalNotificationEmail = async (
+  to: string,
+  subject: string,
+  message: string,
+  goalTitle?: string,
+  goalId?: string
+): Promise<boolean> => {
+  try {
+    console.log(`[EMAIL] Sending goal notification email to ${to}`);
+    const transporter = getTransporter();
+
+    const goalLink = goalId ? `${process.env.NEXT_PUBLIC_APP_URL || 'https://app.selora.com'}/dashboard/goals/${goalId}` : null;
+
+    await transporter.sendMail({
+      from: process.env.EMAIL_FROM || `"Selora" <${process.env.SMTP_USER || process.env.EMAIL_USER || 'noreply@selora.com'}>`,
+      to,
+      subject,
+      html: `
+        <div style="font-family: 'Arial', sans-serif; max-width: 600px; margin: 0 auto; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);">
+          <!-- Header with brand color -->
+          <div style="background-color: #6A0DAD; padding: 30px 20px; text-align: center; color: white;">
+            <h1 style="margin: 0; font-size: 24px; font-weight: 600;">Goal Notification</h1>
+          </div>
+
+          <!-- Email content -->
+          <div style="padding: 30px; background-color: #ffffff;">
+            <p style="font-size: 16px; line-height: 1.6; color: #333; margin-bottom: 20px;">
+              Hello,<nobr></nobr><br>
+              ${message}
+            </p>
+
+            ${goalTitle ? `
+            <!-- Goal Info Box -->
+            <div style=\"background-color: #f9f5ff; border: 1px solid #e9d8fd; border-radius: 8px; padding: 20px; margin: 25px 0;\">
+              <h3 style=\"margin: 0 0 10px; font-size: 18px; color: #6A0DAD; font-weight: 600;\">
+                🎯 ${goalTitle}
+              </h3>
+              <p style=\"margin: 0; font-size: 14px; color: #4b5563;\">
+                You have been assigned to this goal.
+              </p>
+            </div>
+            ` : ''}
+
+            ${goalLink ? `
+            <!-- Action Button -->
+            <div style=\"text-align: center; margin: 30px 0;\">
+              <a href=\"${goalLink}\"
+                 style=\"background-color: #6A0DAD; color: white; padding: 14px 28px;
+                        text-decoration: none; border-radius: 6px; font-weight: 600;
+                        font-size: 16px; display: inline-block; box-shadow: 0 2px 4px rgba(106, 13, 173, 0.2);\">
+                View Goal Details
+              </a>
+            </div>
+            ` : ''}
+
+            <p style="font-size: 14px; line-height: 1.6; color: #6b7280; margin: 30px 0 10px;">
+              Need help? Feel free to reach out to your goal owner or reply to this email.
+            </p>
+          </div>
+
+          <!-- Footer -->
+          <div style="background-color: #f3f4f6; padding: 20px; text-align: center; border-top: 1px solid #e5e7eb;">
+            <p style="margin: 0; font-size: 14px; color: #6b7280;">
+              &copy; 2025 Selora. All rights reserved.
+            </p>
+            <p style="margin: 10px 0 0; font-size: 13px; color: #9ca3af;">
+              This notification was sent automatically when you were assigned to a goal.
+            </p>
+          </div>
+        </div>
+      `
+    });
+
+    console.log(`[EMAIL] Goal notification email sent successfully to ${to}`);
+    return true;
+  } catch (error) {
+    console.error('[EMAIL] Failed to send goal notification email:', error);
+    return false;
+  }
+};
 // Create a fallback transporter that logs but doesn't send actual emails
 const createFallbackTransporter = () => {
   return {

@@ -15,7 +15,7 @@
     "dev": "concurrently \"next dev\" \"npx stripe listen --forward-to https://www.app.seloraa.com/webhook\" \"python3 ./scripts/stripe_webhook_service.py\" \"node ./scripts/auth-sync.js\" \"node scripts/scheduled-reports-daemon.js\" \"node scripts/data-update-daemon.js\"",
     "predev": "",
     "build": "next build",
-    "start": "NODE_ENV=production concurrently \"next start\" \"node ./scripts/auth-sync.js\" \"node scripts/scheduled-reports-daemon.js\" \"node scripts/data-update-daemon.js\"",
+    "start": "NODE_ENV=production concurrently \"next start\" \"node ./scripts/auth-sync.js\" ",
     "start:simple": "next start",
     "lint": "next lint",
     "auth-sync": "node ./scripts/auth-sync.js",

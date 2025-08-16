@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
 import { MongoClient, ObjectId, Collection, Document } from 'mongodb';
 import { verifyAuth } from '@/lib/auth';
+import dbConnect from '@/lib/dbConnect';
+import Notification from '@/models/Notification';
+import { sendNotificationEmail } from '@/services/emailService';
 
 const uri = process.env.MONGODB_URI || '';
 
@@ -396,6 +399,83 @@ export async function POST(
             }
           }
         );
+        // Notify all project members that their project has been linked to this goal
+        try {
+          // Ensure Mongoose connection for Notification model (company-scoped)
+          await dbConnect(companyCode);
+
+          // Build a unique set of member emails from the project document
+          const memberEmailsSet = new Set<string>();
+          const pushEmail = (val: any) => {
+            if (!val) return;
+            const email = (typeof val === 'string') ? val : (val.email || val.employee_email || val.user_email);
+            if (email && typeof email === 'string') memberEmailsSet.add(email.toLowerCase());
+          };
+
+          // Collect from common fields
+          if (Array.isArray(project?.employees)) project.employees.forEach(pushEmail);
+          if (Array.isArray(project?.viewers)) project.viewers.forEach(pushEmail);
+          if (Array.isArray(project?.employee_contributions)) {
+            project.employee_contributions.forEach((c: any) => pushEmail(c));
+          }
+
+          const memberEmails = Array.from(memberEmailsSet);
+
+          // Helper to resolve userId by email
+          const findUserIdByEmail = async (email: string) => {
+            // 1) central auth_db
+            try {
+              const authDb = client.db('auth_db');
+              const authUsers = authDb.collection('authUsers');
+              const authUser = await authUsers.findOne({ email });
+              if (authUser?.userId) {
+                try { return new ObjectId(String(authUser.userId)); } catch {}
+              }
+            } catch {}
+            // 2) company-specific users
+            try {
+              const companyDb = client.db(`company_${companyCode.toLowerCase()}`);
+              const companyUsers = companyDb.collection('users');
+              const companyUser = await companyUsers.findOne({ email });
+              if (companyUser?._id) return companyUser._id;
+            } catch {}
+            return null;
+          };
+
+          const goalTitle = goal.title || '';
+          const projectTitle = project.project_title || project.name || 'Project';
+          const subject = `Your project ${projectTitle} has been linked to goal ${goalTitle}`;
+          const linkPath = `/dashboard/goals/${resolvedParams.goalId}`;
+          const projectIdStr = validProjectId.toString();
+
+          for (const email of memberEmails) {
+            try {
+              const userId = await findUserIdByEmail(email);
+              if (userId) {
+                await Notification.create({
+                  userId,
+                  type: 'project',
+                  title: 'Project linked to a goal',
+                  message: `Your project \"${projectTitle}\" has been linked to goal \"${goalTitle}\"`,
+                  link: linkPath,
+                  isRead: false,
+                });
+              }
+              await sendNotificationEmail(
+                email,
+                subject,
+                `Your project \"${projectTitle}\" has been linked to the goal \"${goalTitle}\".`,
+                projectTitle,
+                projectIdStr
+              );
+            } catch (notifErr) {
+              console.error('[GOAL-PROJECT LINK] Failed to notify', email, notifErr);
+            }
+          }
+        } catch (notifyErr) {
+          console.error('[GOAL-PROJECT LINK] Notification/email dispatch error:', notifyErr);
+          // do not fail the main operation due to notification issues
+        }
         return NextResponse.json({ 
           success: true, 
           message: 'Project assigned to goal successfully',
@@ -482,6 +562,83 @@ export async function POST(
         
         if (goalResult.modifiedCount > 0) {
           console.log(`Project created and assigned to goal successfully: ${projectResult.insertedId}`);
+          // Notify all project members that their project has been linked to this goal
+          try {
+            // Ensure Mongoose connection for Notification model (company-scoped)
+            await dbConnect(companyCode);
+
+            // Build a unique set of member emails from the created project document
+            const memberEmailsSet = new Set<string>();
+            const pushEmail = (val: any) => {
+              if (!val) return;
+              const email = (typeof val === 'string') ? val : (val.email || val.employee_email || val.user_email);
+              if (email && typeof email === 'string') memberEmailsSet.add(email.toLowerCase());
+            };
+
+            // Collect from common fields on the newly created project
+            if (Array.isArray(projectDocument?.employees)) projectDocument.employees.forEach(pushEmail);
+            if (Array.isArray(projectDocument?.viewers)) projectDocument.viewers.forEach(pushEmail);
+            if (Array.isArray(projectDocument?.employee_contributions)) {
+              projectDocument.employee_contributions.forEach((c: any) => pushEmail(c));
+            }
+
+            const memberEmails = Array.from(memberEmailsSet);
+
+            // Helper to resolve userId by email
+            const findUserIdByEmail = async (email: string) => {
+              // 1) central auth_db
+              try {
+                const authDb = client.db('auth_db');
+                const authUsers = authDb.collection('authUsers');
+                const authUser = await authUsers.findOne({ email });
+                if (authUser?.userId) {
+                  try { return new ObjectId(String(authUser.userId)); } catch {}
+                }
+              } catch {}
+              // 2) company-specific users
+              try {
+                const companyDb = client.db(`company_${companyCode.toLowerCase()}`);
+                const companyUsers = companyDb.collection('users');
+                const companyUser = await companyUsers.findOne({ email });
+                if (companyUser?._id) return companyUser._id;
+              } catch {}
+              return null;
+            };
+
+            const goalTitle = goal.title || '';
+            const projectTitle = projectDocument.project_title || 'Project';
+            const subject = `Your project ${projectTitle} has been linked to goal ${goalTitle}`;
+            const linkPath = `/dashboard/goals/${resolvedParams.goalId}`;
+            const projectIdStr = projectResult.insertedId.toString();
+
+            for (const email of memberEmails) {
+              try {
+                const userId = await findUserIdByEmail(email);
+                if (userId) {
+                  await Notification.create({
+                    userId,
+                    type: 'project',
+                    title: 'Project linked to a goal',
+                    message: `Your project \"${projectTitle}\" has been linked to goal \"${goalTitle}\"`,
+                    link: linkPath,
+                    isRead: false,
+                  });
+                }
+                await sendNotificationEmail(
+                  email,
+                  subject,
+                  `Your project \"${projectTitle}\" has been linked to the goal \"${goalTitle}\".`,
+                  projectTitle,
+                  projectIdStr
+                );
+              } catch (notifErr) {
+                console.error('[GOAL-PROJECT CREATE] Failed to notify', email, notifErr);
+              }
+            }
+          } catch (notifyErr) {
+            console.error('[GOAL-PROJECT CREATE] Notification/email dispatch error:', notifyErr);
+            // do not fail the main operation due to notification issues
+          }
           return NextResponse.json({ 
             success: true, 
             projectId: projectResult.insertedId.toString(),

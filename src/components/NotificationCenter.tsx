@@ -11,7 +11,7 @@ export interface Notification {
   id: string;
   title: string;
   message: string;
-  type: 'info' | 'success' | 'warning' | 'error' | 'project' | 'employee';
+  type: 'info' | 'success' | 'warning' | 'error' | 'project' | 'goal' | 'employee';
   isRead: boolean;
   createdAt: string;
   link?: string;
@@ -191,7 +191,7 @@ export default function NotificationCenter({ onNavigate }: NotificationCenterPro
   const getNotificationIcon = (type: Notification['type']) => {
     switch (type) {
       case 'info':
-        return <FaBell className="text-blue-500" />;
+        return <FaSolidBell className="text-blue-500" />;
       case 'success':
         return <FaCheck className="text-green-500" />;
       case 'warning':
@@ -200,10 +200,12 @@ export default function NotificationCenter({ onNavigate }: NotificationCenterPro
         return <FaExclamationTriangle className="text-red-500" />;
       case 'project':
         return <FaProjectDiagram className="text-purple-500" />;
+      case 'goal':
+        return <FaProjectDiagram className="text-indigo-600" />;
       case 'employee':
         return <FaUsers className="text-indigo-500" />;
       default:
-        return <FaBell className="text-gray-500" />;
+        return <FaSolidBell className="text-gray-500" />;
     }
   };
   

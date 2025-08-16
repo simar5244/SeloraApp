@@ -329,11 +329,38 @@ export async function GET(request: Request) {
         project.isManagementProject = true;
       }
       
-      // Populate linkedProjects with titles
-      if (Array.isArray(project.linkedProjects) && project.linkedProjects.length > 0) {
-        const lpIds = project.linkedProjects.map((id: any) => new ObjectId(id));
-        const linkedDocs = await collection.find({ _id: { $in: lpIds } }).toArray();
-        project.linkedProjects = linkedDocs.map(doc => ({ id: doc._id.toString(), title: doc.project_title || doc.name }));
+      // Populate linkedProjects with titles (support both legacy camelCase and new snake_case storage)
+      const collectLinkedIds = () => {
+        const ids: string[] = [];
+        // If already stored as array of IDs
+        if (Array.isArray(project.linkedProjects) && project.linkedProjects.length > 0) {
+          for (const v of project.linkedProjects) {
+            if (typeof v === 'string') ids.push(v);
+            else if (v && (v.id || v._id || v.projectId)) ids.push(String(v.id || v._id || v.projectId));
+          }
+        }
+        // If stored as normalized objects under linked_projects
+        if (Array.isArray(project.linked_projects) && project.linked_projects.length > 0) {
+          for (const v of project.linked_projects) {
+            if (!v) continue;
+            const idVal = typeof v === 'string' ? v : (v.projectId || v._id || v.id);
+            if (idVal) ids.push(String(idVal));
+          }
+        }
+        // Dedupe
+        return Array.from(new Set(ids));
+      };
+      const linkedIds = collectLinkedIds();
+      if (linkedIds.length > 0) {
+        const lpIds = linkedIds.filter(ObjectId.isValid).map((id: string) => new ObjectId(id));
+        const linkedDocs = lpIds.length > 0
+          ? await collection.find({ _id: { $in: lpIds } }).toArray()
+          : [];
+        const linkedDocsMap = new Map<string, any>(linkedDocs.map(d => [d._id.toString(), d]));
+        project.linkedProjects = linkedIds.map((id: string) => {
+          const doc = linkedDocsMap.get(id);
+          return { id, title: doc ? (doc.project_title || doc.name) : 'Project' };
+        });
       } else {
         project.linkedProjects = [];
       }
@@ -530,15 +557,27 @@ export async function POST(request: Request) {
       linkedToGoal: false // Initialize linkedToGoal flag
     };
     
-    // If linked_projects is provided, ensure it's properly formatted
-    if (requestData.linked_projects) {
+    // Normalize linked projects input from either camelCase (linkedProjects) or snake_case (linked_projects)
+    if (requestData.linkedProjects !== undefined && Array.isArray(requestData.linkedProjects)) {
+      dataToInsert.linked_projects = requestData.linkedProjects.map((p: any) => ({
+        projectId: typeof p === 'string' ? p : (p?.projectId || p?._id || p?.id),
+        linkedAt: new Date(),
+        linkedBy: creatorEmail
+      })).filter((lp: any) => !!lp.projectId);
+      // Also maintain legacy field as array of IDs for frontend compatibility
+      (dataToInsert as any).linkedProjects = dataToInsert.linked_projects.map((lp: any) => lp.projectId);
+      delete dataToInsert.linkedProjects;
+    } else if (requestData.linked_projects) {
+      // If linked_projects is provided, ensure it's properly formatted
       dataToInsert.linked_projects = Array.isArray(requestData.linked_projects) 
         ? requestData.linked_projects.map((p: any) => ({
-            projectId: p.projectId || p._id || p.id,
+            projectId: typeof p === 'string' ? p : (p?.projectId || p?._id || p?.id),
             linkedAt: new Date(),
             linkedBy: creatorEmail
-          }))
+          })).filter((lp: any) => !!lp.projectId)
         : [];
+      // Maintain legacy field
+      (dataToInsert as any).linkedProjects = dataToInsert.linked_projects.map((lp: any) => lp.projectId);
     }
 
     // Handle field name mapping
@@ -916,19 +955,69 @@ export async function PUT(req: Request) {
       delete updateData.criticality;
     }
     
+    // Accept camelCase linkedProjects from UI and normalize to linked_projects
+    if ((updateData as any).linkedProjects !== undefined) {
+      const arr: any[] = Array.isArray((updateData as any).linkedProjects) ? (updateData as any).linkedProjects : [];
+      (updateData as any).linked_projects = arr.map((p: any) => ({
+        projectId: typeof p === 'string' ? p : (p?.projectId || p?._id || p?.id),
+        linkedAt: new Date(),
+        linkedBy: userEmail
+      })).filter((lp: any) => !!lp.projectId);
+      // Also write legacy field for compatibility
+      (updateData as any).linkedProjects = (updateData as any).linked_projects.map((lp: any) => lp.projectId);
+      delete (updateData as any).linkedProjects;
+    }
+
     // Handle linked_projects updates
     if (updateData.linked_projects !== undefined) {
       if (Array.isArray(updateData.linked_projects)) {
         updateData.linked_projects = updateData.linked_projects.map((p: any) => ({
-          projectId: p.projectId || p._id || p.id,
-          linkedAt: p.linkedAt || new Date(),
-          linkedBy: p.linkedBy || userEmail
-        }));
+          projectId: typeof p === 'string' ? p : (p?.projectId || p?._id || p?.id),
+          linkedAt: (typeof p === 'string' ? undefined : p?.linkedAt) || new Date(),
+          linkedBy: (typeof p === 'string' ? undefined : p?.linkedBy) || userEmail
+        })).filter((lp: any) => !!lp.projectId);
+        // Keep camelCase mirror for UI consumption
+        (updateData as any).linkedProjects = updateData.linked_projects.map((lp: any) => lp.projectId);
       } else {
         updateData.linked_projects = [];
+        (updateData as any).linkedProjects = [];
       }
     }
     
+    // Collect existing member emails from current project for diffing
+    const existingMemberEmailsSet = new Set<string>();
+    if (Array.isArray((project as any).employees)) {
+      for (const e of (project as any).employees) {
+        const em = (e?.email || e?.employee_email || e?.user_email || '').toLowerCase();
+        if (em) existingMemberEmailsSet.add(em);
+      }
+    }
+
+    // Collect incoming member emails from various possible payload fields (if provided)
+    const incomingMemberEmailsSet = new Set<string>();
+    const pushEmail = (val: any) => {
+      if (!val) return;
+      const email = (typeof val === 'string') ? val : (val.email || val.employee_email || val.user_email);
+      if (email && typeof email === 'string') incomingMemberEmailsSet.add(email.toLowerCase());
+    };
+    let memberFieldsProvided = false;
+    if (Array.isArray((updateData as any).employees)) {
+      memberFieldsProvided = true;
+      (updateData as any).employees.forEach(pushEmail);
+    }
+    if (Array.isArray((updateData as any).assignedEmployees)) {
+      memberFieldsProvided = true;
+      (updateData as any).assignedEmployees.forEach(pushEmail);
+    }
+    if (Array.isArray((updateData as any).assigned_employees)) {
+      memberFieldsProvided = true;
+      (updateData as any).assigned_employees.forEach(pushEmail);
+    }
+    if (Array.isArray((updateData as any).team_members)) {
+      memberFieldsProvided = true;
+      (updateData as any).team_members.forEach(pushEmail);
+    }
+
     // Update the project
     const result = await collection.updateOne(
       { _id: new ObjectId(projectId) }, 
@@ -936,6 +1025,213 @@ export async function PUT(req: Request) {
     );
     
     if (result.matchedCount === 1) {
+      // If member fields were provided, notify only newly added members
+      if (memberFieldsProvided && incomingMemberEmailsSet.size > 0) {
+        try {
+          // Ensure DB connection for Notification model
+          await dbConnect(companyCode);
+
+          // Helper to find user _id by email across known user stores
+          const findUserIdByEmail = async (email: string) => {
+            // 1) Try central auth_db linkage
+            try {
+              const authDb = client.db('auth_db');
+              const authUsers = authDb.collection('authUsers');
+              const authUser = await authUsers.findOne({ email });
+              if (authUser?.userId) {
+                try { return new ObjectId(String(authUser.userId)); } catch {}
+              }
+            } catch {}
+
+            // 2) Try company-specific users collection
+            try {
+              const companyDb = client.db(dbName);
+              const companyUsers = companyDb.collection('users');
+              const companyUser = await companyUsers.findOne({ email });
+              if (companyUser?._id) return companyUser._id;
+            } catch {}
+
+            // 3) Try default org users as a last resort
+            try {
+              const defaultDb = client.db(defaultDbName);
+              const usersCol = defaultDb.collection('users');
+              const defaultUser = await usersCol.findOne({ email });
+              if (defaultUser?._id) return defaultUser._id;
+            } catch {}
+
+            return null;
+          };
+
+          // Determine project details for messaging
+          const projectIdStr = String(projectId);
+          const projectTitle = (updateData as any).project_title || (updateData as any).name || (project as any).project_title || (project as any).name || 'Project';
+          const subject = `You were added to a project: ${projectTitle}`;
+          const linkPath = `/dashboard/projects/${projectIdStr}`;
+
+          // Compute newly added emails = incoming - existing
+          const newlyAdded = Array.from(incomingMemberEmailsSet).filter(e => !existingMemberEmailsSet.has(e));
+
+          for (const email of newlyAdded) {
+            try {
+              const userId = await findUserIdByEmail(email);
+              if (userId) {
+                await Notification.create({
+                  userId,
+                  type: 'project',
+                  title: 'Added to a project',
+                  message: `You were added as a member to "${projectTitle}"`,
+                  link: linkPath,
+                  isRead: false,
+                });
+              }
+
+              // Send email (best-effort)
+              await sendNotificationEmail(
+                email,
+                subject,
+                `You have been added as a member to the project "${projectTitle}". Click the button below to view the project details and get started.`,
+                projectTitle,
+                projectIdStr
+              );
+            } catch (notifErr) {
+              console.error('[PROJECT UPDATE] Failed to create/send notification for', email, notifErr);
+            }
+          }
+        } catch (notifyError) {
+          console.error('[PROJECT UPDATE] Notification/email dispatch error:', notifyError);
+          // Do not fail the update because of notification issues
+        }
+      }
+
+      // If linked projects were provided, notify members of newly linked projects
+      if ((updateData as any).linked_projects !== undefined) {
+        try {
+          // Build sets of existing and incoming linked project IDs
+          const existingLinkedIds = new Set<string>();
+          if (Array.isArray((project as any).linked_projects)) {
+            for (const lp of (project as any).linked_projects) {
+              const idVal = typeof lp === 'string' ? lp : (lp?.projectId || lp?._id || lp?.id);
+              if (idVal) existingLinkedIds.add(String(idVal));
+            }
+          }
+
+          const incomingLinkedIds = new Set<string>();
+          if (Array.isArray((updateData as any).linked_projects)) {
+            for (const lp of (updateData as any).linked_projects) {
+              const idVal = lp?.projectId || lp?._id || lp?.id;
+              if (idVal) incomingLinkedIds.add(String(idVal));
+            }
+          }
+
+          // Compute newly linked = incoming - existing
+          const newlyLinked = Array.from(incomingLinkedIds).filter(id => !existingLinkedIds.has(id));
+
+          if (newlyLinked.length > 0) {
+            // Ensure DB connection for Notification model
+            await dbConnect(companyCode);
+
+            // Helper to find user _id by email across known user stores
+            const findUserIdByEmail = async (email: string) => {
+              // 1) Try central auth_db linkage
+              try {
+                const authDb = client.db('auth_db');
+                const authUsers = authDb.collection('authUsers');
+                const authUser = await authUsers.findOne({ email });
+                if (authUser?.userId) {
+                  try { return new ObjectId(String(authUser.userId)); } catch {}
+                }
+              } catch {}
+
+              // 2) Try company-specific users collection
+              try {
+                const companyDb = client.db(dbName);
+                const companyUsers = companyDb.collection('users');
+                const companyUser = await companyUsers.findOne({ email });
+                if (companyUser?._id) return companyUser._id;
+              } catch {}
+
+              // 3) Try default org users as a last resort
+              try {
+                const defaultDb = client.db(defaultDbName);
+                const usersCol = defaultDb.collection('users');
+                const defaultUser = await usersCol.findOne({ email });
+                if (defaultUser?._id) return defaultUser._id;
+              } catch {}
+
+              return null;
+            };
+
+            // Helper to collect emails from a project document
+            const collectEmails = (doc: any) => {
+              const set = new Set<string>();
+              const push = (val: any) => {
+                if (!val) return;
+                const email = (typeof val === 'string') ? val : (val.email || val.employee_email || val.user_email);
+                if (email && typeof email === 'string') set.add(email.toLowerCase());
+              };
+              if (Array.isArray(doc?.employees)) doc.employees.forEach(push);
+              if (Array.isArray(doc?.assignedEmployees)) doc.assignedEmployees.forEach(push);
+              if (Array.isArray(doc?.assigned_employees)) doc.assigned_employees.forEach(push);
+              if (Array.isArray(doc?.team_members)) doc.team_members.forEach(push);
+              return Array.from(set);
+            };
+
+            const currentProjectIdStr = String(projectId);
+            const currentTitle = (project as any).project_title || (project as any).name || (project as any).title || 'Project';
+
+            for (const linkedId of newlyLinked) {
+              try {
+                let linkedDoc: any = null;
+                if (ObjectId.isValid(linkedId)) {
+                  linkedDoc = await collection.findOne({ _id: new ObjectId(linkedId) });
+                }
+                if (!linkedDoc) {
+                  linkedDoc = await collection.findOne({ project_id: linkedId });
+                }
+                if (!linkedDoc) continue;
+
+                const linkedTitle = linkedDoc.project_title || linkedDoc.name || linkedDoc.title || 'Project';
+                const recipientEmails = collectEmails(linkedDoc);
+
+                const subject = `Project linked: ${currentTitle} ↔ ${linkedTitle}`;
+                const message = `Your project "${linkedTitle}" was linked with "${currentTitle}".`;
+                const linkPath = `/dashboard/projects/${currentProjectIdStr}`;
+
+                for (const email of recipientEmails) {
+                  try {
+                    const userId = await findUserIdByEmail(email);
+                    if (userId) {
+                      await Notification.create({
+                        userId,
+                        type: 'project',
+                        title: 'Project Linked',
+                        message,
+                        link: linkPath,
+                        isRead: false,
+                      });
+                    }
+
+                    await sendNotificationEmail(
+                      email,
+                      subject,
+                      message + ' Click to view details.',
+                      currentTitle,
+                      currentProjectIdStr
+                    );
+                  } catch (lnErr) {
+                    console.error('[PROJECT UPDATE] Failed to notify linked project member', email, lnErr);
+                  }
+                }
+              } catch (linkErr) {
+                console.error('[PROJECT UPDATE] Error processing linked project', linkedId, linkErr);
+              }
+            }
+          }
+        } catch (linkedNotifyErr) {
+          console.error('[PROJECT UPDATE] Linked-project notification/email error:', linkedNotifyErr);
+        }
+      }
+
       return NextResponse.json({ success: true, message: 'Project updated successfully' });
     } else {
       return NextResponse.json({ success: false, message: 'Project not found' }, { status: 404 });

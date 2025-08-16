@@ -313,11 +313,18 @@ export default function ProjectDetailPage({ params }: ProjectDetailProps) {
 
   useEffect(() => {
     if (project && currentUser) {
-      // Check if user is top management - they can edit all projects
+      // Normalize role
+      const role = (currentUser.role || '').toString();
+      const roleLc = role.toLowerCase();
+
+      // Admins can edit all projects (treat variants like 'Admin', 'administrator')
+      const isAdmin = roleLc.includes('admin');
+
+      // Top management - they can edit all projects (as per current project permissions)
       const isTopManagement = 
-        currentUser.role === 'top_management_tier_1' || 
-        currentUser.role === 'top_management_tier_2' || 
-        currentUser.role === 'top_management_tier_3';
+        role === 'top_management_tier_1' || 
+        role === 'top_management_tier_2' || 
+        role === 'top_management_tier_3';
       
       // Check if user is a project member (with edit rights)
       const isMember = project.employees?.some((emp: any) => 
@@ -329,17 +336,18 @@ export default function ProjectDetailPage({ params }: ProjectDetailProps) {
         viewer.email === currentUser.email
       );
       
-      // Top management can always edit
-      // Any project member can edit
-      setCanEdit(isTopManagement || isMember);
+      // Admin or top management or any project member can edit
+      const allowed = isAdmin || isTopManagement || isMember;
+      setCanEdit(allowed);
       
       console.log('Access check:', {
         email: currentUser.email,
-        role: currentUser.role,
+        role,
+        isAdmin,
         isTopManagement,
         isMember,
         isViewer,
-        canEdit: isTopManagement || isMember
+        canEdit: allowed
       });
     } else {
       setCanEdit(false);

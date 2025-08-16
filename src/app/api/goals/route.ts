@@ -3,10 +3,12 @@ import { unstable_noStore as noStore } from 'next/cache';
 import { MongoClient, ObjectId } from 'mongodb';
 import { z } from 'zod';
 import { verifyAuth } from '@/lib/auth';
+import dbConnect from '@/lib/dbConnect';
+import Notification from '@/models/Notification';
+import { sendNotificationEmail, sendGoalNotificationEmail } from '@/services/emailService';
 
 // MongoDB connection string from environment variable
 const uri = process.env.MONGODB_URI || '';
-const defaultDbName = 'org_sim_db';
 const goalsCollection = 'goals';
 
 // Validation schemas
@@ -85,16 +87,16 @@ export async function GET(request: Request) {
       }
     }
     
-    // If no company code yet, try to get from user record
-    if (!companyCode && userEmail) {
-      const defaultDb = client.db(defaultDbName);
-      const usersCol = defaultDb.collection('users');
-      const userDoc = await usersCol.findOne({ email: userEmail });
-      if (userDoc) {
-        companyCode = (userDoc as any).companyCode || '';
-        dbUserRole = (userDoc as any).role || '';
+    // Prefer token email for all checks
+    let effectiveUserEmail = userEmail;
+    try {
+      const authHeaderInner = request.headers.get('authorization');
+      if (authHeaderInner && authHeaderInner.startsWith('Bearer ')) {
+        const tokenInner = authHeaderInner.split(' ')[1];
+        const payloadInner = await verifyAuth(tokenInner);
+        if (payloadInner?.email) effectiveUserEmail = payloadInner.email;
       }
-    }
+    } catch {}
     
     if (!companyCode) {
       console.error('Company code missing for goal access');
@@ -112,7 +114,7 @@ export async function GET(request: Request) {
     const isTopManagement = ['top_management_tier_1', 'top_management_tier_2', 'top_management_tier_3'].includes(dbUserRole || '') || (dbUserRole || '').toLowerCase() === 'admin';
     console.log(`User is top management: ${isTopManagement}`);
     
-    console.log(`API Goals GET Request - goalId: ${goalId}, userEmail: ${userEmail}, userRole: ${dbUserRole}, companyCode: ${companyCode}`);
+    console.log(`API Goals GET Request - goalId: ${goalId}, userEmail: ${effectiveUserEmail}, userRole: ${dbUserRole}, companyCode: ${companyCode}`);
 
     if (goalId) {
       // Single goal fetch
@@ -135,9 +137,9 @@ export async function GET(request: Request) {
       // VIEWING PERMISSION: Check if user can view this goal
       if (dbUserRole !== 'admin') {
         const isViewer = Array.isArray(goal.viewers) && goal.viewers.some((v: any) => 
-          v.email === userEmail);
+          v.email === effectiveUserEmail);
         const isAssigned = Array.isArray(goal.assignedEmployees) && goal.assignedEmployees.some((e: any) => 
-          e.email === userEmail);
+          e.email === effectiveUserEmail);
         
         // User can view if: assigned as member, listed as viewer, or goal is visibleToAll
         if (!goal.visibleToAll && !isViewer && !isAssigned) {
@@ -153,9 +155,9 @@ export async function GET(request: Request) {
       
       // EDIT/DELETE PERMISSION: Only assigned members + admin
       const isAssigned = Array.isArray(goal.assignedEmployees) && goal.assignedEmployees.some((e: any) => 
-        e.email === userEmail);
-      const canEdit = (dbUserRole === 'admin') || isAssigned;
-      const canDelete = (dbUserRole === 'admin') || isAssigned;
+        e.email === effectiveUserEmail);
+      const canEdit = ((dbUserRole || '').toLowerCase() === 'admin') || isAssigned;
+      const canDelete = ((dbUserRole || '').toLowerCase() === 'admin') || isAssigned;
       
       goal.permissions = {
         canEdit,
@@ -171,7 +173,7 @@ export async function GET(request: Request) {
       // VIEWING PERMISSION: Only assigned members, viewers, or if visibleToAll is true
       let query: any = {};
       
-      if (dbUserRole === 'admin') {
+      if ((dbUserRole || '').toLowerCase() === 'admin') {
         // Only admin can see all goals
         query = {};
       } else {
@@ -182,15 +184,15 @@ export async function GET(request: Request) {
         query = {
           $or: [
             { visibleToAll: true },
-            { 'assignedEmployees.email': userEmail },
-            { 'viewers.email': userEmail }
+            { 'assignedEmployees.email': effectiveUserEmail },
+            { 'viewers.email': effectiveUserEmail }
           ]
         };
       }
       
       const allGoals = await collection.find(query).toArray();
       
-      console.log(`Found ${allGoals.length} goals for user ${userEmail} with role ${dbUserRole}`);
+      console.log(`Found ${allGoals.length} goals for user ${effectiveUserEmail} with role ${dbUserRole}`);
       
       // Format goal IDs and add permission flags
       const formattedGoals = allGoals.map((goal: any) => {
@@ -200,11 +202,11 @@ export async function GET(request: Request) {
         
         // EDIT PERMISSION: Only assigned members + admin
         const isAssigned = Array.isArray(goal.assignedEmployees) && goal.assignedEmployees.some((e: any) => 
-          e.email === userEmail);
-        const canEdit = (dbUserRole === 'admin') || isAssigned;
+          e.email === effectiveUserEmail);
+        const canEdit = ((dbUserRole || '').toLowerCase() === 'admin') || isAssigned;
         
         // DELETE PERMISSION: Only assigned members + admin  
-        const canDelete = (dbUserRole === 'admin') || isAssigned;
+        const canDelete = ((dbUserRole || '').toLowerCase() === 'admin') || isAssigned;
         
         goal.permissions = {
           canEdit,
@@ -261,12 +263,43 @@ export async function POST(request: Request) {
           if (authUser) {
             companyCode = authUser.companyCode || companyCode;
             dbUserRole = authUser.role || dbUserRole;
+          } else {
+            // Try lookup by email as a fallback
+            if (payload.email) {
+              const authUserByEmail = await authUsers.findOne({ email: payload.email });
+              if (authUserByEmail) {
+                companyCode = authUserByEmail.companyCode || companyCode;
+                dbUserRole = authUserByEmail.role || dbUserRole;
+              } else {
+                // Fallback to token payload if auth_db has no record
+                dbUserRole = payload.role || dbUserRole;
+                companyCode = payload.companyCode || companyCode;
+              }
+            } else {
+              // Fallback to token payload if no email available
+              dbUserRole = payload.role || dbUserRole;
+              companyCode = payload.companyCode || companyCode;
+            }
           }
         } catch (err) {
           console.error('Error loading user from auth_db:', err);
+          // Fallback to token payload on error
+          dbUserRole = payload.role || dbUserRole;
+          companyCode = payload.companyCode || companyCode;
         }
       }
     }
+    // Prefer token email for permission checks
+    let effectiveUserEmail = userEmail;
+    try {
+      const authHeaderInner = request.headers.get('authorization');
+      if (authHeaderInner && authHeaderInner.startsWith('Bearer ')) {
+        const tokenInner = authHeaderInner.split(' ')[1];
+        const payloadInner = await verifyAuth(tokenInner);
+        if (payloadInner?.email) effectiveUserEmail = payloadInner.email;
+      }
+    } catch {}
+    // Use token-derived email for create auditing only via 'createdBy' above; no permission checks rely on email for create.
     
     if (!companyCode) {
       return NextResponse.json({ error: 'Company code required for goal creation' }, { status: 400 });
@@ -341,6 +374,135 @@ export async function POST(request: Request) {
     
     if (result.insertedId) {
       console.log(`Goal created successfully with ID: ${result.insertedId}`);
+      // Synchronous notifications before closing the client, but guard with timeout to avoid hangs
+      const withTimeout = async <T>(promise: Promise<T>, ms: number, label: string): Promise<T | null> => {
+        return await Promise.race([
+          promise,
+          new Promise<null>((resolve) => setTimeout(() => {
+            console.warn(`[GOAL CREATE] Notification step timed out after ${ms}ms: ${label}`);
+            resolve(null);
+          }, ms))
+        ]);
+      };
+      try {
+        await dbConnect(companyCode);
+        const goalTitle = goalDocument.title;
+        const linkPath = `/dashboard/goals/${result.insertedId.toString()}`;
+
+        // Helper to resolve userId by email
+        const findUserIdByEmail = async (email: string) => {
+          try {
+            const authDb = client.db('auth_db');
+            const authUsers = authDb.collection('authUsers');
+            const authUser = await authUsers.findOne({ email });
+            if (authUser?.userId) {
+              try { return new ObjectId(String(authUser.userId)); } catch {}
+            }
+          } catch {}
+          try {
+            const companyDb = client.db(`company_${companyCode.toLowerCase()}`);
+            const companyUsers = companyDb.collection('users');
+            const companyUser = await companyUsers.findOne({ email });
+            if (companyUser?._id) return companyUser._id;
+          } catch {}
+          return null;
+        };
+
+        // Notify assigned employees
+        const memberEmails: string[] = (goalDocument.assignedEmployees || [])
+          .map((e: any) => (e?.email || '').toLowerCase())
+          .filter((e: string) => !!e);
+
+        // Ensure tenant DB is connected for Notification model writes
+        await dbConnect(companyCode);
+        await withTimeout((async () => {
+          for (const email of Array.from(new Set(memberEmails))) {
+            try {
+              const userId = await findUserIdByEmail(email);
+              if (userId) {
+                await Notification.create({
+                  userId,
+                  type: 'goal',
+                  title: 'You have been added to a Strategic Objective',
+                  message: `You have been added to a Strategic Objective: "${goalTitle}"`,
+                  link: linkPath,
+                  isRead: false,
+                });
+              }
+              await sendGoalNotificationEmail(
+                email,
+                `You have been added to a Strategic Objective: ${goalTitle}`,
+                `You have been added as a team member to the Strategic Objective "${goalTitle}". Click below to view details and next steps.`,
+                goalTitle,
+                result.insertedId.toString()
+              );
+            } catch (err) {
+              console.error('[GOAL CREATE] Failed to notify member', email, err);
+            }
+          }
+        })(), 8000, 'member notifications');
+
+        // Notify project members for projects assigned on creation (guarded with timeout)
+        const assignedProjects = goalDocument.assignedProjects || [];
+        await withTimeout((async () => {
+          for (const ap of assignedProjects) {
+            try {
+              const projectId = (ap?.projectId || ap || '').toString();
+              if (!ObjectId.isValid(projectId)) continue;
+              const project = await client
+                .db(`company_${companyCode.toLowerCase()}`)
+                .collection('projects')
+                .findOne({ _id: new ObjectId(projectId) });
+              if (!project) continue;
+
+              const set = new Set<string>();
+              const push = (v: any) => {
+                if (!v) return;
+                const email = (typeof v === 'string') ? v : (v.email || v.employee_email || v.user_email);
+                if (email) set.add(String(email).toLowerCase());
+              };
+              if (Array.isArray(project.employees)) project.employees.forEach(push);
+              if (Array.isArray(project.viewers)) project.viewers.forEach(push);
+              if (Array.isArray(project.employee_contributions)) project.employee_contributions.forEach(push);
+
+              const projectTitle = project.project_title || project.name || 'Project';
+              const subject = `Your project ${projectTitle} has been linked to goal ${goalTitle}`;
+              const projectIdStr = (project._id || '').toString();
+
+              // Ensure tenant DB is connected for Notification model writes
+              await dbConnect(companyCode);
+              for (const email of Array.from(set)) {
+                try {
+                  const userId = await findUserIdByEmail(email);
+                  if (userId) {
+                    await Notification.create({
+                      userId,
+                      type: 'project',
+                      title: 'Project linked to a goal',
+                      message: `Your project "${projectTitle}" has been linked to goal "${goalTitle}"`,
+                      link: linkPath,
+                      isRead: false,
+                    });
+                  }
+                  await sendNotificationEmail(
+                    email,
+                    subject,
+                    `Your project "${projectTitle}" has been linked to the goal "${goalTitle}".`,
+                    projectTitle,
+                    projectIdStr
+                  );
+                } catch (e) {
+                  console.error('[GOAL CREATE] Failed to notify project member', email, e);
+                }
+              }
+            } catch (e) {
+              console.error('[GOAL CREATE] Project notification error:', e);
+            }
+          }
+        })(), 8000, 'project notifications');
+      } catch (notifyErr) {
+        console.error('[GOAL CREATE] Notification dispatch error:', notifyErr);
+      }
       return NextResponse.json({ 
         success: true, 
         goalId: result.insertedId.toString(),
@@ -396,12 +558,29 @@ export async function PUT(request: Request) {
           if (authUser) {
             companyCode = authUser.companyCode || companyCode;
             dbUserRole = authUser.role || dbUserRole;
+          } else {
+            // Fallback to token payload if auth_db has no record
+            dbUserRole = payload.role || dbUserRole;
+            companyCode = payload.companyCode || companyCode;
           }
         } catch (err) {
           console.error('Error loading user from auth_db:', err);
+          // Fallback to token payload on error
+          dbUserRole = payload.role || dbUserRole;
+          companyCode = payload.companyCode || companyCode;
         }
       }
     }
+    // Prefer token email for permission checks
+    let effectiveUserEmail = userEmail;
+    try {
+      const authHeaderInner = request.headers.get('authorization');
+      if (authHeaderInner && authHeaderInner.startsWith('Bearer ')) {
+        const tokenInner = authHeaderInner.split(' ')[1];
+        const payloadInner = await verifyAuth(tokenInner);
+        if (payloadInner?.email) effectiveUserEmail = payloadInner.email;
+      }
+    } catch {}
     
     if (!companyCode) {
       return NextResponse.json({ error: 'Company code required for goal update' }, { status: 400 });
@@ -430,12 +609,12 @@ export async function PUT(request: Request) {
     
     // EDIT PERMISSION: Only assigned members + admin can edit
     const isAssigned = Array.isArray(existingGoal.assignedEmployees) && existingGoal.assignedEmployees.some((e: any) => 
-      e.email === userEmail);
+      e.email === effectiveUserEmail);
     
-    const canEdit = (dbUserRole === 'admin') || isAssigned;
+    const canEdit = ((dbUserRole || '').toLowerCase() === 'admin') || isAssigned;
     
     if (!canEdit) {
-      console.log(`User ${userEmail} with role ${dbUserRole} attempted to edit goal ${goalId} but lacks permission`);
+      console.log(`User ${effectiveUserEmail} with role ${dbUserRole} attempted to edit goal ${goalId} but lacks permission`);
       return NextResponse.json({ 
         error: 'Insufficient privileges to edit this goal. Only administrators and assigned members can edit goals.' 
       }, { status: 403 });
@@ -464,6 +643,135 @@ export async function PUT(request: Request) {
     
     if (result.modifiedCount > 0) {
       console.log(`Goal updated successfully: ${goalId}`);
+      // Run notifications synchronously to ensure DB writes before response, but guard with timeout
+      const withTimeout = async <T>(promise: Promise<T>, ms: number, label: string): Promise<T | null> => {
+        return await Promise.race([
+          promise,
+          new Promise<null>((resolve) => setTimeout(() => {
+            console.warn(`[GOAL UPDATE] Notification step timed out after ${ms}ms: ${label}`);
+            resolve(null);
+          }, ms))
+        ]);
+      };
+      try {
+        await dbConnect(companyCode);
+        const goalTitle = existingGoal.title || 'Goal';
+        const linkPath = `/dashboard/goals/${goalId}`;
+          
+          // Helper to resolve userId by email (auth_db -> company users)
+          const findUserIdByEmail = async (email: string) => {
+            try {
+              const authDb = client.db('auth_db');
+              const authUsers = authDb.collection('authUsers');
+              const authUser = await authUsers.findOne({ email });
+              if (authUser?.userId) {
+                try { return new ObjectId(String(authUser.userId)); } catch {}
+              }
+            } catch {}
+            try {
+              const companyDb = client.db(`company_${companyCode.toLowerCase()}`);
+              const companyUsers = companyDb.collection('users');
+              const companyUser = await companyUsers.findOne({ email });
+              if (companyUser?._id) return companyUser._id;
+            } catch {}
+            return null;
+          };
+          
+        // Compute diffs for assignedEmployees
+        const prevMemberEmails = new Set<string>((existingGoal.assignedEmployees || []).map((e: any) => (e?.email || '').toLowerCase()).filter(Boolean));
+        const nextMemberEmails = new Set<string>((body.assignedEmployees || []).map((e: any) => (e?.email || '').toLowerCase()).filter(Boolean));
+        const newlyAddedMembers = Array.from(nextMemberEmails).filter(e => !prevMemberEmails.has(e));
+
+        await withTimeout((async () => {
+          for (const email of newlyAddedMembers) {
+            try {
+              const userId = await findUserIdByEmail(email);
+              if (userId) {
+                await Notification.create({
+                  userId,
+                  type: 'goal',
+                  title: 'You have been added to a Strategic Objective',
+                  message: `You have been added to a Strategic Objective: "${goalTitle}"`,
+                  link: linkPath,
+                  isRead: false,
+                });
+              }
+              await sendGoalNotificationEmail(
+                email,
+                `You have been added to a Strategic Objective: ${goalTitle}`,
+                `You have been added as a team member to the Strategic Objective "${goalTitle}". Click below to view details and next steps.`,
+                goalTitle,
+                goalId
+              );
+            } catch (e) {
+              console.error('[GOAL UPDATE] Failed to notify new member', email, e);
+            }
+          }
+        })(), 8000, 'member notifications');
+
+        // Compute diffs for assignedProjects (compare by projectId string)
+        const prevProjectIds = new Set<string>((existingGoal.assignedProjects || []).map((p: any) => (p?.projectId?.toString?.() || p?.toString?.() || '').toString()).filter(Boolean));
+        const nextProjectIds = new Set<string>((body.assignedProjects || []).map((p: any) => (p?.projectId?.toString?.() || p?.toString?.() || '').toString()).filter(Boolean));
+        const newlyAddedProjects = Array.from(nextProjectIds).filter(id => !prevProjectIds.has(id));
+
+        await withTimeout((async () => {
+          for (const pid of newlyAddedProjects) {
+            try {
+              if (!ObjectId.isValid(pid)) continue;
+              const project = await client
+                .db(`company_${companyCode.toLowerCase()}`)
+                .collection('projects')
+                .findOne({ _id: new ObjectId(pid) });
+              if (!project) continue;
+
+              const set = new Set<string>();
+              const push = (v: any) => {
+                if (!v) return;
+                const email = (typeof v === 'string') ? v : (v.email || v.employee_email || v.user_email);
+                if (email) set.add(String(email).toLowerCase());
+              };
+              if (Array.isArray(project.employees)) project.employees.forEach(push);
+              if (Array.isArray(project.viewers)) project.viewers.forEach(push);
+              if (Array.isArray(project.employee_contributions)) project.employee_contributions.forEach(push);
+
+              const projectTitle = project.project_title || project.name || 'Project';
+              const subject = `Your project ${projectTitle} has been linked to goal ${goalTitle}`;
+              const projectIdStr = (project._id || '').toString();
+
+              // Ensure tenant DB is connected for Notification model writes
+              await dbConnect(companyCode);
+              for (const email of Array.from(set)) {
+                try {
+                  const userId = await findUserIdByEmail(email);
+                  if (userId) {
+                    await Notification.create({
+                      userId,
+                      type: 'project',
+                      title: 'Project linked to a goal',
+                      message: `Your project "${projectTitle}" has been linked to goal "${goalTitle}"`,
+                      link: linkPath,
+                      isRead: false,
+                    });
+                  }
+                  await sendNotificationEmail(
+                    email,
+                    subject,
+                    `Your project "${projectTitle}" has been linked to the goal "${goalTitle}".`,
+                    projectTitle,
+                    projectIdStr
+                  );
+                } catch (e) {
+                  console.error('[GOAL UPDATE] Failed to notify project member', email, e);
+                }
+              }
+            } catch (e) {
+              console.error('[GOAL UPDATE] Project notification error:', e);
+            }
+          }
+        })(), 8000, 'project notifications');
+      } catch (notifyErr) {
+        console.error('[GOAL UPDATE] Notification dispatch error:', notifyErr);
+      }
       return NextResponse.json({ success: true, goalId });
     } else {
       throw new Error('Failed to update goal');
@@ -522,6 +830,17 @@ export async function DELETE(request: Request) {
       }
     }
     
+    // Prefer token email for permission checks
+    let effectiveUserEmail = userEmail;
+    try {
+      const authHeaderInner = request.headers.get('authorization');
+      if (authHeaderInner && authHeaderInner.startsWith('Bearer ')) {
+        const tokenInner = authHeaderInner.split(' ')[1];
+        const payloadInner = await verifyAuth(tokenInner);
+        if (payloadInner?.email) effectiveUserEmail = payloadInner.email;
+      }
+    } catch {}
+
     if (!companyCode) {
       return NextResponse.json({ error: 'Company code required for goal deletion' }, { status: 400 });
     }
@@ -546,12 +865,12 @@ export async function DELETE(request: Request) {
     
     // DELETE PERMISSION: Only assigned members + admin can delete
     const isAssigned = Array.isArray(existingGoal.assignedEmployees) && existingGoal.assignedEmployees.some((e: any) => 
-      e.email === userEmail);
+      e.email === effectiveUserEmail);
     
     const canDelete = (dbUserRole === 'admin') || isAssigned;
     
     if (!canDelete) {
-      console.log(`User ${userEmail} with role ${dbUserRole} attempted to delete goal ${goalId} but lacks permission`);
+      console.log(`User ${effectiveUserEmail} with role ${dbUserRole} attempted to delete goal ${goalId} but lacks permission`);
       return NextResponse.json({ 
         error: 'Insufficient privileges to delete goals. Only administrators and assigned members can delete goals.' 
       }, { status: 403 });
