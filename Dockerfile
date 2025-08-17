@@ -20,7 +20,6 @@ RUN apt-get update && apt-get install -y \
     pkg-config \
     && rm -rf /var/lib/apt/lists/*
 
-
 WORKDIR /app
 
 # Copy package and requirements files
@@ -65,27 +64,22 @@ RUN apt-get update && apt-get install -y --fix-missing \
     libc6 \
     && rm -rf /var/lib/apt/lists/*
 
-
 WORKDIR /app
 
 # Copy venv and node deps
-COPY --from=builder /venv /venv
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package*.json ./
-
 
 # Copy requirements first
 COPY --from=builder /app/requirements*.txt ./
 
-# Recreate virtual environment (don’t copy broken one) )
-#RUN python3 -m venv /venv && \
-#    /venv/bin/pip install --upgrade pip && \
-#    /venv/bin/pip install --no-cache-dir --prefer-binary -r requirements.txt
-
+# Recreate virtual environment (don’t copy broken one)
+RUN python3 -m venv /venv && \
+    /venv/bin/pip install --upgrade pip && \
+    /venv/bin/pip install --no-cache-dir --prefer-binary -r requirements.txt
 
 # Ensure venv takes priority
 ENV PATH="/venv/bin:$PATH"
-
 
 # Copy built app and runtime files
 COPY --from=builder /app/.next ./.next
